@@ -1,26 +1,110 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --cream: #F2EDE3;
+  --white: #FAFAF7;
+  --black: #0A0A0A;
+  --b2: #141414;
+  --b3: #1E1E1E;
+  --b4: #2A2A2A;
+  --muted: #8C8778;
+  --muted-l: #C2BDB0;
+  --border: #DDD8CC;
+  --acid: #C8FF45;
+  --coral: #FF6848;
+  --sky: #5AB4FF;
+  --amber: #FFB830;
+  --violet: #B57BFF;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  --color-cream: var(--cream);
+  --color-th-white: var(--white);
+  --color-th-black: var(--black);
+  --color-b2: var(--b2);
+  --color-b3: var(--b3);
+  --color-b4: var(--b4);
+  --color-muted: var(--muted);
+  --color-muted-l: var(--muted-l);
+  --color-th-border: var(--border);
+  --color-acid: var(--acid);
+  --color-coral: var(--coral);
+  --color-sky: var(--sky);
+  --color-amber: var(--amber);
+  --color-violet: var(--violet);
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --font-display: 'Bebas Neue', sans-serif;
+  --font-mono: 'DM Mono', monospace;
+  --font-body: 'DM Sans', sans-serif;
+
+  --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--cream);
+  color: var(--black);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Scrollbar hide utility */
+.scrollbar-hide {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Blink animation (logo pip, window dot, artist flag dot) */
+@keyframes blink {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.6); }
+}
+.animate-blink {
+  animation: blink 2.4s ease-in-out infinite;
+}
+
+/* Pulse animation (new tag) */
+@keyframes tag-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 184, 48, 0.4); }
+  50% { box-shadow: 0 0 3px 1px rgba(255, 184, 48, 0.3); }
+}
+.animate-tag-pulse {
+  animation: tag-pulse 2.8s ease-in-out infinite;
+}
+
+/* Spring slide animations */
+.sheet-enter {
+  transform: translateY(100%);
+}
+.sheet-open {
+  transform: translateY(0);
+  transition: transform 400ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.sheet-closed {
+  transform: translateY(100%);
+  transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.slide-right-enter {
+  transform: translateX(100%);
+}
+.slide-right-open {
+  transform: translateX(0);
+  transition: transform 350ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.slide-right-closed {
+  transform: translateX(100%);
+  transition: transform 250ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Toast */
+.toast-hidden {
+  transform: translateY(300px);
+}
+.toast-visible {
+  transform: translateY(0);
+  transition: transform 350ms cubic-bezier(0.16, 1, 0.3, 1);
 }
