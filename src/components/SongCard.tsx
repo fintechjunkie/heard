@@ -10,7 +10,6 @@ interface SongCardProps {
   index: number;
   onOpenDetail: (songId: number) => void;
   onOpenDealRoom: (songId: number) => void;
-  onOpenShare: (songId: number) => void;
   onOpenRightsPassport: (songId: number) => void;
   onOpenProfile: (memberId: number) => void;
   onReserve: (songId: number) => void;
@@ -25,7 +24,7 @@ const REACTION_MAP: Record<string, { emoji: string; label: string }> = {
 };
 
 export default function SongCard({
-  song, index, onOpenDetail, onOpenDealRoom, onOpenShare,
+  song, index, onOpenDetail, onOpenDealRoom,
   onOpenRightsPassport, onOpenProfile, onReserve,
 }: SongCardProps) {
   const { savedSongIds, toggleSave, artistQueue, toggleArtistQueue, showToast, artistReactions, releaseReserve } = useStore();
@@ -133,18 +132,6 @@ export default function SongCard({
               </svg>
             </span>
             <span className="text-[5px] tracking-[0.8px] uppercase" style={{ fontFamily: "'DM Mono', monospace" }}>Deals</span>
-          </button>
-          <button onClick={(e) => { e.stopPropagation(); onOpenShare(song.id); }}
-            title="Share"
-            className="flex flex-col items-center gap-[2px] cursor-pointer bg-transparent border-none"
-            style={{ color: isPlayingSong ? 'rgba(255,255,255,0.4)' : 'var(--muted)' }}>
-            <span className="w-[26px] h-[26px] rounded-full flex items-center justify-center border"
-              style={{ borderColor: isPlayingSong ? 'var(--b4)' : 'var(--border)' }}>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/>
-              </svg>
-            </span>
-            <span className="text-[5px] tracking-[0.8px] uppercase" style={{ fontFamily: "'DM Mono', monospace" }}>Share</span>
           </button>
         </div>
       </div>

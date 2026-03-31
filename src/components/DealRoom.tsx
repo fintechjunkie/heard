@@ -1,9 +1,8 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Song } from '@/data/types';
-import { DEAL_ROOM_TEAM } from '@/data/users';
-import { useStore } from '@/lib/store';
+import { createClient } from '@/lib/supabase/client';
 
 interface DealRoomProps {
   song: Song | null;
@@ -11,49 +10,144 @@ interface DealRoomProps {
   onClose: () => void;
   onReserve: (songId: number) => void;
   onBuy: (songId: number) => void;
+  teamId?: number;
 }
 
-function formatCountdown(sec: number): string {
-  const h = Math.floor(sec / 3600);
-  const m = Math.floor((sec % 3600) / 60);
-  const s = sec % 60;
-  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+interface Reaction {
+  id: number;
+  user_id: string;
+  reaction: string;
+  full_name: string;
+  avatar_url: string;
 }
 
-export default function DealRoom({ song, open, onClose, onReserve, onBuy }: DealRoomProps) {
-  const { dealRoomReaction, setDealRoomReaction, dealRoomNote, setDealRoomNote, showToast } = useStore();
-  const [countdown, setCountdown] = useState(68 * 3600 + 24 * 60);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
+interface Comment {
+  id: number;
+  user_id: string | null;
+  is_admin_response: boolean;
+  is_admin_question: boolean;
+  content: string;
+  created_at: string;
+  full_name: string;
+  avatar_url: string;
+}
 
-  const isHeld = song?.status === 'reserved';
+export default function DealRoom({ song, open, onClose, onReserve, onBuy, teamId }: DealRoomProps) {
+  const [dealRoomId, setDealRoomId] = useState<number | null>(null);
+  const [dealRoomExists, setDealRoomExists] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [reactions, setReactions] = useState<Reaction[]>([]);
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [myReaction, setMyReaction] = useState<string | null>(null);
+  const [commentText, setCommentText] = useState('');
+  const [isAdminQuestion, setIsAdminQuestion] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [userName, setUserName] = useState('');
+  const commentsEndRef = useRef<HTMLDivElement>(null);
 
+  // Get current user
   useEffect(() => {
-    if (open && isHeld) {
-      setCountdown(68 * 3600 + 24 * 60);
-      timerRef.current = setInterval(() => {
-        setCountdown(prev => {
-          if (prev <= 0) {
-            if (timerRef.current) clearInterval(timerRef.current);
-            showToast('Hold expired — song is back on the market.');
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
+    async function getUser() {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setUserId(user.id);
+        const { data } = await supabase.from('profiles').select('full_name').eq('id', user.id).single();
+        if (data) setUserName(data.full_name);
+      }
     }
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
-    };
-  }, [open, isHeld, showToast]);
+    getUser();
+  }, []);
+
+  // Check if deal room exists for this song+team
+  const checkDealRoom = useCallback(async () => {
+    if (!song || !teamId) { setLoading(false); return; }
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/dealrooms?songId=${song.id}&teamId=${teamId}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data) {
+          setDealRoomId(data.id);
+          setDealRoomExists(true);
+        } else {
+          setDealRoomId(null);
+          setDealRoomExists(false);
+        }
+      }
+    } catch { /* ignore */ }
+    setLoading(false);
+  }, [song, teamId]);
+
+  // Load reactions and comments
+  const loadData = useCallback(async () => {
+    if (!dealRoomId) return;
+    try {
+      const [reactionsRes, commentsRes] = await Promise.all([
+        fetch(`/api/dealrooms/reactions?dealRoomId=${dealRoomId}`),
+        fetch(`/api/dealrooms/comments?dealRoomId=${dealRoomId}`),
+      ]);
+      if (reactionsRes.ok) {
+        const r = await reactionsRes.json();
+        setReactions(r);
+        const mine = r.find((rx: Reaction) => rx.user_id === userId);
+        if (mine) setMyReaction(mine.reaction);
+      }
+      if (commentsRes.ok) setComments(await commentsRes.json());
+    } catch { /* ignore */ }
+  }, [dealRoomId, userId]);
+
+  useEffect(() => { if (open) checkDealRoom(); }, [open, checkDealRoom]);
+  useEffect(() => { if (dealRoomId) loadData(); }, [dealRoomId, loadData]);
+  useEffect(() => { commentsEndRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [comments]);
+
+  const startDealRoom = async () => {
+    if (!song || !teamId) return;
+    const res = await fetch('/api/dealrooms', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ songId: song.id, teamId, createdBy: userId }),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      setDealRoomId(data.id);
+      setDealRoomExists(true);
+    }
+  };
+
+  const submitReaction = async (reaction: string) => {
+    if (!dealRoomId || !userId) return;
+    const newReaction = myReaction === reaction ? null : reaction;
+    if (newReaction) {
+      await fetch('/api/dealrooms/reactions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ dealRoomId, userId, reaction: newReaction }),
+      });
+    }
+    setMyReaction(newReaction);
+    loadData();
+  };
+
+  const submitComment = async () => {
+    if (!dealRoomId || !commentText.trim()) return;
+    await fetch('/api/dealrooms/comments', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ dealRoomId, userId, content: commentText, isAdminQuestion }),
+    });
+    setCommentText('');
+    setIsAdminQuestion(false);
+    loadData();
+  };
 
   if (!song) return null;
 
-  // Calculate consensus
-  const votes = { yes: 1, maybe: 1, no: 0, waiting: dealRoomReaction ? 1 : 2 };
-  if (dealRoomReaction === 'yes') { votes.yes++; votes.waiting--; }
-  else if (dealRoomReaction === 'maybe') { votes.maybe++; votes.waiting--; }
-  else if (dealRoomReaction === 'no') { votes.no++; votes.waiting--; }
-  const total = 4;
+  const isHeld = song.status === 'reserved';
+  const yesCt = reactions.filter(r => r.reaction === 'yes').length;
+  const maybeCt = reactions.filter(r => r.reaction === 'maybe').length;
+  const passCt = reactions.filter(r => r.reaction === 'pass').length;
+  const totalReactions = reactions.length;
 
   return (
     <div
@@ -78,192 +172,176 @@ export default function DealRoom({ song, open, onClose, onReserve, onBuy }: Deal
         </button>
       </div>
 
-      <div className="flex-1 overflow-y-auto scrollbar-hide pb-[120px]">
-        {/* Song Hero */}
-        <div className="px-5 py-5" style={{ background: 'var(--black)' }}>
-          <div className="text-[8px] tracking-[2px] uppercase mb-1" style={{ fontFamily: "'DM Mono', monospace", color: 'rgba(255,255,255,0.45)' }}>Evaluating</div>
-          <div className="text-[32px] tracking-[2px] leading-none mb-1" style={{ fontFamily: "'Bebas Neue', sans-serif", color: '#FFFFFF' }}>{song.title}</div>
-          <div className="text-[11px] mb-4" style={{ color: 'rgba(255,255,255,0.6)' }}>{song.writers.join(' · ')}</div>
+      {/* Song header */}
+      <div className="px-5 py-4" style={{ background: 'var(--black)' }}>
+        <div className="text-[8px] tracking-[2px] uppercase mb-1" style={{ fontFamily: "'DM Mono', monospace", color: 'rgba(255,255,255,0.45)' }}>Evaluating</div>
+        <div className="text-[32px] tracking-[2px] leading-none mb-1" style={{ fontFamily: "'Bebas Neue', sans-serif", color: '#FFFFFF' }}>{song.title}</div>
+        <div className="text-[11px]" style={{ color: 'rgba(255,255,255,0.6)' }}>{song.writers.join(' · ')}</div>
+      </div>
 
-          {/* Hold box */}
-          {isHeld ? (
-            <div className="flex items-center justify-between rounded-xl px-4 py-3" style={{ background: 'var(--b2)', border: '1px solid var(--b3)' }}>
-              <div>
-                <div className="text-[8px] tracking-[2px] uppercase mb-[3px]" style={{ fontFamily: "'DM Mono', monospace", color: 'rgba(255,255,255,0.5)' }}>Hold Expires In</div>
-                <div className="text-[32px] tracking-[2px] leading-none" style={{ fontFamily: "'Bebas Neue', sans-serif", color: 'var(--acid)' }}>{formatCountdown(countdown)}</div>
-              </div>
-              <div className="text-[10px] text-right max-w-[110px]" style={{ color: 'rgba(255,255,255,0.55)', lineHeight: 1.5 }}>Song is off-market. 72 hours to complete.</div>
-            </div>
-          ) : (
-            <div className="flex items-center gap-[10px] rounded-xl px-4 py-3" style={{ background: 'var(--b2)', border: '1px solid var(--b3)' }}>
-              <span className="text-[18px]">◷</span>
-              <div className="text-[11px] flex-1" style={{ color: 'rgba(255,255,255,0.58)', lineHeight: 1.5 }}>
-                No hold placed yet. Reserve to lock this song for 72 hours while your team decides.
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Consensus */}
-        <div className="mx-5 mt-[14px] rounded-xl p-4" style={{ background: 'var(--th-white)', border: '1px solid var(--border)' }}>
-          <div className="text-[8px] tracking-[2px] uppercase mb-[10px]" style={{ fontFamily: "'DM Mono', monospace", color: '#5a5650', fontWeight: 500 }}>
-            Team Consensus · {total} Members
+      {/* Content */}
+      <div className="flex-1 overflow-y-auto scrollbar-hide pb-[140px]">
+        {loading ? (
+          <div className="py-12 text-center text-gray-400 text-sm">Loading...</div>
+        ) : !dealRoomExists ? (
+          /* No deal room yet */
+          <div className="py-12 text-center px-8">
+            <div className="text-[32px] mb-3" style={{ opacity: 0.3 }}>🤝</div>
+            <p className="text-[11px] leading-relaxed mb-4" style={{ fontFamily: "'DM Mono', monospace", color: 'var(--muted)' }}>
+              No deal room exists for this song yet. Start one to collaborate with your team.
+            </p>
+            <button onClick={startDealRoom}
+              className="px-6 py-3 rounded-xl text-[10px] tracking-[1.5px] uppercase cursor-pointer border-none"
+              style={{ fontFamily: "'DM Mono', monospace", background: 'var(--sky)', color: 'var(--black)' }}>
+              Start Deal Room
+            </button>
           </div>
-          <div className="flex gap-[2px] h-[6px] rounded-full overflow-hidden mb-2">
-            <div className="rounded-l-[3px] transition-[flex] duration-500" style={{ flex: votes.yes, background: '#2a7a2a' }} />
-            <div className="transition-[flex] duration-500" style={{ flex: votes.maybe, background: 'var(--amber)' }} />
-            <div className="transition-[flex] duration-500" style={{ flex: votes.no, background: 'var(--coral)' }} />
-            <div className="rounded-r-[3px] transition-[flex] duration-500" style={{ flex: votes.waiting, background: 'var(--border)' }} />
-          </div>
-          <div className="flex gap-3">
-            {[
-              { label: 'Yes', count: votes.yes, color: '#2a7a2a' },
-              { label: 'Maybe', count: votes.maybe, color: 'var(--amber)' },
-              { label: 'Pass', count: votes.no, color: 'var(--coral)' },
-              { label: 'Waiting', count: votes.waiting, color: 'var(--border)' },
-            ].map(v => (
-              <div key={v.label} className="flex items-center gap-1" style={{ fontFamily: "'DM Mono', monospace", fontSize: 7.5, color: '#6a6660' }}>
-                <div className="w-[6px] h-[6px] rounded-full flex-shrink-0" style={{ background: v.color }} />
-                {v.label} {v.count}
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Team Members */}
-        <div className="px-5 pt-[14px]">
-          <div className="text-[8px] tracking-[3px] uppercase mb-[10px]" style={{ fontFamily: "'DM Mono', monospace", color: '#5a5650', fontWeight: 500 }}>Team</div>
-          {DEAL_ROOM_TEAM.map((m, i) => (
-            <div key={i} className="rounded-xl p-[13px] mb-2" style={{ background: 'var(--th-white)', border: '1px solid var(--border)' }}>
-              <div className="flex items-center gap-[10px] mb-[10px]">
-                <div className="w-[32px] h-[32px] rounded-full flex items-center justify-center text-[9px] font-medium flex-shrink-0"
-                  style={{ fontFamily: "'DM Mono', monospace", background: `${m.color}22`, color: m.color }}>
-                  {m.initials}
+        ) : (
+          <>
+            {/* Consensus */}
+            {totalReactions > 0 && (
+              <div className="mx-5 mt-4 rounded-xl p-4" style={{ background: 'var(--th-white)', border: '1px solid var(--border)' }}>
+                <div className="text-[8px] tracking-[2px] uppercase mb-2" style={{ fontFamily: "'DM Mono', monospace", color: '#5a5650' }}>
+                  Team Consensus · {totalReactions} vote{totalReactions !== 1 ? 's' : ''}
                 </div>
-                <div>
-                  <div className="text-[13px] font-medium" style={{ color: 'var(--black)' }}>{m.name}</div>
-                  <div className="text-[10px]" style={{ fontFamily: "'DM Mono', monospace", color: '#6a6660' }}>{m.role}</div>
+                <div className="flex gap-[2px] mb-2 rounded-full overflow-hidden" style={{ height: 8 }}>
+                  {yesCt > 0 && <div style={{ flex: yesCt, background: '#2a7a2a' }} />}
+                  {maybeCt > 0 && <div style={{ flex: maybeCt, background: 'var(--amber)' }} />}
+                  {passCt > 0 && <div style={{ flex: passCt, background: 'var(--coral)' }} />}
                 </div>
-                <div className="ml-auto">
-                  <span className={`inline-flex items-center gap-[5px] px-[9px] py-1 rounded-full text-[8px] tracking-[1px] uppercase ${
-                    m.reaction === 'yes' ? '' : m.reaction === 'maybe' ? '' : m.reaction === 'no' ? '' : ''
-                  }`} style={{
-                    fontFamily: "'DM Mono', monospace",
-                    ...(m.reaction === 'yes' ? { background: 'rgba(42,122,42,0.1)', border: '1px solid rgba(42,122,42,0.3)', color: '#2a7a2a' } :
-                       m.reaction === 'maybe' ? { background: 'rgba(255,184,48,0.1)', border: '1px solid rgba(255,184,48,0.3)', color: '#9a7000' } :
-                       m.reaction === 'no' ? { background: 'rgba(255,104,72,0.08)', border: '1px solid rgba(255,104,72,0.3)', color: 'var(--coral)' } :
-                       { background: 'var(--cream)', border: '1px solid var(--border)', color: 'var(--muted-l)' }),
-                  }}>
-                    {m.reaction === 'yes' ? '✓ Yes' : m.reaction === 'maybe' ? '〰 Maybe' : m.reaction === 'no' ? '✗ Pass' : 'Waiting'}
+                <div className="flex gap-4 text-[8px]" style={{ fontFamily: "'DM Mono', monospace", color: '#6a6660' }}>
+                  <span>● Yes {yesCt}</span>
+                  <span>● Maybe {maybeCt}</span>
+                  <span>● Pass {passCt}</span>
+                </div>
+              </div>
+            )}
+
+            {/* Team reactions */}
+            <div className="mx-5 mt-4">
+              <div className="text-[8px] tracking-[2px] uppercase mb-2" style={{ fontFamily: "'DM Mono', monospace", color: '#5a5650' }}>Team</div>
+              {reactions.map(r => (
+                <div key={r.id} className="flex items-center justify-between py-2 px-3 mb-2 rounded-xl"
+                  style={{ background: 'var(--th-white)', border: '1px solid var(--border)' }}>
+                  <div className="flex items-center gap-3">
+                    <div className="w-[28px] h-[28px] rounded-full flex items-center justify-center text-[9px] font-medium"
+                      style={{ background: 'rgba(90,180,255,0.12)', color: 'var(--sky)', fontFamily: "'DM Mono', monospace" }}>
+                      {r.full_name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)}
+                    </div>
+                    <span className="text-[12px] font-medium">{r.full_name}</span>
+                  </div>
+                  <span className={`px-2 py-1 rounded-md text-[8px] tracking-[1px] uppercase ${
+                    r.reaction === 'yes' ? 'bg-green-50 text-green-700' :
+                    r.reaction === 'maybe' ? 'bg-amber-50 text-amber-700' :
+                    'bg-red-50 text-red-600'
+                  }`} style={{ fontFamily: "'DM Mono', monospace" }}>
+                    {r.reaction === 'yes' ? '✓ Yes' : r.reaction === 'maybe' ? '∼ Maybe' : '✕ Pass'}
                   </span>
                 </div>
-              </div>
-              {m.note && (
-                <div className="text-[11px] px-[10px] py-2 rounded-md" style={{ background: 'var(--cream)', color: 'var(--muted)', fontWeight: 300, lineHeight: 1.5 }}>{m.note}</div>
-              )}
-              {m.artistFlag && (
-                <div className="flex items-center gap-[6px] px-[10px] py-2 rounded-lg mt-[2px]" style={{ background: 'rgba(181,123,255,0.06)', border: '1px solid rgba(181,123,255,0.2)' }}>
-                  <span className="text-[14px]">♥</span>
-                  <span className="text-[11px]" style={{ color: 'rgba(181,123,255,0.9)', lineHeight: 1.4 }}>Flagged this song {m.flagTime} — no other notes yet.</span>
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-
-        {/* My Reaction */}
-        <div className="px-5 pt-[14px]">
-          <div className="text-[8px] tracking-[3px] uppercase mb-[10px]" style={{ fontFamily: "'DM Mono', monospace", color: '#5a5650', fontWeight: 500 }}>My Reaction</div>
-          <div className="rounded-xl p-[13px]" style={{ background: 'var(--th-white)', border: '1px solid var(--border)' }}>
-            <div className="flex items-center gap-[10px] mb-[10px]">
-              <div className="w-[32px] h-[32px] rounded-full flex items-center justify-center text-[9px] font-medium flex-shrink-0"
-                style={{ fontFamily: "'DM Mono', monospace", background: 'var(--acid)', color: 'var(--black)' }}>MJ</div>
-              <div>
-                <div className="text-[13px] font-medium">Marcus Johnson</div>
-                <div className="text-[10px]" style={{ fontFamily: "'DM Mono', monospace", color: '#6a6660' }}>Artist Manager</div>
-              </div>
-              <div className="ml-auto">
-                <span className="inline-flex items-center gap-[5px] px-[9px] py-1 rounded-full text-[8px] tracking-[1px] uppercase"
-                  style={{
-                    fontFamily: "'DM Mono', monospace",
-                    ...(dealRoomReaction === 'yes' ? { background: 'rgba(42,122,42,0.1)', border: '1px solid rgba(42,122,42,0.3)', color: '#2a7a2a' } :
-                       dealRoomReaction === 'maybe' ? { background: 'rgba(255,184,48,0.1)', border: '1px solid rgba(255,184,48,0.3)', color: '#9a7000' } :
-                       dealRoomReaction === 'no' ? { background: 'rgba(255,104,72,0.08)', border: '1px solid rgba(255,104,72,0.3)', color: 'var(--coral)' } :
-                       { background: 'var(--cream)', border: '1px solid var(--border)', color: 'var(--muted-l)' }),
-                  }}>
-                  {dealRoomReaction === 'yes' ? '✓ Yes' : dealRoomReaction === 'maybe' ? '〰 Maybe' : dealRoomReaction === 'no' ? '✗ Pass' : 'Reviewing'}
-                </span>
-              </div>
-            </div>
-
-            {/* Reaction buttons */}
-            <div className="flex gap-[6px] mb-[9px]">
-              {[
-                { key: 'yes', label: '✓ Yes', style: { borderColor: 'rgba(42,122,42,0.4)', background: 'rgba(42,122,42,0.08)', color: '#2a7a2a' } },
-                { key: 'maybe', label: '〰 Maybe', style: { borderColor: 'rgba(255,184,48,0.4)', background: 'rgba(255,184,48,0.08)', color: '#8a6000' } },
-                { key: 'no', label: '✗ Pass', style: { borderColor: 'rgba(255,104,72,0.35)', background: 'rgba(255,104,72,0.06)', color: 'var(--coral)' } },
-              ].map(btn => (
-                <button
-                  key={btn.key}
-                  onClick={() => setDealRoomReaction(dealRoomReaction === btn.key ? null : btn.key)}
-                  className="flex-1 py-[9px] rounded-lg text-[8px] tracking-[1px] uppercase text-center cursor-pointer transition-all duration-150"
-                  style={{
-                    fontFamily: "'DM Mono', monospace",
-                    border: `1px solid ${dealRoomReaction === btn.key ? btn.style.borderColor : 'var(--border)'}`,
-                    background: dealRoomReaction === btn.key ? btn.style.background : 'var(--cream)',
-                    color: dealRoomReaction === btn.key ? btn.style.color : 'var(--muted)',
-                  }}
-                >
-                  {btn.label}
-                </button>
               ))}
             </div>
 
-            {/* Note input */}
-            <textarea
-              value={dealRoomNote}
-              onChange={(e) => setDealRoomNote(e.target.value)}
-              placeholder={
-                dealRoomReaction === 'yes' ? 'What makes this the one…' :
-                dealRoomReaction === 'maybe' ? 'What needs to be right…' :
-                dealRoomReaction === 'no' ? "Why it's not right…" :
-                'Add a note for your team…'
-              }
-              rows={2}
-              className="w-full px-3 py-[9px] rounded-lg text-[12px] outline-none resize-none"
-              style={{
-                background: 'var(--cream)',
-                border: '1px solid var(--border)',
-                fontFamily: "'DM Sans', sans-serif",
-                color: 'var(--black)',
-              }}
-            />
-          </div>
-        </div>
+            {/* My reaction */}
+            <div className="mx-5 mt-4">
+              <div className="text-[8px] tracking-[2px] uppercase mb-2" style={{ fontFamily: "'DM Mono', monospace", color: '#5a5650' }}>
+                My Reaction
+              </div>
+              <div className="flex gap-2">
+                {[
+                  { key: 'yes', label: '✓ Yes', color: '#2a7a2a', bg: 'rgba(42,122,42,0.1)', border: 'rgba(42,122,42,0.3)' },
+                  { key: 'maybe', label: '∼ Maybe', color: 'var(--amber)', bg: 'rgba(255,184,48,0.1)', border: 'rgba(255,184,48,0.3)' },
+                  { key: 'pass', label: '✕ Pass', color: 'var(--coral)', bg: 'rgba(255,104,72,0.1)', border: 'rgba(255,104,72,0.3)' },
+                ].map(r => (
+                  <button key={r.key} onClick={() => submitReaction(r.key)}
+                    className="flex-1 py-[10px] rounded-xl text-[9px] tracking-[1px] uppercase text-center cursor-pointer"
+                    style={{
+                      fontFamily: "'DM Mono', monospace",
+                      background: myReaction === r.key ? r.bg : 'var(--th-white)',
+                      border: myReaction === r.key ? `1.5px solid ${r.border}` : '1px solid var(--border)',
+                      color: myReaction === r.key ? r.color : '#6a6660',
+                    }}>
+                    {r.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Comments */}
+            <div className="mx-5 mt-4">
+              <div className="text-[8px] tracking-[2px] uppercase mb-2" style={{ fontFamily: "'DM Mono', monospace", color: '#5a5650' }}>
+                Discussion ({comments.length})
+              </div>
+              <div className="space-y-2 mb-3">
+                {comments.map(c => (
+                  <div key={c.id} className={`rounded-xl px-3 py-2 ${c.is_admin_response ? 'ml-0' : c.user_id === userId ? 'ml-8' : 'mr-8'}`}
+                    style={{
+                      background: c.is_admin_response ? 'rgba(200,255,69,0.08)' : 'var(--th-white)',
+                      border: c.is_admin_response ? '1px solid rgba(200,255,69,0.3)' : '1px solid var(--border)',
+                    }}>
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-[9px] font-medium" style={{ color: c.is_admin_response ? 'var(--acid)' : 'var(--black)' }}>
+                        {c.is_admin_response ? '★ Heard Admin' : c.full_name}
+                      </span>
+                      <span className="text-[7px]" style={{ color: '#999' }}>
+                        {new Date(c.created_at).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                      </span>
+                      {c.is_admin_question && !c.is_admin_response && (
+                        <span className="text-[7px] px-1 py-[1px] rounded" style={{ background: 'rgba(200,255,69,0.15)', color: 'var(--acid)' }}>To Admin</span>
+                      )}
+                    </div>
+                    <div className="text-[11px] leading-relaxed" style={{ color: '#333' }}>{c.content}</div>
+                  </div>
+                ))}
+                {comments.length === 0 && (
+                  <div className="text-[11px] text-center py-4" style={{ color: '#999' }}>No comments yet. Start the conversation.</div>
+                )}
+                <div ref={commentsEndRef} />
+              </div>
+
+              {/* Comment input */}
+              <div className="flex gap-2 mb-2">
+                <input
+                  value={commentText}
+                  onChange={e => setCommentText(e.target.value)}
+                  onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submitComment(); } }}
+                  placeholder={isAdminQuestion ? 'Message to Heard admin...' : 'Add a comment...'}
+                  className="flex-1 px-3 py-2 rounded-lg text-[11px] outline-none"
+                  style={{ background: 'var(--th-white)', border: '1px solid var(--border)', fontFamily: "'DM Sans', sans-serif" }}
+                />
+                <button onClick={submitComment}
+                  className="px-3 py-2 rounded-lg text-[9px] tracking-[1px] uppercase cursor-pointer border-none"
+                  style={{ fontFamily: "'DM Mono', monospace", background: 'var(--black)', color: '#FFFFFF' }}>
+                  Send
+                </button>
+              </div>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" checked={isAdminQuestion} onChange={e => setIsAdminQuestion(e.target.checked)} />
+                <span className="text-[9px]" style={{ fontFamily: "'DM Mono', monospace", color: '#6a6660' }}>Send to Heard admin for response</span>
+              </label>
+            </div>
+          </>
+        )}
       </div>
 
       {/* Footer CTAs */}
-      <div className="absolute bottom-0 left-0 right-0 flex flex-col gap-2 px-5 pb-5 pt-3" style={{ background: '#F2EDE3', borderTop: '1px solid var(--border)', boxShadow: '0 -8px 20px rgba(0,0,0,0.08)' }}>
-        <button
-          onClick={() => { onClose(); setTimeout(() => onReserve(song.id), 100); }}
-          className="w-full py-[12px] rounded-xl text-[10px] tracking-[1.5px] uppercase cursor-pointer border-none"
-          style={{
-            fontFamily: "'DM Mono', monospace",
-            background: 'var(--sky)',
-            color: 'var(--black)',
-            opacity: isHeld ? 0.5 : 1,
-          }}
-          disabled={isHeld}
-        >
-          {isHeld ? '⏱ Hold Active' : 'Reserve · 72-Hour Hold'}
-        </button>
-        <button
-          onClick={() => { onClose(); setTimeout(() => onBuy(song.id), 100); }}
-          className="w-full py-[12px] rounded-xl text-[10px] tracking-[1.5px] uppercase cursor-pointer border-none"
-          style={{ fontFamily: "'DM Mono', monospace", background: 'var(--coral)', color: 'white' }}>
-          Buy Now — $85,000
-        </button>
-      </div>
+      {dealRoomExists && (
+        <div className="absolute bottom-0 left-0 right-0 flex flex-col gap-2 px-5 pb-5 pt-3" style={{ background: '#F2EDE3', borderTop: '1px solid var(--border)', boxShadow: '0 -8px 20px rgba(0,0,0,0.08)' }}>
+          <button
+            onClick={() => { onClose(); setTimeout(() => onReserve(song.id), 100); }}
+            className="w-full py-[12px] rounded-xl text-[10px] tracking-[1.5px] uppercase cursor-pointer border-none"
+            style={{ fontFamily: "'DM Mono', monospace", background: 'var(--sky)', color: 'var(--black)', opacity: isHeld ? 0.5 : 1 }}
+            disabled={isHeld}
+          >
+            {isHeld ? '⏱ Hold Active' : 'Reserve · 72-Hour Hold'}
+          </button>
+          <button
+            onClick={() => { onClose(); setTimeout(() => onBuy(song.id), 100); }}
+            className="w-full py-[12px] rounded-xl text-[10px] tracking-[1.5px] uppercase cursor-pointer border-none"
+            style={{ fontFamily: "'DM Mono', monospace", background: 'var(--coral)', color: 'white' }}>
+            Buy Now — $85,000
+          </button>
+        </div>
+      )}
     </div>
   );
 }

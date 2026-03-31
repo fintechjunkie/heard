@@ -55,6 +55,9 @@ export default function AdminPage() {
   const [addUserToTeamId, setAddUserToTeamId] = useState('');
   const [editingTeam, setEditingTeam] = useState<Team | null>(null);
   const [editTeamForm, setEditTeamForm] = useState({ name: '', description: '' });
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [adminMessages, setAdminMessages] = useState<any[]>([]);
+  const [adminReply, setAdminReply] = useState<Record<number, string>>({});
 
   const loadSongs = useCallback(async () => {
     try {
@@ -193,11 +196,31 @@ export default function AdminPage() {
     loadTeamMembers(selectedTeamId);
   };
 
+  const loadAdminMessages = useCallback(async () => {
+    try {
+      const res = await fetch('/api/dealrooms/comments?adminOnly=true');
+      if (res.ok) setAdminMessages(await res.json());
+    } catch { /* ignore */ }
+  }, []);
+
+  const sendAdminReply = async (dealRoomId: number) => {
+    const reply = adminReply[dealRoomId];
+    if (!reply?.trim()) return;
+    await fetch('/api/dealrooms/comments', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ dealRoomId, content: reply, isAdminResponse: true }),
+    });
+    setAdminReply(prev => ({ ...prev, [dealRoomId]: '' }));
+    loadAdminMessages();
+  };
+
   // Load data when tabs are selected
   useEffect(() => {
     if (activeTab === 'users' && authed) loadUsers();
     if (activeTab === 'teams' && authed) { loadTeams(); loadUsers(); }
-  }, [activeTab, authed, loadUsers, loadTeams]);
+    if (activeTab === 'dashboard' && authed) loadAdminMessages();
+  }, [activeTab, authed, loadUsers, loadTeams, loadAdminMessages]);
 
   useEffect(() => {
     if (selectedTeamId) loadTeamMembers(selectedTeamId);
@@ -347,6 +370,53 @@ export default function AdminPage() {
                 <div className="text-sm font-medium mb-3">Buyers: 1</div>
                 <div className="text-xs text-gray-400">Tier 1: 1 · Tier 2: 0</div>
               </div>
+            </div>
+
+            {/* Deal Room Messages needing admin response */}
+            <div className="mt-8">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-bold">Deal Room Messages</h3>
+                <button onClick={loadAdminMessages}
+                  className="px-3 py-1 text-xs text-gray-500 border border-gray-200 rounded-lg cursor-pointer bg-white">Refresh</button>
+              </div>
+              {adminMessages.length === 0 ? (
+                <div className="bg-white rounded-xl border border-gray-100 p-6 text-center text-gray-400 text-sm">
+                  No messages from deal rooms yet
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {adminMessages.map((msg: { id: number; deal_room_id: number; content: string; created_at: string; profiles: { full_name: string } | null; deal_rooms: { songs: { title: string } | null; teams: { name: string } | null } | null }) => (
+                    <div key={msg.id} className="bg-white rounded-xl border border-gray-100 p-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <div>
+                          <span className="text-sm font-medium">
+                            {(msg.profiles as { full_name: string } | null)?.full_name || 'Unknown'}
+                          </span>
+                          <span className="text-xs text-gray-400 ml-2">
+                            re: {(msg.deal_rooms as { songs: { title: string } | null } | null)?.songs?.title || '?'} ·
+                            Team: {(msg.deal_rooms as { teams: { name: string } | null } | null)?.teams?.name || '?'}
+                          </span>
+                        </div>
+                        <span className="text-xs text-gray-400">{new Date(msg.created_at).toLocaleDateString()}</span>
+                      </div>
+                      <div className="text-sm text-gray-700 mb-3 px-3 py-2 rounded-lg bg-amber-50 border border-amber-100">
+                        {msg.content}
+                      </div>
+                      <div className="flex gap-2">
+                        <input
+                          value={adminReply[msg.deal_room_id] || ''}
+                          onChange={e => setAdminReply(prev => ({ ...prev, [msg.deal_room_id]: e.target.value }))}
+                          placeholder="Type your response..."
+                          className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none"
+                          onKeyDown={e => { if (e.key === 'Enter') sendAdminReply(msg.deal_room_id); }}
+                        />
+                        <button onClick={() => sendAdminReply(msg.deal_room_id)}
+                          className="px-4 py-2 bg-black text-white rounded-lg text-sm cursor-pointer border-none">Reply</button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </>
         )}

@@ -13,7 +13,6 @@ import WritersTab from '@/components/WritersTab';
 import SongDetailSheet from '@/components/SongDetailSheet';
 import ReserveSheet from '@/components/ReserveSheet';
 import BuyFlowSheet from '@/components/BuyFlowSheet';
-import ShareSheet from '@/components/ShareSheet';
 import RightsPassportSheet from '@/components/RightsPassportSheet';
 import SortSheet from '@/components/SortSheet';
 import MemberProfile from '@/components/MemberProfile';
@@ -32,7 +31,6 @@ export default function Home() {
   const [detailSongId, setDetailSongId] = useState<number | null>(null);
   const [reserveSongId, setReserveSongId] = useState<number | null>(null);
   const [buySongId, setBuySongId] = useState<number | null>(null);
-  const [shareSongId, setShareSongId] = useState<number | null>(null);
   const [rightsSongId, setRightsSongId] = useState<number | null>(null);
   const [sortOpen, setSortOpen] = useState(false);
 
@@ -116,20 +114,6 @@ export default function Home() {
                   Tier 1 · {filteredSongs.filter(s => s.status === 'available').length} available
                 </div>
               </div>
-              <button
-                onClick={() => setShareSongId(0)}
-                className="flex items-center gap-[5px] px-3 py-[7px] rounded-md cursor-pointer"
-                style={{
-                  fontFamily: "'DM Mono', monospace",
-                  fontSize: 8,
-                  letterSpacing: 1.5,
-                  textTransform: 'uppercase',
-                  border: '1px solid var(--sky)',
-                  color: 'var(--sky)',
-                  background: 'transparent',
-                }}>
-                ⊕ Share
-              </button>
             </div>
 
             {activeTab === 'bank' && <StatsStrip />}
@@ -171,7 +155,6 @@ export default function Home() {
                       index={i}
                       onOpenDetail={setDetailSongId}
                       onOpenDealRoom={setDealRoomSongId}
-                      onOpenShare={setShareSongId}
                       onOpenRightsPassport={setRightsSongId}
                       onOpenProfile={setProfileMemberId}
                       onReserve={setReserveSongId}
@@ -206,7 +189,6 @@ export default function Home() {
         onClose={() => setDetailSongId(null)}
         onReserve={setReserveSongId}
         onBuy={setBuySongId}
-        onShare={setShareSongId}
         onOpenProfile={(mid) => { setDetailSongId(null); setTimeout(() => setProfileMemberId(mid), 100); }}
       />
       <ReserveSheet
@@ -220,11 +202,6 @@ export default function Home() {
         open={buySongId !== null}
         onClose={() => setBuySongId(null)}
         onComplete={handlePurchaseComplete}
-      />
-      <ShareSheet
-        song={shareSongId === 0 ? null : findSong(shareSongId)}
-        open={shareSongId !== null}
-        onClose={() => setShareSongId(null)}
       />
       <RightsPassportSheet
         song={findSong(rightsSongId)}
@@ -247,6 +224,7 @@ export default function Home() {
         onClose={() => setDealRoomSongId(null)}
         onReserve={setReserveSongId}
         onBuy={setBuySongId}
+        teamId={activeTeam?.id}
       />
     </div>
   );

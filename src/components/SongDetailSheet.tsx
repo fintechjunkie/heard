@@ -13,12 +13,11 @@ interface SongDetailSheetProps {
   onClose: () => void;
   onReserve: (songId: number) => void;
   onBuy: (songId: number) => void;
-  onShare: (songId: number) => void;
   onOpenProfile: (memberId: number) => void;
 }
 
 export default function SongDetailSheet({
-  song, open, onClose, onReserve, onBuy, onShare, onOpenProfile,
+  song, open, onClose, onReserve, onBuy, onOpenProfile,
 }: SongDetailSheetProps) {
   const { activeSong, isPlaying } = usePlayer();
   if (!song) return null;
@@ -166,11 +165,6 @@ export default function SongDetailSheet({
 
         {/* Footer CTAs */}
         <div className="flex-shrink-0 flex flex-col gap-2 px-5 pb-5 pt-3" style={{ background: '#F2EDE3', borderTop: '1px solid var(--border)', boxShadow: '0 -8px 20px rgba(0,0,0,0.08)' }}>
-          <button onClick={() => { onClose(); onShare(song.id); }}
-            className="w-full py-[12px] rounded-xl text-[10px] tracking-[1.5px] uppercase cursor-pointer"
-            style={{ fontFamily: "'DM Mono', monospace", background: 'var(--b3)', color: '#FFFFFF', border: 'none' }}>
-            Share with Team
-          </button>
           <button onClick={() => { onClose(); onReserve(song.id); }}
             className="w-full py-[12px] rounded-xl text-[10px] tracking-[1.5px] uppercase cursor-pointer"
             style={{ fontFamily: "'DM Mono', monospace", background: 'var(--sky)', color: 'var(--black)', border: 'none' }}>
