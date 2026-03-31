@@ -109,7 +109,7 @@ export default function Waveform({
             color: isThisPlaying
               ? 'var(--black)'
               : isActive
-                ? 'var(--th-white)'
+                ? '#FAFAF7'
                 : 'var(--muted)',
             fontSize: btnSize * 0.34,
           }}
@@ -130,8 +130,8 @@ export default function Waveform({
             width: btnSize * 0.75,
             height: btnSize * 0.75,
             background: 'transparent',
-            border: isThisPlaying ? '1px solid rgba(200,255,69,0.3)' : '1px solid rgba(255,255,255,0.15)',
-            color: isThisPlaying ? 'var(--acid)' : 'rgba(255,255,255,0.5)',
+            border: isThisPlaying ? '1px solid rgba(200,255,69,0.3)' : '1px solid rgba(255,255,255,0.25)',
+            color: isThisPlaying ? 'var(--acid)' : 'rgba(255,255,255,0.6)',
             fontSize: btnSize * 0.28,
           }}
           title="Start over"
