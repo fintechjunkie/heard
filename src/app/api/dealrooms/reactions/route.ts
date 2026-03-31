@@ -17,19 +17,32 @@ export async function GET(request: NextRequest) {
   const supabase = getClient();
   const { data, error } = await supabase
     .from('deal_room_reactions')
-    .select('id, user_id, reaction, updated_at, profiles(full_name, avatar_url)')
+    .select('id, user_id, reaction, updated_at')
     .eq('deal_room_id', parseInt(dealRoomId))
     .order('updated_at', { ascending: true });
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+  // Look up profile names separately
+  const userIds = [...new Set((data || []).map(r => r.user_id).filter(Boolean))];
+  let profileMap: Record<string, { full_name: string; avatar_url: string }> = {};
+  if (userIds.length > 0) {
+    const { data: profiles } = await supabase
+      .from('profiles')
+      .select('id, full_name, avatar_url')
+      .in('id', userIds);
+    if (profiles) {
+      profileMap = Object.fromEntries(profiles.map(p => [p.id, { full_name: p.full_name || 'Unknown', avatar_url: p.avatar_url || '' }]));
+    }
+  }
 
   const reactions = (data || []).map(r => ({
     id: r.id,
     user_id: r.user_id,
     reaction: r.reaction,
     updated_at: r.updated_at,
-    full_name: (r.profiles as unknown as Record<string, string>)?.full_name || 'Unknown',
-    avatar_url: (r.profiles as unknown as Record<string, string>)?.avatar_url || '',
+    full_name: profileMap[r.user_id]?.full_name || 'Unknown',
+    avatar_url: profileMap[r.user_id]?.avatar_url || '',
   }));
 
   return NextResponse.json(reactions);
