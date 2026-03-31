@@ -552,6 +552,7 @@ export default function AdminPage() {
 
 function SongForm({ song, members, onSave, onCancel }: { song: Song; members: Member[]; onSave: (s: Song) => void; onCancel: () => void }) {
   const [form, setForm] = useState(song);
+  const [moodText, setMoodText] = useState(song.mood.join(', '));
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [showManualUrl, setShowManualUrl] = useState(false);
@@ -640,7 +641,7 @@ function SongForm({ song, members, onSave, onCancel }: { song: Song; members: Me
           </div>
           <div>
             <label className="block text-xs text-gray-500 mb-1">Mood (comma-separated)</label>
-            <input value={form.mood.join(', ')} onChange={e => update('mood', e.target.value.split(',').map(s => s.trim()).filter(Boolean))}
+            <input value={moodText} onChange={e => setMoodText(e.target.value)}
               className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none" />
           </div>
           <div>
@@ -763,7 +764,7 @@ function SongForm({ song, members, onSave, onCancel }: { song: Song; members: Me
           </div>
         </div>
         <div className="flex gap-3 mt-6">
-          <button onClick={() => onSave(form)}
+          <button onClick={() => onSave({ ...form, mood: moodText.split(',').map(s => s.trim()).filter(Boolean) })}
             className="px-6 py-2 bg-black text-white rounded-lg text-sm cursor-pointer border-none">Save</button>
           <button onClick={onCancel}
             className="px-6 py-2 bg-gray-100 text-gray-600 rounded-lg text-sm cursor-pointer border-none">Cancel</button>
@@ -831,7 +832,7 @@ function MemberForm({ member, onSave, onCancel }: { member: Member; onSave: (m: 
           </div>
         </div>
         <div className="flex gap-3 mt-6">
-          <button onClick={() => onSave(form)}
+          <button onClick={() => onSave({ ...form, mood: moodText.split(',').map(s => s.trim()).filter(Boolean) })}
             className="px-6 py-2 bg-black text-white rounded-lg text-sm cursor-pointer border-none">Save</button>
           <button onClick={onCancel}
             className="px-6 py-2 bg-gray-100 text-gray-600 rounded-lg text-sm cursor-pointer border-none">Cancel</button>
