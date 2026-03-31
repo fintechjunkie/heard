@@ -278,7 +278,17 @@ export default function ArtistMode({ open, onClose, onOpenProfile, inline }: Art
               </div>
 
               {/* Transport controls */}
-              <div className="flex items-center justify-center gap-4 mb-3">
+              <div className="flex items-center justify-center gap-3 mb-3">
+                {/* Start Over */}
+                <button
+                  onClick={(e) => { e.stopPropagation(); playSong(song); }}
+                  className="w-[34px] h-[34px] rounded-full flex items-center justify-center cursor-pointer border-none active:scale-90 transition-transform"
+                  style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)' }}
+                  title="Start over"
+                >
+                  <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', lineHeight: 1 }}>⏮</span>
+                </button>
+
                 {/* Rewind 10s */}
                 <button
                   onClick={(e) => { e.stopPropagation(); skipBack(10); }}
@@ -317,7 +327,6 @@ export default function ArtistMode({ open, onClose, onOpenProfile, inline }: Art
                     <span style={{ fontSize: 6, fontFamily: "'DM Mono', monospace", color: 'rgba(255,255,255,0.4)', lineHeight: 1 }}>10</span>
                   </div>
                 </button>
-
               </div>
 
               {/* Progress bar */}
@@ -340,17 +349,19 @@ export default function ArtistMode({ open, onClose, onOpenProfile, inline }: Art
                   return (
                     <button key={r.key}
                       onClick={(e) => { e.stopPropagation(); handleReaction(song.id, r.key); }}
-                      className="py-[9px] rounded-lg text-center cursor-pointer transition-all duration-150"
+                      className="py-[10px] rounded-lg text-center cursor-pointer transition-all duration-150"
                       style={{
                         fontFamily: "'DM Mono', monospace",
-                        background: isSelected ? `${effectiveColor}20` : 'rgba(255,255,255,0.04)',
-                        border: isSelected ? `1px solid ${effectiveColor}55` : '1px solid rgba(255,255,255,0.08)',
-                        color: isSelected ? 'white' : 'rgba(255,255,255,0.45)',
+                        background: isSelected ? `${effectiveColor}40` : 'rgba(255,255,255,0.04)',
+                        border: isSelected ? `2px solid ${effectiveColor}` : '1px solid rgba(255,255,255,0.1)',
+                        color: isSelected ? 'white' : 'rgba(255,255,255,0.55)',
+                        boxShadow: isSelected ? `0 0 12px ${effectiveColor}44, inset 0 0 12px ${effectiveColor}22` : 'none',
                       }}>
-                      <span className="text-[18px] block">{r.emoji}</span>
-                      {isSelected && (
-                        <span className="text-[7px] tracking-[0.5px] uppercase block mt-[3px]">{r.label}</span>
-                      )}
+                      <span className={`block ${isSelected ? 'text-[20px]' : 'text-[16px]'}`}>{r.emoji}</span>
+                      <span className={`tracking-[0.5px] uppercase block mt-[3px] ${isSelected ? 'text-[7px] font-medium' : 'text-[6px]'}`}
+                        style={{ color: isSelected ? 'white' : 'rgba(255,255,255,0.35)' }}>
+                        {r.label}
+                      </span>
                     </button>
                   );
                 })}

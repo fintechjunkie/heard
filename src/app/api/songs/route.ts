@@ -65,6 +65,7 @@ export async function POST(request: NextRequest) {
       credit_type: body.credit_type || 'fixed',
       is_new: body.is_new !== false,
       season_id: body.season_id || 1,
+      legal_doc_url: body.legal_doc_url || '',
     })
     .select()
     .single();

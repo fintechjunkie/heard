@@ -40,6 +40,8 @@ export async function POST(request: NextRequest) {
       awards: body.awards || [],
       hits: body.hits || [],
       member_type: body.member_type || 'general',
+      avatar_url: body.avatar_url || '',
+      banner_url: body.banner_url || '',
     })
     .select()
     .single();

@@ -25,6 +25,7 @@ export interface Song {
   artistFlagged: boolean;
   artistFlagTime: string | null;
   artistReaction: string | null;
+  legal_doc_url?: string;
 }
 
 export interface Member {

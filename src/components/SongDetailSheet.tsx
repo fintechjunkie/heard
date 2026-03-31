@@ -178,6 +178,29 @@ export default function SongDetailSheet({
             </div>
           </div>
 
+          {/* Legal Document */}
+          {song.legal_doc_url && (
+            <div className="px-5 pb-4">
+              <div className="text-[8px] tracking-[2px] uppercase mb-2" style={{ fontFamily: "'DM Mono', monospace", color: '#5a5650' }}>
+                Legal
+              </div>
+              <a
+                href={song.legal_doc_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 px-4 py-3 rounded-xl no-underline"
+                style={{ background: 'var(--th-white)', border: '1px solid var(--border)' }}
+              >
+                <span className="text-[18px]">📄</span>
+                <div className="flex-1">
+                  <div className="text-[12px] font-medium" style={{ color: 'var(--black)' }}>Song Agreement</div>
+                  <div className="text-[9px]" style={{ fontFamily: "'DM Mono', monospace", color: '#6a6660' }}>View standardized contract</div>
+                </div>
+                <span style={{ color: 'var(--muted-l)', fontSize: 14 }}>↗</span>
+              </a>
+            </div>
+          )}
+
           {/* Spacer for CTAs */}
           <div className="h-[180px]" />
         </div>

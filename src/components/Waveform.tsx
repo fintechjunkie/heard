@@ -118,7 +118,7 @@ export default function Waveform({
         </button>
       )}
 
-      {/* Restart button — only when song is active */}
+      {/* Start Over button — only when song is active */}
       {!hidePlayButton && isActive && (
         <button
           onClick={(e) => {
@@ -134,9 +134,9 @@ export default function Waveform({
             color: isThisPlaying ? 'var(--acid)' : 'rgba(255,255,255,0.5)',
             fontSize: btnSize * 0.28,
           }}
-          title="Restart song"
+          title="Start over"
         >
-          ↺
+          ⏮
         </button>
       )}
 

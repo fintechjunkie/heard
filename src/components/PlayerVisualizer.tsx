@@ -67,7 +67,7 @@ export default function PlayerVisualizer({
 
         {mode === 'waveform' && (
           <div className="w-full px-4">
-            <Waveform song={song} barCount={52} fillColor={color} baseColor="rgba(255,255,255,0.15)" height={90} />
+            <Waveform song={song} barCount={52} fillColor={color} baseColor="rgba(255,255,255,0.15)" height={90} hidePlayButton />
           </div>
         )}
 

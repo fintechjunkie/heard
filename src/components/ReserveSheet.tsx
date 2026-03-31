@@ -9,10 +9,13 @@ interface ReserveSheetProps {
   open: boolean;
   onClose: () => void;
   onConfirm: (songId: number) => void;
+  teamReservedCount?: number;
+  maxReserves?: number;
 }
 
-export default function ReserveSheet({ song, open, onClose, onConfirm }: ReserveSheetProps) {
+export default function ReserveSheet({ song, open, onClose, onConfirm, teamReservedCount = 0, maxReserves = 2 }: ReserveSheetProps) {
   if (!song) return null;
+  const atLimit = teamReservedCount >= maxReserves;
 
   return (
     <BottomSheet open={open} onClose={onClose}>
@@ -56,17 +59,34 @@ export default function ReserveSheet({ song, open, onClose, onConfirm }: Reserve
           ))}
         </div>
 
+        {/* Reserve cap indicator */}
+        <div className="flex items-center justify-center gap-2 mb-3">
+          <span className="text-[8px] tracking-[1px] uppercase" style={{ fontFamily: "'DM Mono', monospace", color: atLimit ? 'var(--coral)' : '#6a6660' }}>
+            Reserves: {teamReservedCount} / {maxReserves}
+          </span>
+          <div className="flex gap-[3px]">
+            {Array.from({ length: maxReserves }).map((_, i) => (
+              <div key={i} className="w-[8px] h-[8px] rounded-full" style={{
+                background: i < teamReservedCount ? 'var(--sky)' : 'var(--border)',
+              }} />
+            ))}
+          </div>
+        </div>
+
         {/* Disclaimer */}
         <p className="text-[10px] text-center mb-5" style={{ color: 'var(--muted)', lineHeight: 1.5 }}>
-          Reserving does not obligate purchase. Song auto-relists after 72 hours if not purchased.
+          {atLimit
+            ? `Your team has reached the ${maxReserves}-reserve limit. Release a hold before reserving another song.`
+            : 'Reserving does not obligate purchase. Song auto-relists after 72 hours if not purchased.'}
         </p>
 
         {/* CTA */}
         <button
-          onClick={() => onConfirm(song.id)}
+          onClick={() => !atLimit && onConfirm(song.id)}
+          disabled={atLimit}
           className="w-full py-[14px] rounded-xl text-[10px] tracking-[1.5px] uppercase cursor-pointer border-none"
-          style={{ fontFamily: "'DM Mono', monospace", background: 'var(--sky)', color: 'var(--black)' }}>
-          Confirm Reserve
+          style={{ fontFamily: "'DM Mono', monospace", background: atLimit ? '#ccc' : 'var(--sky)', color: atLimit ? '#999' : 'var(--black)', opacity: atLimit ? 0.6 : 1 }}>
+          {atLimit ? 'Reserve Limit Reached' : 'Confirm Reserve'}
         </button>
         <button onClick={onClose}
           className="w-full py-[10px] mt-2 text-[10px] tracking-[1px] uppercase cursor-pointer bg-transparent border-none"

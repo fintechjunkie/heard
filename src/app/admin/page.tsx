@@ -430,7 +430,7 @@ export default function AdminPage() {
                 mood: [], tier1_days_remaining: 180, days_in_bank: 0, audio_url: '', audio_duration_seconds: 60,
                 color: '#FFB830', gradient: '', status: 'available', reserved_by: null, reserved_until: null,
                 purchased_by: null, purchased_at: null, credit_type: 'fixed', is_new: true, season_id: 1,
-                created_at: new Date().toISOString(), artistFlagged: false, artistFlagTime: null, artistReaction: null,
+                created_at: new Date().toISOString(), artistFlagged: false, artistFlagTime: null, artistReaction: null, legal_doc_url: '',
               })}
                 className="px-4 py-2 bg-black text-white rounded-lg text-sm cursor-pointer border-none">
                 + Add Song
@@ -872,6 +872,8 @@ function SongForm({ song, members, onSave, onCancel }: { song: Song; members: Me
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [showManualUrl, setShowManualUrl] = useState(false);
+  const [legalUploading, setLegalUploading] = useState(false);
+  const [legalUploadError, setLegalUploadError] = useState<string | null>(null);
 
   const update = (field: string, value: unknown) => setForm({ ...form, [field]: value });
 
@@ -1078,6 +1080,88 @@ function SongForm({ song, members, onSave, onCancel }: { song: Song; members: Me
                 className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none mt-1" />
             )}
           </div>
+          <div className="col-span-2">
+            <label className="block text-xs text-gray-500 mb-1">Legal Document (PDF)</label>
+
+            {/* Current legal doc display */}
+            {form.legal_doc_url && (
+              <div className="flex items-center gap-2 mb-2 px-3 py-2 bg-blue-50 border border-blue-200 rounded-lg">
+                <span className="text-blue-700 text-xs">📄</span>
+                <span className="text-xs text-blue-800 flex-1 truncate">{form.legal_doc_url}</span>
+                <a href={form.legal_doc_url} target="_blank" rel="noopener noreferrer"
+                  className="text-xs text-blue-700 underline">View</a>
+                <button type="button" onClick={() => update('legal_doc_url', '')}
+                  className="text-xs text-red-400 cursor-pointer bg-transparent border-none">Remove</button>
+              </div>
+            )}
+
+            {/* Upload legal doc */}
+            <div
+              className={`relative border-2 border-dashed rounded-lg p-4 text-center transition-colors ${
+                legalUploading ? 'border-blue-300 bg-blue-50' : 'border-gray-300 hover:border-gray-400'
+              }`}
+              onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
+              onDrop={async (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const file = e.dataTransfer.files[0];
+                if (!file) return;
+                setLegalUploading(true);
+                setLegalUploadError(null);
+                try {
+                  const formData = new FormData();
+                  formData.append('file', file);
+                  const res = await fetch('/api/upload/image', { method: 'POST', body: formData });
+                  if (!res.ok) { const err = await res.json(); throw new Error(err.error || 'Upload failed'); }
+                  const data = await res.json();
+                  setForm(prev => ({ ...prev, legal_doc_url: data.url }));
+                } catch (err) {
+                  setLegalUploadError(err instanceof Error ? err.message : 'Upload failed');
+                } finally {
+                  setLegalUploading(false);
+                }
+              }}
+            >
+              {legalUploading ? (
+                <div className="text-sm text-blue-600">Uploading...</div>
+              ) : (
+                <>
+                  <div className="text-sm text-gray-500 mb-1">
+                    Drag &amp; drop a PDF, or click to browse
+                  </div>
+                  <input
+                    type="file"
+                    accept=".pdf,.doc,.docx"
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      setLegalUploading(true);
+                      setLegalUploadError(null);
+                      try {
+                        const formData = new FormData();
+                        formData.append('file', file);
+                        const res = await fetch('/api/upload/image', { method: 'POST', body: formData });
+                        if (!res.ok) { const err = await res.json(); throw new Error(err.error || 'Upload failed'); }
+                        const data = await res.json();
+                        setForm(prev => ({ ...prev, legal_doc_url: data.url }));
+                      } catch (err) {
+                        setLegalUploadError(err instanceof Error ? err.message : 'Upload failed');
+                      } finally {
+                        setLegalUploading(false);
+                      }
+                    }}
+                  />
+                </>
+              )}
+            </div>
+            {legalUploadError && <div className="text-xs text-red-500 mt-1">{legalUploadError}</div>}
+
+            {/* Manual URL fallback */}
+            <input value={form.legal_doc_url || ''} onChange={e => update('legal_doc_url', e.target.value)}
+              placeholder="Or paste URL to legal document..."
+              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none mt-2" />
+          </div>
         </div>
         <div className="flex gap-3 mt-6">
           <button onClick={() => onSave({ ...form, mood: moodText.split(',').map(s => s.trim()).filter(Boolean) })}
@@ -1086,6 +1170,64 @@ function SongForm({ song, members, onSave, onCancel }: { song: Song; members: Me
             className="px-6 py-2 bg-gray-100 text-gray-600 rounded-lg text-sm cursor-pointer border-none">Cancel</button>
         </div>
       </div>
+    </div>
+  );
+}
+
+function ImageUploadField({ label, value, onChange }: { label: string; value: string; onChange: (url: string) => void }) {
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleUpload = async (file: File) => {
+    setUploading(true);
+    setError(null);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      const res = await fetch('/api/upload/image', { method: 'POST', body: formData });
+      if (!res.ok) { const err = await res.json(); throw new Error(err.error || 'Upload failed'); }
+      const data = await res.json();
+      onChange(data.url);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Upload failed');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  return (
+    <div>
+      <label className="block text-xs text-gray-500 mb-1">{label}</label>
+      {value && (
+        <div className="flex items-center gap-2 mb-2">
+          <img src={value} alt={label} className="w-12 h-12 rounded-lg object-cover border border-gray-200" />
+          <span className="text-xs text-gray-500 flex-1 truncate">{value}</span>
+          <button type="button" onClick={() => onChange('')}
+            className="text-xs text-red-400 cursor-pointer bg-transparent border-none">Remove</button>
+        </div>
+      )}
+      <div
+        className={`relative border-2 border-dashed rounded-lg p-3 text-center transition-colors ${
+          uploading ? 'border-blue-300 bg-blue-50' : 'border-gray-300 hover:border-gray-400'
+        }`}
+        onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
+        onDrop={(e) => { e.preventDefault(); e.stopPropagation(); const file = e.dataTransfer.files[0]; if (file) handleUpload(file); }}
+      >
+        {uploading ? (
+          <div className="text-sm text-blue-600">Uploading...</div>
+        ) : (
+          <>
+            <div className="text-xs text-gray-500">Drop image or click to browse</div>
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/gif"
+              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+              onChange={(e) => { const file = e.target.files?.[0]; if (file) handleUpload(file); }}
+            />
+          </>
+        )}
+      </div>
+      {error && <div className="text-xs text-red-500 mt-1">{error}</div>}
     </div>
   );
 }
@@ -1145,6 +1287,20 @@ function MemberForm({ member, onSave, onCancel }: { member: Member; onSave: (m: 
             <label className="block text-xs text-gray-500 mb-1">Awards (comma-separated)</label>
             <input value={form.awards.join(', ')} onChange={e => update('awards', e.target.value.split(',').map(s => s.trim()).filter(Boolean))}
               className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none" />
+          </div>
+          <div>
+            <ImageUploadField
+              label="Avatar Image"
+              value={form.avatar_url || ''}
+              onChange={(url) => update('avatar_url', url)}
+            />
+          </div>
+          <div>
+            <ImageUploadField
+              label="Banner Image"
+              value={form.banner_url || ''}
+              onChange={(url) => update('banner_url', url)}
+            />
           </div>
         </div>
         <div className="flex gap-3 mt-6">

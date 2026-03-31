@@ -33,6 +33,14 @@ interface Comment {
   avatar_url: string;
 }
 
+const DEAL_REACTIONS = [
+  { key: 'musthave', emoji: '🔥', label: 'Must Have', color: '#FF6848', bg: 'rgba(255,104,72,0.1)', border: 'rgba(255,104,72,0.3)' },
+  { key: 'hit', emoji: '⚡', label: 'Hit', color: '#FFB830', bg: 'rgba(255,184,48,0.1)', border: 'rgba(255,184,48,0.3)' },
+  { key: 'love', emoji: '♥', label: 'Love', color: '#B57BFF', bg: 'rgba(181,123,255,0.1)', border: 'rgba(181,123,255,0.3)' },
+  { key: 'notsure', emoji: '〰', label: 'Not Sure', color: '#6a6660', bg: 'rgba(106,102,96,0.1)', border: 'rgba(106,102,96,0.3)' },
+  { key: 'notforme', emoji: '✕', label: 'Pass', color: 'var(--coral)', bg: 'rgba(255,104,72,0.08)', border: 'rgba(255,104,72,0.2)' },
+];
+
 export default function DealRoom({ song, open, onClose, onReserve, onBuy, teamId }: DealRoomProps) {
   const [dealRoomId, setDealRoomId] = useState<number | null>(null);
   const [dealRoomExists, setDealRoomExists] = useState(false);
@@ -145,9 +153,9 @@ export default function DealRoom({ song, open, onClose, onReserve, onBuy, teamId
   if (!song) return null;
 
   const isHeld = song.status === 'reserved';
-  const yesCt = reactions.filter(r => r.reaction === 'yes').length;
-  const maybeCt = reactions.filter(r => r.reaction === 'maybe').length;
-  const passCt = reactions.filter(r => r.reaction === 'pass').length;
+  const positiveCt = reactions.filter(r => ['musthave', 'hit', 'love'].includes(r.reaction)).length;
+  const unsureCt = reactions.filter(r => r.reaction === 'notsure').length;
+  const passCt = reactions.filter(r => r.reaction === 'notforme').length;
   const totalReactions = reactions.length;
 
   return (
@@ -182,7 +190,7 @@ export default function DealRoom({ song, open, onClose, onReserve, onBuy, teamId
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto scrollbar-hide pb-[140px]">
+      <div className="flex-1 overflow-y-auto scrollbar-hide pb-4">
         {loading ? (
           <div className="py-12 text-center text-gray-400 text-sm">Loading...</div>
         ) : !dealRoomExists ? (
@@ -207,13 +215,13 @@ export default function DealRoom({ song, open, onClose, onReserve, onBuy, teamId
                   Team Consensus · {totalReactions} vote{totalReactions !== 1 ? 's' : ''}
                 </div>
                 <div className="flex gap-[2px] mb-2 rounded-full overflow-hidden" style={{ height: 8 }}>
-                  {yesCt > 0 && <div style={{ flex: yesCt, background: '#2a7a2a' }} />}
-                  {maybeCt > 0 && <div style={{ flex: maybeCt, background: 'var(--amber)' }} />}
+                  {positiveCt > 0 && <div style={{ flex: positiveCt, background: '#B57BFF' }} />}
+                  {unsureCt > 0 && <div style={{ flex: unsureCt, background: '#6a6660' }} />}
                   {passCt > 0 && <div style={{ flex: passCt, background: 'var(--coral)' }} />}
                 </div>
                 <div className="flex gap-4 text-[8px]" style={{ fontFamily: "'DM Mono', monospace", color: '#6a6660' }}>
-                  <span>● Yes {yesCt}</span>
-                  <span>● Maybe {maybeCt}</span>
+                  <span>● Positive {positiveCt}</span>
+                  <span>● Not Sure {unsureCt}</span>
                   <span>● Pass {passCt}</span>
                 </div>
               </div>
@@ -232,13 +240,20 @@ export default function DealRoom({ song, open, onClose, onReserve, onBuy, teamId
                     </div>
                     <span className="text-[12px] font-medium">{r.full_name}</span>
                   </div>
-                  <span className={`px-2 py-1 rounded-md text-[8px] tracking-[1px] uppercase ${
-                    r.reaction === 'yes' ? 'bg-green-50 text-green-700' :
-                    r.reaction === 'maybe' ? 'bg-amber-50 text-amber-700' :
-                    'bg-red-50 text-red-600'
-                  }`} style={{ fontFamily: "'DM Mono', monospace" }}>
-                    {r.reaction === 'yes' ? '✓ Yes' : r.reaction === 'maybe' ? '∼ Maybe' : '✕ Pass'}
-                  </span>
+                  {(() => {
+                    const rxDef = DEAL_REACTIONS.find(dr => dr.key === r.reaction);
+                    return rxDef ? (
+                      <span className="px-2 py-1 rounded-md text-[8px] tracking-[1px] uppercase"
+                        style={{ fontFamily: "'DM Mono', monospace", background: rxDef.bg, color: rxDef.color, border: `1px solid ${rxDef.border}` }}>
+                        {rxDef.emoji} {rxDef.label}
+                      </span>
+                    ) : (
+                      <span className="px-2 py-1 rounded-md text-[8px] tracking-[1px] uppercase bg-gray-50 text-gray-500"
+                        style={{ fontFamily: "'DM Mono', monospace" }}>
+                        {r.reaction}
+                      </span>
+                    );
+                  })()}
                 </div>
               ))}
             </div>
@@ -248,21 +263,18 @@ export default function DealRoom({ song, open, onClose, onReserve, onBuy, teamId
               <div className="text-[8px] tracking-[2px] uppercase mb-2" style={{ fontFamily: "'DM Mono', monospace", color: '#5a5650' }}>
                 My Reaction
               </div>
-              <div className="flex gap-2">
-                {[
-                  { key: 'yes', label: '✓ Yes', color: '#2a7a2a', bg: 'rgba(42,122,42,0.1)', border: 'rgba(42,122,42,0.3)' },
-                  { key: 'maybe', label: '∼ Maybe', color: 'var(--amber)', bg: 'rgba(255,184,48,0.1)', border: 'rgba(255,184,48,0.3)' },
-                  { key: 'pass', label: '✕ Pass', color: 'var(--coral)', bg: 'rgba(255,104,72,0.1)', border: 'rgba(255,104,72,0.3)' },
-                ].map(r => (
+              <div className="grid grid-cols-5 gap-[6px]">
+                {DEAL_REACTIONS.map(r => (
                   <button key={r.key} onClick={() => submitReaction(r.key)}
-                    className="flex-1 py-[10px] rounded-xl text-[9px] tracking-[1px] uppercase text-center cursor-pointer"
+                    className="py-[10px] rounded-xl text-center cursor-pointer"
                     style={{
                       fontFamily: "'DM Mono', monospace",
                       background: myReaction === r.key ? r.bg : 'var(--th-white)',
                       border: myReaction === r.key ? `1.5px solid ${r.border}` : '1px solid var(--border)',
                       color: myReaction === r.key ? r.color : '#6a6660',
                     }}>
-                    {r.label}
+                    <span className="text-[16px] block">{r.emoji}</span>
+                    <span className="text-[7px] tracking-[0.5px] uppercase block mt-[2px]">{r.label}</span>
                   </button>
                 ))}
               </div>
@@ -300,34 +312,39 @@ export default function DealRoom({ song, open, onClose, onReserve, onBuy, teamId
                 <div ref={commentsEndRef} />
               </div>
 
-              {/* Comment input */}
-              <div className="flex gap-2 mb-2">
-                <input
-                  value={commentText}
-                  onChange={e => setCommentText(e.target.value)}
-                  onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submitComment(); } }}
-                  placeholder={isAdminQuestion ? 'Message to Heard admin...' : 'Add a comment...'}
-                  className="flex-1 px-3 py-2 rounded-lg text-[11px] outline-none"
-                  style={{ background: 'var(--th-white)', border: '1px solid var(--border)', fontFamily: "'DM Sans', sans-serif" }}
-                />
-                <button onClick={submitComment}
-                  className="px-3 py-2 rounded-lg text-[9px] tracking-[1px] uppercase cursor-pointer border-none"
-                  style={{ fontFamily: "'DM Mono', monospace", background: 'var(--black)', color: '#FFFFFF' }}>
-                  Send
-                </button>
-              </div>
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" checked={isAdminQuestion} onChange={e => setIsAdminQuestion(e.target.checked)} />
-                <span className="text-[9px]" style={{ fontFamily: "'DM Mono', monospace", color: '#6a6660' }}>Send to Heard admin for response</span>
-              </label>
             </div>
           </>
         )}
       </div>
 
+      {/* Comment input — fixed above CTAs so it never scrolls away */}
+      {dealRoomExists && (
+        <div className="flex-shrink-0 px-5 pt-3 pb-2" style={{ background: '#F2EDE3', borderTop: '1px solid var(--border)' }}>
+          <div className="flex gap-2 mb-2">
+            <input
+              value={commentText}
+              onChange={e => setCommentText(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submitComment(); } }}
+              placeholder={isAdminQuestion ? 'Message to Heard admin...' : 'Add a comment...'}
+              className="flex-1 px-3 py-2 rounded-lg text-[11px] outline-none"
+              style={{ background: 'var(--th-white)', border: '1px solid var(--border)', fontFamily: "'DM Sans', sans-serif", minHeight: 36 }}
+            />
+            <button onClick={submitComment}
+              className="px-3 py-2 rounded-lg text-[9px] tracking-[1px] uppercase cursor-pointer border-none"
+              style={{ fontFamily: "'DM Mono', monospace", background: 'var(--black)', color: '#FFFFFF' }}>
+              Send
+            </button>
+          </div>
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" checked={isAdminQuestion} onChange={e => setIsAdminQuestion(e.target.checked)} />
+            <span className="text-[9px]" style={{ fontFamily: "'DM Mono', monospace", color: '#6a6660' }}>Send to Heard admin for response</span>
+          </label>
+        </div>
+      )}
+
       {/* Footer CTAs */}
       {dealRoomExists && (
-        <div className="absolute bottom-0 left-0 right-0 flex flex-col gap-2 px-5 pb-5 pt-3" style={{ background: '#F2EDE3', borderTop: '1px solid var(--border)', boxShadow: '0 -8px 20px rgba(0,0,0,0.08)' }}>
+        <div className="flex-shrink-0 flex flex-col gap-2 px-5 pb-5 pt-2" style={{ background: '#F2EDE3' }}>
           <button
             onClick={() => { onClose(); setTimeout(() => onReserve(song.id), 100); }}
             className="w-full py-[12px] rounded-xl text-[10px] tracking-[1.5px] uppercase cursor-pointer border-none"

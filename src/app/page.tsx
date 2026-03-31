@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useStore } from '@/lib/store';
 import { MEMBERS } from '@/data/members';
 import TopNav from '@/components/TopNav';
@@ -54,12 +54,62 @@ export default function Home() {
     localStorage.setItem('theheard_activeTeam', JSON.stringify(team));
   }, []);
 
+  // Sync Pocket Songs reactions → Deal Room
+  const prevReactionsRef = useRef(store.artistReactions);
+  useEffect(() => {
+    const prev = prevReactionsRef.current;
+    const curr = store.artistReactions;
+    prevReactionsRef.current = curr;
+
+    if (!activeTeam) return;
+
+    // Find which song IDs changed
+    const allIds = new Set([...Object.keys(prev), ...Object.keys(curr)]);
+    for (const idStr of allIds) {
+      const songId = Number(idStr);
+      if (prev[songId] !== curr[songId] && curr[songId]) {
+        // Reaction was added or changed — sync to deal room
+        (async () => {
+          try {
+            // Check if a deal room exists for this song+team
+            const drRes = await fetch(`/api/dealrooms?songId=${songId}&teamId=${activeTeam.id}`);
+            if (!drRes.ok) return;
+            const dr = await drRes.json();
+            if (!dr?.id) return;
+
+            // Get current user ID
+            const { createClient } = await import('@/lib/supabase/client');
+            const supabase = createClient();
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) return;
+
+            // Upsert the reaction
+            await fetch('/api/dealrooms/reactions', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ dealRoomId: dr.id, userId: user.id, reaction: curr[songId] }),
+            });
+          } catch { /* ignore sync errors */ }
+        })();
+      }
+    }
+  }, [store.artistReactions, activeTeam]);
+
   const filteredSongs = getFilteredSongs();
 
   const findSong = (id: number | null) => id ? songs.find(s => s.id === id) || null : null;
   const findMember = (id: number | null) => id ? MEMBERS.find(m => m.id === id) || null : null;
 
+  const MAX_RESERVES_PER_TEAM = 2;
+  const teamReservedCount = songs.filter(s => s.status === 'reserved').length;
+
   const handleReserveConfirm = useCallback((songId: number) => {
+    const currentReserved = songs.filter(s => s.status === 'reserved').length;
+    if (currentReserved >= MAX_RESERVES_PER_TEAM) {
+      showToast(`Reserve limit reached (${MAX_RESERVES_PER_TEAM} per team). Release a hold first.`);
+      setReserveSongId(null);
+      return;
+    }
     reserveSong(songId);
     setReserveSongId(null);
     const song = songs.find(s => s.id === songId);
@@ -187,6 +237,8 @@ export default function Home() {
         open={reserveSongId !== null}
         onClose={() => setReserveSongId(null)}
         onConfirm={handleReserveConfirm}
+        teamReservedCount={teamReservedCount}
+        maxReserves={MAX_RESERVES_PER_TEAM}
       />
       <BuyFlowSheet
         song={findSong(buySongId)}
