@@ -81,7 +81,7 @@ export default function ArtistMode({ open, onClose, onOpenProfile, inline }: Art
       const rxData = REACTIONS.find(r => r.key === key);
       const s = songs.find(x => x.id === songId);
       if (rxData && s) {
-        showToast(`${rxData.emoji} "${s.title}" — your manager sees "${rxData.label}"`);
+        showToast(`${rxData.emoji} "${s.title}" — your team sees "${rxData.label}"`);
       }
     }
   };
@@ -93,7 +93,7 @@ export default function ArtistMode({ open, onClose, onOpenProfile, inline }: Art
       if (!artistReactions[songId]) {
         setArtistReaction(songId, 'love');
       }
-      showToast(`♥ "${s.title}" flagged — your manager will see this.`);
+      showToast(`♥ "${s.title}" flagged — your team will see this.`);
     } else {
       setArtistReaction(songId, null);
       showToast(`Flag removed from "${s.title}".`);
@@ -361,7 +361,7 @@ export default function ArtistMode({ open, onClose, onOpenProfile, inline }: Art
                   style={{ background: `${effectiveColor}0a`, border: `1px solid ${effectiveColor}22` }}>
                   <span className="text-[14px]">{rxData.emoji}</span>
                   <span className="text-[10px]" style={{ color: 'rgba(255,255,255,0.6)' }}>
-                    You said: <strong style={{ color: '#fff' }}>{rxData.label}</strong> · shared with your manager
+                    You said: <strong style={{ color: '#fff' }}>{rxData.label}</strong> · shared with your team
                   </span>
                 </div>
               )}
