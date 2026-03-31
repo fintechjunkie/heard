@@ -4,6 +4,17 @@ input::placeholder, textarea::placeholder, select {
   color: rgba(255,255,255,0.45) !important;
 }
 
+input, textarea, select {
+  color: #FAFAF7 !important;
+  -webkit-text-fill-color: #FAFAF7;
+}
+
+input[type="password"] {
+  -webkit-text-security: disc;
+  color: #FAFAF7 !important;
+  -webkit-text-fill-color: #FAFAF7;
+}
+
 :root {
   --cream: #F2EDE3;
   --white: #FAFAF7;

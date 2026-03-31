@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { createClient } from '@/lib/supabase/client';
 
 export default function ApplyPage() {
   const [form, setForm] = useState({
@@ -16,8 +15,6 @@ export default function ApplyPage() {
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const supabase = createClient();
-
   const handleApply = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -29,41 +26,31 @@ export default function ApplyPage() {
       return;
     }
 
-    // Create the auth user
-    const { data, error: signUpError } = await supabase.auth.signUp({
-      email: form.email,
-      password: form.password,
-      options: {
-        data: {
-          full_name: form.fullName,
-        },
-      },
-    });
-
-    if (signUpError) {
-      setError(signUpError.message);
-      setLoading(false);
-      return;
-    }
-
-    // Update the profile with additional info
-    if (data.user) {
-      await supabase
-        .from('profiles')
-        .update({
-          full_name: form.fullName,
+    try {
+      const res = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: form.email,
+          password: form.password,
+          fullName: form.fullName,
           role: form.role,
           company: form.company,
           bio: form.bio,
-          status: 'pending',
-        })
-        .eq('id', data.user.id);
+        }),
+      });
 
-      // Sign out — they can't access until approved
-      await supabase.auth.signOut();
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error || 'Something went wrong.');
+        setLoading(false);
+        return;
+      }
+
+      setSuccess(true);
+    } catch {
+      setError('Network error. Please try again.');
     }
-
-    setSuccess(true);
     setLoading(false);
   };
 
