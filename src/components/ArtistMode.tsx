@@ -318,18 +318,6 @@ export default function ArtistMode({ open, onClose, onOpenProfile, inline }: Art
                   </div>
                 </button>
 
-                {/* Flag */}
-                <button
-                  onClick={(e) => { e.stopPropagation(); handleFlag(song.id); }}
-                  className="w-[38px] h-[38px] rounded-full flex items-center justify-center text-[16px] cursor-pointer border-none flex-shrink-0"
-                  style={{
-                    background: song.artistFlagged ? 'rgba(181,123,255,0.15)' : 'rgba(255,255,255,0.06)',
-                    border: song.artistFlagged ? '1px solid rgba(181,123,255,0.4)' : '1px solid rgba(255,255,255,0.1)',
-                    color: song.artistFlagged ? 'var(--violet)' : 'rgba(255,255,255,0.4)',
-                  }}
-                >
-                  {song.artistFlagged ? '♥' : '♡'}
-                </button>
               </div>
 
               {/* Progress bar */}
@@ -346,35 +334,26 @@ export default function ArtistMode({ open, onClose, onOpenProfile, inline }: Art
               </div>
 
               {/* Reactions */}
-              <div className="grid grid-cols-3 gap-[6px] mb-[6px]">
-                {REACTIONS.slice(0, 3).map(r => (
-                  <button key={r.key}
-                    onClick={(e) => { e.stopPropagation(); handleReaction(song.id, r.key); }}
-                    className="py-[9px] rounded-lg text-[8px] tracking-[0.5px] uppercase text-center cursor-pointer transition-all duration-150"
-                    style={{
-                      fontFamily: "'DM Mono', monospace",
-                      background: rx === r.key ? `${effectiveColor}20` : 'rgba(255,255,255,0.04)',
-                      border: rx === r.key ? `1px solid ${effectiveColor}55` : '1px solid rgba(255,255,255,0.08)',
-                      color: rx === r.key ? 'white' : 'rgba(255,255,255,0.45)',
-                    }}>
-                    <span className="text-[14px] block mb-[2px]">{r.emoji}</span>{r.label}
-                  </button>
-                ))}
-              </div>
-              <div className="grid grid-cols-2 gap-[6px]">
-                {REACTIONS.slice(3).map(r => (
-                  <button key={r.key}
-                    onClick={(e) => { e.stopPropagation(); handleReaction(song.id, r.key); }}
-                    className="py-[9px] rounded-lg text-[8px] tracking-[0.5px] uppercase text-center cursor-pointer transition-all duration-150"
-                    style={{
-                      fontFamily: "'DM Mono', monospace",
-                      background: rx === r.key ? `${effectiveColor}20` : 'rgba(255,255,255,0.04)',
-                      border: rx === r.key ? `1px solid ${effectiveColor}55` : '1px solid rgba(255,255,255,0.08)',
-                      color: rx === r.key ? 'white' : 'rgba(255,255,255,0.45)',
-                    }}>
-                    <span className="text-[14px] block mb-[2px]">{r.emoji}</span>{r.label}
-                  </button>
-                ))}
+              <div className="grid grid-cols-5 gap-[6px] mb-[6px]">
+                {REACTIONS.map(r => {
+                  const isSelected = rx === r.key;
+                  return (
+                    <button key={r.key}
+                      onClick={(e) => { e.stopPropagation(); handleReaction(song.id, r.key); }}
+                      className="py-[9px] rounded-lg text-center cursor-pointer transition-all duration-150"
+                      style={{
+                        fontFamily: "'DM Mono', monospace",
+                        background: isSelected ? `${effectiveColor}20` : 'rgba(255,255,255,0.04)',
+                        border: isSelected ? `1px solid ${effectiveColor}55` : '1px solid rgba(255,255,255,0.08)',
+                        color: isSelected ? 'white' : 'rgba(255,255,255,0.45)',
+                      }}>
+                      <span className="text-[18px] block">{r.emoji}</span>
+                      {isSelected && (
+                        <span className="text-[7px] tracking-[0.5px] uppercase block mt-[3px]">{r.label}</span>
+                      )}
+                    </button>
+                  );
+                })}
               </div>
 
               {rxData && (
