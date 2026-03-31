@@ -42,23 +42,39 @@ export default function Waveform({
   const handlePlayPause = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
     if (isActive) {
-      toggle(song);
+      // If preview ended (at or past 20s in preview mode), restart from beginning
+      if (previewMode && currentTime >= 19.5 && !isPlaying) {
+        playSong(song);
+      } else {
+        toggle(song);
+      }
     } else {
       playSong(song);
     }
     onClick?.();
-  }, [isActive, toggle, playSong, song, onClick]);
+  }, [isActive, isPlaying, previewMode, currentTime, toggle, playSong, song, onClick]);
 
   const handleBarClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     e.stopPropagation();
     const rect = e.currentTarget.getBoundingClientRect();
     const percent = ((e.clientX - rect.left) / rect.width) * 100;
-    const clampedPercent = Math.max(0, Math.min(100, percent));
+    let clampedPercent = Math.max(0, Math.min(100, percent));
+
+    // In preview mode, clicking the bar maps to 0-20s range
+    if (previewMode && duration > 0) {
+      const seekSeconds = (clampedPercent / 100) * 20;
+      clampedPercent = (seekSeconds / duration) * 100;
+    }
 
     if (isActive) {
-      seek(clampedPercent);
-      if (!isPlaying) {
-        toggle(song);
+      // If preview ended, restart from clicked position
+      if (previewMode && currentTime >= 19.5 && !isPlaying) {
+        playSong(song, clampedPercent);
+      } else {
+        seek(clampedPercent);
+        if (!isPlaying) {
+          toggle(song);
+        }
       }
     } else {
       playSong(song, clampedPercent);

@@ -29,7 +29,7 @@ export default function SongCard({
   onOpenRightsPassport, onOpenProfile, onReserve,
 }: SongCardProps) {
   const { savedSongIds, toggleSave, artistQueue, toggleArtistQueue, showToast, artistReactions, releaseReserve } = useStore();
-  const { activeSong, isPlaying, toggle, playSong } = usePlayer();
+  const { activeSong, isPlaying, toggle, playSong, previewMode, currentTime } = usePlayer();
   const isSaved = savedSongIds.includes(song.id);
   const isQueued = artistQueue.includes(song.id);
   const isActive = activeSong?.id === song.id && isPlaying;
@@ -56,7 +56,12 @@ export default function SongCard({
       }}
       onClick={() => {
         if (activeSong?.id === song.id) {
-          toggle(song);
+          // If preview ended, restart from beginning
+          if (previewMode && currentTime >= 19.5 && !isPlaying) {
+            playSong(song);
+          } else {
+            toggle(song);
+          }
         } else {
           playSong(song);
         }
@@ -147,7 +152,7 @@ export default function SongCard({
       {/* Row 2: Title + Price */}
       <div className="flex items-baseline justify-between gap-2 mb-[2px]">
         <span className="text-[26px] tracking-[1.5px] leading-none flex-1"
-          style={{ fontFamily: "'Bebas Neue', sans-serif", color: isPlayingSong ? 'var(--th-white)' : 'var(--black)' }}>
+          style={{ fontFamily: "'Bebas Neue', sans-serif", color: isPlayingSong ? '#FFFFFF' : 'var(--black)' }}>
           {song.title}
         </span>
         <span className="text-[18px] tracking-[1px] flex-shrink-0"
