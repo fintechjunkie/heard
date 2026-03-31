@@ -56,7 +56,7 @@ export default function ApplyPage() {
 
   if (success) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--black)' }}>
+      <div className="min-h-screen flex items-center justify-center dark-form" style={{ background: 'var(--black)' }}>
         <div className="w-full max-w-sm px-6 text-center">
           <div className="text-[48px] tracking-[12px] mb-4"
             style={{ fontFamily: "'Bebas Neue', sans-serif", color: '#ffffff', textShadow: '0 0 20px rgba(200,255,69,0.3)' }}>
@@ -81,7 +81,7 @@ export default function ApplyPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--black)' }}>
+    <div className="min-h-screen flex items-center justify-center dark-form" style={{ background: 'var(--black)' }}>
       <div className="w-full max-w-sm px-6">
         {/* Logo */}
         <div className="text-center mb-8">

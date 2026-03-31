@@ -1,25 +1,25 @@
 @import "tailwindcss";
 
-input::placeholder, textarea::placeholder, select {
+.dark-form input::placeholder, .dark-form textarea::placeholder, .dark-form select {
   color: rgba(255,255,255,0.45) !important;
 }
 
-input, textarea, select {
+.dark-form input, .dark-form textarea, .dark-form select {
   color: #FAFAF7 !important;
   -webkit-text-fill-color: #FAFAF7;
 }
 
-input[type="password"] {
+.dark-form input[type="password"] {
   -webkit-text-security: disc;
   color: #FAFAF7 !important;
   -webkit-text-fill-color: #FAFAF7;
 }
 
-input:-webkit-autofill,
-input:-webkit-autofill:hover,
-input:-webkit-autofill:focus,
-textarea:-webkit-autofill,
-select:-webkit-autofill {
+.dark-form input:-webkit-autofill,
+.dark-form input:-webkit-autofill:hover,
+.dark-form input:-webkit-autofill:focus,
+.dark-form textarea:-webkit-autofill,
+.dark-form select:-webkit-autofill {
   -webkit-box-shadow: 0 0 0px 1000px #1E1E1E inset !important;
   -webkit-text-fill-color: #FAFAF7 !important;
   transition: background-color 5000s ease-in-out 0s;
