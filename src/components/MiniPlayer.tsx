@@ -45,11 +45,11 @@ export default function MiniPlayer({ onOpenDetail, onReserve, onBuy }: MiniPlaye
         </div>
       </div>
 
-      <div className="flex items-center gap-3 px-4 py-[10px]">
-        {/* Play/Pause with glow */}
+      <div className="flex items-center gap-3 px-4 py-[8px]">
+        {/* Play/Pause */}
         <button
           onClick={(e) => { e.stopPropagation(); toggle(activeSong); }}
-          className={`w-[34px] h-[34px] rounded-full flex items-center justify-center text-[14px] flex-shrink-0 cursor-pointer border-none ${
+          className={`w-[32px] h-[32px] rounded-full flex items-center justify-center text-[13px] flex-shrink-0 cursor-pointer border-none ${
             isPlaying ? 'animate-pulse-glow' : ''
           }`}
           style={{ background: 'var(--acid)', color: 'var(--black)' }}
@@ -57,49 +57,25 @@ export default function MiniPlayer({ onOpenDetail, onReserve, onBuy }: MiniPlaye
           {isPlaying ? '⏸' : '▶'}
         </button>
 
-        {/* Equalizer bars — only when playing */}
-        <div className="flex items-end gap-[2px] flex-shrink-0" style={{ height: 18, width: 20 }}>
-          {EQ_CLASSES.map((cls, i) => (
-            <div
-              key={i}
-              className={`w-[3px] rounded-[1px] ${isPlaying ? cls : ''}`}
-              style={{
-                height: '100%',
-                background: 'var(--acid)',
-                transform: isPlaying ? undefined : 'scaleY(0.2)',
-                transformOrigin: 'bottom',
-                transition: 'transform 0.3s ease',
-              }}
-            />
-          ))}
-        </div>
-
         {/* Song info */}
         <div className="flex-1 min-w-0">
-          <div className="truncate text-[14px] tracking-[1px]"
+          <div className="truncate text-[13px] tracking-[1px]"
             style={{ fontFamily: "'Bebas Neue', sans-serif", color: '#FFFFFF' }}>
             {activeSong.title}
           </div>
-          <div className="truncate text-[9px] tracking-[0.5px]"
-            style={{ fontFamily: "'DM Mono', monospace", color: 'rgba(255,255,255,0.45)' }}>
-            {activeSong.writers.join(' \u00B7 ')}
+          <div className="truncate text-[8px] tracking-[0.5px]"
+            style={{ fontFamily: "'DM Mono', monospace", color: 'rgba(255,255,255,0.4)' }}>
+            {activeSong.writers.join(' · ')}
           </div>
         </div>
 
-        {/* Action buttons */}
+        {/* Info button */}
         <button
-          onClick={(e) => { e.stopPropagation(); onReserve(activeSong.id); }}
-          className="px-[10px] py-[5px] rounded-md text-[8px] tracking-[1px] uppercase cursor-pointer border-none"
-          style={{ fontFamily: "'DM Mono', monospace", background: 'var(--sky)', color: 'var(--black)' }}
+          onClick={(e) => { e.stopPropagation(); onOpenDetail(activeSong.id); }}
+          className="text-[8px] tracking-[1px] uppercase px-[8px] py-[4px] rounded cursor-pointer border-none"
+          style={{ fontFamily: "'DM Mono', monospace", background: 'var(--b3)', color: 'rgba(255,255,255,0.5)', border: '1px solid var(--b4)' }}
         >
-          Hold
-        </button>
-        <button
-          onClick={(e) => { e.stopPropagation(); onBuy(activeSong.id); }}
-          className="px-[10px] py-[5px] rounded-md text-[8px] tracking-[1px] uppercase cursor-pointer border-none"
-          style={{ fontFamily: "'DM Mono', monospace", background: 'var(--coral)', color: 'white' }}
-        >
-          Buy
+          Info
         </button>
       </div>
     </div>
