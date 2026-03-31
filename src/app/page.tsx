@@ -165,12 +165,14 @@ export default function Home() {
         )}
       </div>
 
-      {/* Mini Player */}
-      <MiniPlayer
-        onOpenDetail={setDetailSongId}
-        onReserve={setReserveSongId}
-        onBuy={setBuySongId}
-      />
+      {/* Mini Player — hidden on Pocket Songs tab (has its own controls) */}
+      {activeTab !== 'pocket' && (
+        <MiniPlayer
+          onOpenDetail={setDetailSongId}
+          onReserve={setReserveSongId}
+          onBuy={setBuySongId}
+        />
+      )}
 
       {/* Bottom Tab Bar */}
       <BottomTabBar />
