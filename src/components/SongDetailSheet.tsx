@@ -66,14 +66,25 @@ export default function SongDetailSheet({
         </div>
 
         {/* Scrollable body */}
-        <div className="flex-1 overflow-y-auto scrollbar-hide" style={{ background: 'var(--cream)' }}>
+        <div className="flex-1 overflow-y-auto scrollbar-hide relative" style={{ background: 'var(--cream)' }}>
+          {/* Scroll hint — subtle text below the waveform */}
           {/* Generative art */}
           <SongArt songId={song.id} bpm={song.bpm} songKey={song.key} color={song.color} mood={song.mood} height={140} />
 
           {/* Preview waveform */}
-          <div className="p-5">
+          <div className="p-5 pb-2">
             <div className="text-[8px] tracking-[2px] uppercase mb-2" style={{ fontFamily: "'DM Mono', monospace", color: '#5a5650' }}>Preview</div>
             <Waveform song={song} barCount={52} height={48} />
+          </div>
+
+          {/* Scroll indicator */}
+          <div className="flex items-center justify-center gap-2 pb-3">
+            <div className="h-[1px] flex-1 mx-5" style={{ background: 'var(--border)' }} />
+            <span className="text-[7px] tracking-[1.5px] uppercase flex-shrink-0 animate-pulse"
+              style={{ fontFamily: "'DM Mono', monospace", color: 'var(--muted)' }}>
+              ↓ Scroll for details ↓
+            </span>
+            <div className="h-[1px] flex-1 mx-5" style={{ background: 'var(--border)' }} />
           </div>
 
           {/* Songwriters & Producers */}
