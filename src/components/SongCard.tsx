@@ -28,7 +28,7 @@ export default function SongCard({
   song, index, onOpenDetail, onOpenDealRoom, onOpenShare,
   onOpenRightsPassport, onOpenProfile, onReserve,
 }: SongCardProps) {
-  const { savedSongIds, toggleSave, artistQueue, toggleArtistQueue, showToast, artistReactions } = useStore();
+  const { savedSongIds, toggleSave, artistQueue, toggleArtistQueue, showToast, artistReactions, releaseReserve } = useStore();
   const { activeSong, isPlaying, toggle, playSong } = usePlayer();
   const isSaved = savedSongIds.includes(song.id);
   const isQueued = artistQueue.includes(song.id);
@@ -269,6 +269,25 @@ export default function SongCard({
               : `♥ Flagged · ${song.artistFlagTime || 'Just now'}`}
           </span>
         </div>
+      )}
+
+      {/* Release Reserve button */}
+      {song.status === 'reserved' && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            releaseReserve(song.id);
+            showToast(`"${song.title}" reserve released. Song is back on the market.`);
+          }}
+          className="mt-[8px] w-full py-[8px] rounded-lg text-[9px] tracking-[1.5px] uppercase cursor-pointer"
+          style={{
+            fontFamily: "'DM Mono', monospace",
+            background: 'transparent',
+            border: isPlayingSong ? '1px solid rgba(255,255,255,0.2)' : '1px solid var(--border)',
+            color: isPlayingSong ? 'rgba(255,255,255,0.5)' : 'var(--muted)',
+          }}>
+          Release Reserve
+        </button>
       )}
     </div>
   );
