@@ -45,6 +45,8 @@ export default function AdminPage() {
   const [mounted, setMounted] = useState(false);
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [usersLoading, setUsersLoading] = useState(false);
+  const [editingUser, setEditingUser] = useState<UserProfile | null>(null);
+  const [editUserForm, setEditUserForm] = useState({ full_name: '', role: '', company: '', bio: '', tier: '' });
 
   useEffect(() => {
     setSongs(loadData('songs', SEED_SONGS));
@@ -88,12 +90,31 @@ export default function AdminPage() {
   const changeTier = (userId: string, tier: string) =>
     updateUser(userId, { tier });
 
+  const saveEditUser = async () => {
+    if (!editingUser) return;
+    await updateUser(editingUser.id, editUserForm);
+    setEditingUser(null);
+  };
+
   // Load users when users tab is selected
   useEffect(() => {
     if (activeTab === 'users' && authed) {
       loadUsers();
     }
   }, [activeTab, authed, loadUsers]);
+
+  // Populate edit form when user is selected
+  useEffect(() => {
+    if (editingUser) {
+      setEditUserForm({
+        full_name: editingUser.full_name || '',
+        role: editingUser.role || '',
+        company: editingUser.company || '',
+        bio: editingUser.bio || '',
+        tier: editingUser.tier || 'tier1',
+      });
+    }
+  }, [editingUser]);
 
   const handleLogin = () => {
     // Simple password check - default "theheard" if no env var
@@ -375,7 +396,7 @@ export default function AdminPage() {
                       <td className="px-4 py-3">{u.role}</td>
                       <td className="px-4 py-3">
                         <select value={u.tier} onChange={(e) => changeTier(u.id, e.target.value)}
-                          className="text-xs px-2 py-1 rounded border border-gray-200 bg-white cursor-pointer">
+                          className="text-xs px-2 py-1 rounded border border-gray-200 bg-white cursor-pointer text-gray-800">
                           <option value="tier1">Tier 1</option>
                           <option value="tier2">Tier 2</option>
                         </select>
@@ -388,7 +409,8 @@ export default function AdminPage() {
                           'bg-amber-50 text-amber-700'
                         }`}>{u.status}</span>
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="px-4 py-3 flex gap-2">
+                        <button onClick={() => setEditingUser(u)} className="text-blue-600 text-xs cursor-pointer bg-transparent border-none">Edit</button>
                         {u.status === 'rejected' && (
                           <button onClick={() => approveUser(u.id)} className="text-green-600 text-xs cursor-pointer bg-transparent border-none">Approve</button>
                         )}
@@ -404,6 +426,64 @@ export default function AdminPage() {
                 </tbody>
               </table>
             </div>
+
+            {/* Edit User Modal */}
+            {editingUser && (
+              <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                <div className="bg-white rounded-xl p-6 w-full max-w-md mx-4">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-bold">Edit User</h3>
+                    <button onClick={() => setEditingUser(null)} className="text-gray-400 text-xl cursor-pointer bg-transparent border-none">✕</button>
+                  </div>
+                  <div className="space-y-3">
+                    <div>
+                      <label className="block text-xs text-gray-500 mb-1">Full Name</label>
+                      <input value={editUserForm.full_name} onChange={e => setEditUserForm({ ...editUserForm, full_name: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none" />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-500 mb-1">Email</label>
+                      <input value={editingUser.email} disabled
+                        className="w-full px-3 py-2 border border-gray-100 rounded-lg text-sm bg-gray-50 text-gray-400" />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-500 mb-1">Role</label>
+                      <select value={editUserForm.role} onChange={e => setEditUserForm({ ...editUserForm, role: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none bg-white text-gray-800">
+                        <option value="manager">Artist Manager</option>
+                        <option value="ar">A&R Representative</option>
+                        <option value="artist">Artist</option>
+                        <option value="label_admin">Label Admin</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-500 mb-1">Company</label>
+                      <input value={editUserForm.company} onChange={e => setEditUserForm({ ...editUserForm, company: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none" />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-500 mb-1">Tier</label>
+                      <select value={editUserForm.tier} onChange={e => setEditUserForm({ ...editUserForm, tier: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none bg-white text-gray-800">
+                        <option value="tier1">Tier 1</option>
+                        <option value="tier2">Tier 2</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-500 mb-1">Bio</label>
+                      <textarea value={editUserForm.bio} onChange={e => setEditUserForm({ ...editUserForm, bio: e.target.value })}
+                        rows={3} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none resize-none" />
+                    </div>
+                  </div>
+                  <div className="flex gap-2 mt-5">
+                    <button onClick={() => setEditingUser(null)}
+                      className="flex-1 px-4 py-2 border border-gray-200 rounded-lg text-sm cursor-pointer bg-white text-gray-600">Cancel</button>
+                    <button onClick={saveEditUser}
+                      className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm cursor-pointer border-none">Save Changes</button>
+                  </div>
+                </div>
+              </div>
+            )}
           </>
         )}
 
