@@ -68,11 +68,11 @@ export default function SongArt({ songId, bpm, songKey, color, mood, height = 20
         type,
         x: rng() * 100,
         y: rng() * 100,
-        size: (isEnergetic ? 20 : 30) + rng() * (isEnergetic ? 40 : 60),
+        size: (isEnergetic ? 10 : 15) + rng() * (isEnergetic ? 30 : 40),
         rotation: rng() * 360,
-        opacity: 0.15 + rng() * 0.4,
+        opacity: 0.3 + rng() * 0.5,
         color: `hsl(${hue}, ${sat}%, ${lit}%)`,
-        blur: (isMoody ? 15 : 8) + rng() * 20,
+        blur: rng() * 4,
       });
     }
 
@@ -82,11 +82,11 @@ export default function SongArt({ songId, bpm, songKey, color, mood, height = 20
         type: i === 0 ? 'blob' : 'circle',
         x: 20 + rng() * 60,
         y: 20 + rng() * 60,
-        size: 40 + rng() * 50,
+        size: 20 + rng() * 35,
         rotation: rng() * 360,
-        opacity: 0.2 + rng() * 0.25,
+        opacity: 0.4 + rng() * 0.3,
         color: `rgba(${r}, ${g}, ${b}, 1)`,
-        blur: 20 + rng() * 15,
+        blur: 2 + rng() * 6,
       });
     }
 

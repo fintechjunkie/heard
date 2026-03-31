@@ -69,7 +69,7 @@ export default function SongDetailSheet({
         {/* Scrollable body */}
         <div className="flex-1 overflow-y-auto scrollbar-hide" style={{ background: 'var(--cream)' }}>
           {/* Generative art */}
-          <SongArt songId={song.id} bpm={song.bpm} songKey={song.key} color={song.color} mood={song.mood} height={180} />
+          <SongArt songId={song.id} bpm={song.bpm} songKey={song.key} color={song.color} mood={song.mood} height={140} />
 
           {/* Preview waveform */}
           <div className="p-5">
