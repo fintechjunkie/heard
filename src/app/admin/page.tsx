@@ -584,8 +584,8 @@ function SongForm({ song, members, onSave, onCancel }: { song: Song; members: Me
         <h2 className="text-2xl font-bold">{song.id === 0 ? 'Add Song' : 'Edit Song'}</h2>
         <button onClick={onCancel} className="text-gray-500 cursor-pointer bg-transparent border-none">← Back</button>
       </div>
-      <div className="bg-white rounded-xl border border-gray-100 p-6 max-w-2xl">
-        <div className="grid grid-cols-2 gap-4">
+      <div className="bg-white rounded-xl border border-gray-100 p-4 max-w-2xl max-h-[calc(100vh-160px)] overflow-y-auto">
+        <div className="grid grid-cols-2 gap-3">
           <div className="col-span-2">
             <label className="block text-xs text-gray-500 mb-1">Title</label>
             <input value={form.title} onChange={e => update('title', e.target.value.toUpperCase())}
