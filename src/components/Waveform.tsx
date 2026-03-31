@@ -27,10 +27,14 @@ export default function Waveform({
   onClick,
   hidePlayButton = false,
 }: WaveformProps) {
-  const { activeSong, isPlaying, progress, seek, toggle, playSong } = usePlayer();
+  const { activeSong, isPlaying, progress, seek, toggle, playSong, previewMode, currentTime, duration } = usePlayer();
   const isActive = activeSong?.id === song.id && song.id != null;
   const isThisPlaying = isActive && isPlaying;
-  const currentProgress = isActive ? progress : 0;
+
+  // In preview mode, map 0-20s to 0-100% so the full waveform fills in 20 seconds
+  const currentProgress = isActive
+    ? (previewMode && duration > 0 ? Math.min(100, (currentTime / 20) * 100) : progress)
+    : 0;
 
   const defaultFillColor = fillColor || 'var(--sky)';
   const defaultBaseColor = baseColor || (isActive ? 'rgba(255,255,255,0.2)' : 'rgba(140,135,120,0.25)');

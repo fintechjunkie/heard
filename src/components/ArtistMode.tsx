@@ -64,15 +64,13 @@ export default function ArtistMode({ open, onClose, onOpenProfile, inline }: Art
     if (queuedSongs.length <= 1) return;
     const next = (currentIndex + 1) % queuedSongs.length;
     setCurrentIndex(next);
-    playSong(queuedSongs[next]);
-  }, [currentIndex, queuedSongs, playSong]);
+  }, [currentIndex, queuedSongs.length]);
 
   const goPrev = useCallback(() => {
     if (queuedSongs.length <= 1) return;
     const prev = (currentIndex - 1 + queuedSongs.length) % queuedSongs.length;
     setCurrentIndex(prev);
-    playSong(queuedSongs[prev]);
-  }, [currentIndex, queuedSongs, playSong]);
+  }, [currentIndex, queuedSongs.length]);
 
   const handleReaction = (songId: number, key: string) => {
     const current = artistReactions[songId];

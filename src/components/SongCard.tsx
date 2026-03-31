@@ -29,7 +29,7 @@ export default function SongCard({
   onOpenRightsPassport, onOpenProfile, onReserve,
 }: SongCardProps) {
   const { savedSongIds, toggleSave, artistQueue, toggleArtistQueue, showToast, artistReactions } = useStore();
-  const { activeSong, isPlaying } = usePlayer();
+  const { activeSong, isPlaying, toggle, playSong } = usePlayer();
   const isSaved = savedSongIds.includes(song.id);
   const isQueued = artistQueue.includes(song.id);
   const isActive = activeSong?.id === song.id && isPlaying;
@@ -54,7 +54,13 @@ export default function SongCard({
         borderLeftColor: isPlayingSong ? 'var(--acid)' : 'transparent',
         padding: '16px 16px 13px',
       }}
-      onClick={() => onOpenDetail(song.id)}
+      onClick={() => {
+        if (activeSong?.id === song.id) {
+          toggle(song);
+        } else {
+          playSong(song);
+        }
+      }}
     >
       {/* Status ribbons */}
       {song.status === 'reserved' && (
