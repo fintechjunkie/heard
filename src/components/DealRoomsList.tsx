@@ -39,7 +39,7 @@ export default function DealRoomsList({ open, onClose, onOpenDealRoom, teamId, s
           const res = await fetch(`/api/dealrooms?songId=${song.id}&teamId=${teamId}`);
           if (res.ok) {
             const data = await res.json();
-            if (data?.id) {
+            if (data?.id && data.status !== 'closed') {
               // Get reaction and comment counts
               const [reactionsRes, commentsRes] = await Promise.all([
                 fetch(`/api/dealrooms/reactions?dealRoomId=${data.id}`),
