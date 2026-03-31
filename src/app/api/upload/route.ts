@@ -16,12 +16,14 @@ export async function POST(request: NextRequest) {
     const jsonResponse = await handleUpload({
       body,
       request,
-      onBeforeGenerateToken: async (pathname) => {
+      onBeforeGenerateToken: async (pathname, clientPayload) => {
         // Validate the upload
         return {
           allowedContentTypes: ['audio/wav', 'audio/wave', 'audio/x-wav', 'audio/mpeg', 'audio/mp3'],
           maximumSizeInBytes: 100 * 1024 * 1024, // 100MB max
-          tokenPayload: JSON.stringify({ pathname }),
+          addRandomSuffix: false,
+          allowOverwrite: true,
+          tokenPayload: JSON.stringify({ pathname, clientPayload }),
         };
       },
       onUploadCompleted: async ({ blob }) => {

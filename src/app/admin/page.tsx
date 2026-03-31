@@ -360,6 +360,7 @@ function SongForm({ song, members, onSave, onCancel }: { song: Song; members: Me
         const blob = await upload(filename, file, {
           access: 'public',
           handleUploadUrl: '/api/upload',
+          clientPayload: JSON.stringify({ allowOverwrite: true }),
         });
         url = blob.url;
       }
