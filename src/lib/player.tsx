@@ -13,7 +13,7 @@ interface PlayerState {
 }
 
 interface PlayerActions {
-  playSong: (song: Song) => void;
+  playSong: (song: Song, seekPercent?: number) => void;
   pause: () => void;
   toggle: (song: Song) => void;
   seek: (percent: number) => void;
@@ -52,7 +52,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     rafRef.current = requestAnimationFrame(update);
   }, [stopProgress]);
 
-  const playSong = useCallback((song: Song) => {
+  const playSong = useCallback((song: Song, seekPercent?: number) => {
     // Stop existing
     if (howlRef.current) {
       howlRef.current.stop();
@@ -60,11 +60,26 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     }
     stopProgress();
 
+    // Extract format hint from file extension
+    const ext = song.audio_url.split('.').pop()?.toLowerCase();
+    const format = ext && ['wav', 'mp3', 'ogg', 'webm', 'flac', 'aac'].includes(ext) ? [ext] : undefined;
+
     const howl = new Howl({
       src: [song.audio_url],
       html5: true,
+      format,
       onplay: () => {
         setIsPlaying(true);
+        // If an initial seek was requested, apply it once playback starts
+        if (seekPercent !== undefined && seekPercent > 0) {
+          const dur = howl.duration();
+          if (dur > 0) {
+            const seekTime = (seekPercent / 100) * dur;
+            howl.seek(seekTime);
+            setCurrentTime(seekTime);
+            setProgress(seekPercent);
+          }
+        }
         startProgress();
       },
       onpause: () => {
@@ -85,7 +100,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
 
     howlRef.current = howl;
     setActiveSong(song);
-    setProgress(0);
+    setProgress(seekPercent || 0);
     setCurrentTime(0);
     howl.play();
   }, [startProgress, stopProgress]);

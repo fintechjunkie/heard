@@ -9,7 +9,7 @@ interface MiniPlayerProps {
 }
 
 export default function MiniPlayer({ onOpenDetail, onReserve, onBuy }: MiniPlayerProps) {
-  const { activeSong, isPlaying, progress, toggle } = usePlayer();
+  const { activeSong, isPlaying, progress, toggle, seek } = usePlayer();
 
   if (!activeSong) return null;
 
@@ -24,12 +24,22 @@ export default function MiniPlayer({ onOpenDetail, onReserve, onBuy }: MiniPlaye
       }}
       onClick={() => onOpenDetail(activeSong.id)}
     >
-      {/* Progress bar */}
-      <div className="absolute top-0 left-0 right-0 h-[3px]" style={{ background: 'var(--b3)' }}>
-        <div
-          className="h-full transition-[width] duration-300"
-          style={{ width: `${progress}%`, background: 'var(--acid)' }}
-        />
+      {/* Progress bar — clickable for seeking */}
+      <div
+        className="absolute top-0 left-0 right-0 h-[12px] -mt-[4px] cursor-pointer z-10"
+        onClick={(e) => {
+          e.stopPropagation();
+          const rect = e.currentTarget.getBoundingClientRect();
+          const percent = ((e.clientX - rect.left) / rect.width) * 100;
+          seek(Math.max(0, Math.min(100, percent)));
+        }}
+      >
+        <div className="absolute bottom-0 left-0 right-0 h-[3px]" style={{ background: 'var(--b3)' }}>
+          <div
+            className="h-full transition-[width] duration-300"
+            style={{ width: `${progress}%`, background: 'var(--acid)' }}
+          />
+        </div>
       </div>
 
       <div className="flex items-center gap-3 px-4 py-[10px]">

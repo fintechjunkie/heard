@@ -181,7 +181,6 @@ export default function ArtistMode({ open, onClose }: ArtistModeProps) {
                       fillColor={song.color}
                       baseColor="rgba(255,255,255,0.22)"
                       height={40}
-                      onClick={() => toggle(song)}
                     />
                   </div>
 

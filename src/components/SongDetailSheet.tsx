@@ -4,7 +4,7 @@ import { Song } from '@/data/types';
 import { MEMBERS } from '@/data/members';
 import BottomSheet from './BottomSheet';
 import Waveform from './Waveform';
-import { usePlayer } from '@/lib/player';
+// Player functionality handled by Waveform component internally
 
 interface SongDetailSheetProps {
   song: Song | null;
@@ -19,8 +19,6 @@ interface SongDetailSheetProps {
 export default function SongDetailSheet({
   song, open, onClose, onReserve, onBuy, onShare, onOpenProfile,
 }: SongDetailSheetProps) {
-  const { toggle } = usePlayer();
-
   if (!song) return null;
 
   const songWriters = song.writer_ids.map(id => MEMBERS.find(m => m.id === id)).filter(Boolean);
@@ -48,7 +46,7 @@ export default function SongDetailSheet({
           {/* Preview waveform */}
           <div className="p-5">
             <div className="text-[8px] tracking-[2px] uppercase mb-2" style={{ fontFamily: "'DM Mono', monospace", color: '#5a5650' }}>Preview</div>
-            <Waveform song={song} barCount={52} height={48} onClick={() => toggle(song)} />
+            <Waveform song={song} barCount={52} height={48} />
           </div>
 
           {/* Songwriters & Producers */}

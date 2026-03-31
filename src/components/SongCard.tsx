@@ -29,7 +29,7 @@ export default function SongCard({
   onOpenRightsPassport, onOpenProfile, onReserve,
 }: SongCardProps) {
   const { savedSongIds, toggleSave, showToast, artistReactions } = useStore();
-  const { activeSong, isPlaying, toggle } = usePlayer();
+  const { activeSong, isPlaying } = usePlayer();
   const isSaved = savedSongIds.includes(song.id);
   const isActive = activeSong?.id === song.id && isPlaying;
   const isPlayingSong = activeSong?.id === song.id;
@@ -159,7 +159,6 @@ export default function SongCard({
           fillColor={isPlayingSong ? 'var(--acid)' : 'var(--sky)'}
           baseColor={isPlayingSong ? 'rgba(255,255,255,0.2)' : 'rgba(140,135,120,0.25)'}
           height={32}
-          onClick={() => toggle(song)}
         />
       </div>
 

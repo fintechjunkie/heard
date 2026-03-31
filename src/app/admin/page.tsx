@@ -324,8 +324,39 @@ export default function AdminPage() {
 
 function SongForm({ song, members, onSave, onCancel }: { song: Song; members: Member[]; onSave: (s: Song) => void; onCancel: () => void }) {
   const [form, setForm] = useState(song);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [showManualUrl, setShowManualUrl] = useState(false);
 
   const update = (field: string, value: unknown) => setForm({ ...form, [field]: value });
+
+  const handleFileUpload = async (file: File) => {
+    setUploading(true);
+    setUploadError(null);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const res = await fetch('/api/upload', { method: 'POST', body: formData });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || 'Upload failed');
+      }
+      const { url } = await res.json();
+      setForm(prev => ({ ...prev, audio_url: url }));
+
+      // Extract duration from audio file
+      const audio = new Audio();
+      audio.src = url.startsWith('http') ? url : url;
+      audio.onloadedmetadata = () => {
+        setForm(prev => ({ ...prev, audio_duration_seconds: Math.round(audio.duration) }));
+      };
+    } catch (err) {
+      setUploadError(err instanceof Error ? err.message : 'Upload failed');
+    } finally {
+      setUploading(false);
+    }
+  };
 
   return (
     <div>
@@ -407,10 +438,78 @@ function SongForm({ song, members, onSave, onCancel }: { song: Song; members: Me
             </select>
           </div>
           <div className="col-span-2">
-            <label className="block text-xs text-gray-500 mb-1">Audio URL</label>
-            <input value={form.audio_url} onChange={e => update('audio_url', e.target.value)}
-              placeholder="/audio/song-name.mp3"
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none" />
+            <label className="block text-xs text-gray-500 mb-1">Audio File</label>
+
+            {/* Current audio URL display */}
+            {form.audio_url && (
+              <div className="flex items-center gap-2 mb-2 px-3 py-2 bg-green-50 border border-green-200 rounded-lg">
+                <span className="text-green-700 text-xs">&#9834;</span>
+                <span className="text-xs text-green-800 flex-1 truncate">{form.audio_url}</span>
+                {form.audio_duration_seconds > 0 && (
+                  <span className="text-xs text-green-600">{Math.floor(form.audio_duration_seconds / 60)}:{String(form.audio_duration_seconds % 60).padStart(2, '0')}</span>
+                )}
+                <button
+                  type="button"
+                  onClick={() => {
+                    const audio = new Audio(form.audio_url);
+                    audio.play().catch(() => {});
+                    setTimeout(() => audio.pause(), 5000);
+                  }}
+                  className="text-xs text-green-700 underline cursor-pointer bg-transparent border-none"
+                >Preview</button>
+              </div>
+            )}
+
+            {/* File upload */}
+            <div
+              className={`relative border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
+                uploading ? 'border-blue-300 bg-blue-50' : 'border-gray-300 hover:border-gray-400'
+              }`}
+              onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
+              onDrop={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const file = e.dataTransfer.files[0];
+                if (file) handleFileUpload(file);
+              }}
+            >
+              {uploading ? (
+                <div className="text-sm text-blue-600">Uploading...</div>
+              ) : (
+                <>
+                  <div className="text-sm text-gray-500 mb-2">
+                    Drag &amp; drop a .wav or .mp3 file here, or click to browse
+                  </div>
+                  <input
+                    type="file"
+                    accept=".wav,.mp3"
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handleFileUpload(file);
+                    }}
+                  />
+                </>
+              )}
+            </div>
+
+            {uploadError && (
+              <div className="text-xs text-red-500 mt-1">{uploadError}</div>
+            )}
+
+            {/* Manual URL fallback */}
+            <button
+              type="button"
+              onClick={() => setShowManualUrl(!showManualUrl)}
+              className="text-xs text-gray-400 mt-2 cursor-pointer bg-transparent border-none underline"
+            >
+              {showManualUrl ? 'Hide manual URL' : 'Or enter URL manually'}
+            </button>
+            {showManualUrl && (
+              <input value={form.audio_url} onChange={e => update('audio_url', e.target.value)}
+                placeholder="/audio/song-name.wav"
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none mt-1" />
+            )}
           </div>
         </div>
         <div className="flex gap-3 mt-6">
