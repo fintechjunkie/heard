@@ -182,8 +182,9 @@ export default function SongCard({
         <span className="px-[8px] py-[2px] rounded-full text-[8px] tracking-[1px] uppercase"
           style={{
             fontFamily: "'DM Mono', monospace",
-            background: isPlayingSong ? 'var(--b3)' : 'var(--black)',
-            color: isPlayingSong ? 'rgba(255,255,255,0.7)' : 'var(--th-white)',
+            background: isPlayingSong ? 'var(--b3)' : 'rgba(10,10,10,0.08)',
+            color: isPlayingSong ? 'rgba(255,255,255,0.7)' : 'var(--black)',
+            border: isPlayingSong ? 'none' : '1px solid var(--border)',
           }}>
           {song.genre}
         </span>
