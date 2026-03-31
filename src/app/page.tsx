@@ -277,6 +277,7 @@ export default function Home() {
         onReserve={setReserveSongId}
         onBuy={setBuySongId}
         teamId={activeTeam?.id}
+        pocketReaction={dealRoomSongId ? store.artistReactions[dealRoomSongId] || null : null}
       />
       <DealRoomsList
         open={showDealRoomsList}

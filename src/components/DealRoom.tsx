@@ -12,6 +12,7 @@ interface DealRoomProps {
   onReserve: (songId: number) => void;
   onBuy: (songId: number) => void;
   teamId?: number;
+  pocketReaction?: string | null;
 }
 
 interface Reaction {
@@ -34,14 +35,14 @@ interface Comment {
 }
 
 const DEAL_REACTIONS = [
-  { key: 'musthave', emoji: '🔥', label: 'Must Have', color: '#FF6848', bg: 'rgba(255,104,72,0.1)', border: 'rgba(255,104,72,0.3)' },
-  { key: 'hit', emoji: '⚡', label: 'Hit', color: '#FFB830', bg: 'rgba(255,184,48,0.1)', border: 'rgba(255,184,48,0.3)' },
-  { key: 'love', emoji: '♥', label: 'Love', color: '#B57BFF', bg: 'rgba(181,123,255,0.1)', border: 'rgba(181,123,255,0.3)' },
-  { key: 'notsure', emoji: '〰', label: 'Not Sure', color: '#6a6660', bg: 'rgba(106,102,96,0.1)', border: 'rgba(106,102,96,0.3)' },
-  { key: 'notforme', emoji: '✕', label: 'Pass', color: 'var(--coral)', bg: 'rgba(255,104,72,0.08)', border: 'rgba(255,104,72,0.2)' },
+  { key: 'musthave', emoji: '🔥', label: 'Must Have', color: '#FF6848', bg: 'rgba(255,104,72,0.12)', bgLight: 'rgba(255,104,72,0.05)', border: 'rgba(255,104,72,0.3)' },
+  { key: 'hit', emoji: '⚡', label: 'Hit', color: '#FFB830', bg: 'rgba(255,184,48,0.12)', bgLight: 'rgba(255,184,48,0.05)', border: 'rgba(255,184,48,0.3)' },
+  { key: 'love', emoji: '♥', label: 'Love', color: '#B57BFF', bg: 'rgba(181,123,255,0.12)', bgLight: 'rgba(181,123,255,0.05)', border: 'rgba(181,123,255,0.3)' },
+  { key: 'notsure', emoji: '〰', label: 'Not Sure', color: '#6a6660', bg: 'rgba(106,102,96,0.12)', bgLight: 'rgba(106,102,96,0.05)', border: 'rgba(106,102,96,0.3)' },
+  { key: 'notforme', emoji: '✕', label: 'Pass', color: '#FF6848', bg: 'rgba(255,104,72,0.1)', bgLight: 'rgba(255,104,72,0.04)', border: 'rgba(255,104,72,0.2)' },
 ];
 
-export default function DealRoom({ song, open, onClose, onReserve, onBuy, teamId }: DealRoomProps) {
+export default function DealRoom({ song, open, onClose, onReserve, onBuy, teamId, pocketReaction }: DealRoomProps) {
   const [dealRoomId, setDealRoomId] = useState<number | null>(null);
   const [dealRoomExists, setDealRoomExists] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -52,6 +53,7 @@ export default function DealRoom({ song, open, onClose, onReserve, onBuy, teamId
   const [isAdminQuestion, setIsAdminQuestion] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [userName, setUserName] = useState('');
+  const [showDeactivateConfirm, setShowDeactivateConfirm] = useState(false);
   const commentsEndRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -77,7 +79,7 @@ export default function DealRoom({ song, open, onClose, onReserve, onBuy, teamId
       const res = await fetch(`/api/dealrooms?songId=${song.id}&teamId=${teamId}`);
       if (res.ok) {
         const data = await res.json();
-        if (data) {
+        if (data && data.status !== 'closed') {
           setDealRoomId(data.id);
           setDealRoomExists(true);
         } else {
@@ -100,8 +102,11 @@ export default function DealRoom({ song, open, onClose, onReserve, onBuy, teamId
       if (reactionsRes.ok) {
         const r = await reactionsRes.json();
         setReactions(r);
-        const mine = r.find((rx: Reaction) => rx.user_id === userId);
-        if (mine) setMyReaction(mine.reaction);
+        // Match my reaction if userId is known
+        if (userId) {
+          const mine = r.find((rx: Reaction) => rx.user_id === userId);
+          setMyReaction(mine ? mine.reaction : null);
+        }
       }
       if (commentsRes.ok) setComments(await commentsRes.json());
     } catch { /* ignore */ }
@@ -109,6 +114,24 @@ export default function DealRoom({ song, open, onClose, onReserve, onBuy, teamId
 
   useEffect(() => { if (open) checkDealRoom(); }, [open, checkDealRoom]);
   useEffect(() => { if (dealRoomId) loadData(); }, [dealRoomId, loadData]);
+
+  // Re-load when userId becomes available (auth finishes after initial load)
+  useEffect(() => { if (dealRoomId && userId) loadData(); }, [userId, dealRoomId, loadData]);
+
+  // Sync Pocket reaction → Deal Room on open
+  useEffect(() => {
+    if (!open || !dealRoomId || !userId || !pocketReaction || myReaction) return;
+    // If user has a Pocket reaction but no Deal Room reaction, auto-sync it
+    (async () => {
+      await fetch('/api/dealrooms/reactions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ dealRoomId, userId, reaction: pocketReaction }),
+      });
+      setMyReaction(pocketReaction);
+      loadData();
+    })();
+  }, [open, dealRoomId, userId, pocketReaction, myReaction, loadData]);
   useEffect(() => {
     // Scroll only the DealRoom's own scroll container — NOT parent containers
     if (scrollContainerRef.current) {
@@ -176,8 +199,23 @@ export default function DealRoom({ song, open, onClose, onReserve, onBuy, teamId
     } catch (err) {
       console.error('Comment post error:', err);
     }
-    // Reload from server to get the real data
-    loadData();
+    // Delay reload to let Supabase commit the write
+    setTimeout(() => loadData(), 800);
+  };
+
+  const deactivateDealRoom = async () => {
+    if (!dealRoomId) return;
+    await fetch('/api/dealrooms', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: dealRoomId, status: 'closed' }),
+    });
+    setDealRoomExists(false);
+    setDealRoomId(null);
+    setReactions([]);
+    setComments([]);
+    setShowDeactivateConfirm(false);
+    onClose();
   };
 
   if (!song) return null;
@@ -250,7 +288,7 @@ export default function DealRoom({ song, open, onClose, onReserve, onBuy, teamId
                       className="py-[10px] rounded-xl text-center cursor-pointer transition-all duration-150"
                       style={{
                         fontFamily: "'DM Mono', monospace",
-                        background: isMine ? r.bg : count > 0 ? `${r.bg.replace('0.1', '0.04').replace('0.08', '0.03')}` : '#FAFAF7',
+                        background: isMine ? r.bg : count > 0 ? r.bgLight : '#FAFAF7',
                         border: isMine ? `2px solid ${r.border}` : count > 0 ? `1px solid ${r.border}` : '1px solid var(--border)',
                         color: isMine ? r.color : count > 0 ? r.color : '#6a6660',
                         boxShadow: isMine ? `0 0 8px ${r.border}` : 'none',
@@ -292,7 +330,7 @@ export default function DealRoom({ song, open, onClose, onReserve, onBuy, teamId
                 {comments.map(c => (
                   <div key={c.id} className={`rounded-xl px-3 py-2 ${c.is_admin_response ? 'ml-0' : c.user_id === userId ? 'ml-8' : 'mr-8'}`}
                     style={{
-                      background: c.is_admin_response ? 'rgba(200,255,69,0.08)' : 'var(--th-white)',
+                      background: c.is_admin_response ? 'rgba(200,255,69,0.08)' : '#FAFAF7',
                       border: c.is_admin_response ? '1px solid rgba(200,255,69,0.3)' : '1px solid var(--border)',
                     }}>
                     <div className="flex items-center gap-2 mb-1">
@@ -362,6 +400,32 @@ export default function DealRoom({ song, open, onClose, onReserve, onBuy, teamId
             style={{ fontFamily: "'DM Mono', monospace", background: 'var(--coral)', color: 'white' }}>
             Buy Now — $85,000
           </button>
+          {!showDeactivateConfirm ? (
+            <button
+              onClick={() => setShowDeactivateConfirm(true)}
+              className="w-full py-[8px] text-[8px] tracking-[1px] uppercase cursor-pointer bg-transparent border-none"
+              style={{ fontFamily: "'DM Mono', monospace", color: 'var(--muted)' }}>
+              Close Deal Room
+            </button>
+          ) : (
+            <div className="rounded-xl p-3 mt-1" style={{ background: 'rgba(255,104,72,0.06)', border: '1px solid rgba(255,104,72,0.2)' }}>
+              <p className="text-[10px] text-center mb-2" style={{ color: '#FF6848' }}>
+                Are you sure? This will close the deal room for your team.
+              </p>
+              <div className="flex gap-2">
+                <button onClick={() => setShowDeactivateConfirm(false)}
+                  className="flex-1 py-[8px] rounded-lg text-[9px] tracking-[1px] uppercase cursor-pointer"
+                  style={{ fontFamily: "'DM Mono', monospace", background: '#FAFAF7', border: '1px solid var(--border)', color: '#6a6660' }}>
+                  Cancel
+                </button>
+                <button onClick={deactivateDealRoom}
+                  className="flex-1 py-[8px] rounded-lg text-[9px] tracking-[1px] uppercase cursor-pointer border-none"
+                  style={{ fontFamily: "'DM Mono', monospace", background: '#FF6848', color: 'white' }}>
+                  Yes, Close It
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>
