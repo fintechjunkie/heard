@@ -8,6 +8,8 @@ interface TopNavProps {
   onArtistMode: () => void;
   teamName?: string;
   onSwitchTeam?: () => void;
+  onOpenDealRooms?: () => void;
+  activeDealRoomCount?: number;
 }
 
 interface UserProfile {
@@ -18,7 +20,7 @@ interface UserProfile {
   company: string;
 }
 
-export default function TopNav({ onArtistMode, teamName, onSwitchTeam }: TopNavProps) {
+export default function TopNav({ onArtistMode, teamName, onSwitchTeam, onOpenDealRooms, activeDealRoomCount = 0 }: TopNavProps) {
   const { searchOpen, setSearchOpen, searchQuery, setSearchQuery, activeTab } = useStore();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [showProfile, setShowProfile] = useState(false);
@@ -86,6 +88,24 @@ export default function TopNav({ onArtistMode, teamName, onSwitchTeam }: TopNavP
             padding: '3px 8px',
             borderRadius: 3,
           }}>{profile?.tier === 'tier2' ? 'T2' : 'T1'}</span>
+          {onOpenDealRooms && (
+            <button
+              onClick={onOpenDealRooms}
+              className="relative h-[34px] flex items-center gap-[5px] px-[10px] rounded-full cursor-pointer border-none"
+              style={{ background: 'var(--b3)', color: 'rgba(90,180,255,0.8)' }}
+            >
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a4 4 0 0 0-8 0v2"/>
+              </svg>
+              <span className="text-[8px] tracking-[1px] uppercase" style={{ fontFamily: "'DM Mono', monospace" }}>Deals</span>
+              {activeDealRoomCount > 0 && (
+                <span className="absolute -top-[3px] -right-[3px] w-[16px] h-[16px] rounded-full flex items-center justify-center text-[8px] font-bold"
+                  style={{ background: 'var(--sky)', color: 'var(--black)', fontFamily: "'DM Mono', monospace" }}>
+                  {activeDealRoomCount}
+                </span>
+              )}
+            </button>
+          )}
           <button
             onClick={() => setSearchOpen(!searchOpen)}
             className="w-[34px] h-[34px] rounded-full flex items-center justify-center text-[15px] cursor-pointer border-none"

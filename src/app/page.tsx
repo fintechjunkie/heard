@@ -16,6 +16,7 @@ import RightsPassportSheet from '@/components/RightsPassportSheet';
 import SortSheet from '@/components/SortSheet';
 import MemberProfile from '@/components/MemberProfile';
 import DealRoom from '@/components/DealRoom';
+import DealRoomsList from '@/components/DealRoomsList';
 import ArtistMode from '@/components/ArtistMode';
 import TeamPicker from '@/components/TeamPicker';
 
@@ -37,6 +38,7 @@ export default function Home() {
   const [profileMemberId, setProfileMemberId] = useState<number | null>(null);
   const [dealRoomSongId, setDealRoomSongId] = useState<number | null>(null);
   const [detailOpenedFromPocket, setDetailOpenedFromPocket] = useState(false);
+  const [showDealRoomsList, setShowDealRoomsList] = useState(false);
 
   // Team state
   const [activeTeam, setActiveTeam] = useState<{ id: number; name: string } | null>(() => {
@@ -144,7 +146,7 @@ export default function Home() {
   return (
     <div className="flex flex-col h-full overflow-hidden" style={{ background: 'var(--cream)' }}>
       {showTeamPicker && <TeamPicker onSelect={handleTeamSelect} />}
-      {activeTab !== 'pocket' && <TopNav onArtistMode={() => {}} teamName={activeTeam?.name} onSwitchTeam={() => setShowTeamPicker(true)} />}
+      {activeTab !== 'pocket' && <TopNav onArtistMode={() => {}} teamName={activeTeam?.name} onSwitchTeam={() => setShowTeamPicker(true)} onOpenDealRooms={() => setShowDealRoomsList(true)} />}
 
       {/* Main content */}
       <div className="flex-1 overflow-y-auto scrollbar-hide" style={{ paddingBottom: activeTab === 'pocket' ? 60 : 140 }}>
@@ -275,6 +277,13 @@ export default function Home() {
         onReserve={setReserveSongId}
         onBuy={setBuySongId}
         teamId={activeTeam?.id}
+      />
+      <DealRoomsList
+        open={showDealRoomsList}
+        onClose={() => setShowDealRoomsList(false)}
+        onOpenDealRoom={setDealRoomSongId}
+        teamId={activeTeam?.id}
+        songs={songs}
       />
     </div>
   );

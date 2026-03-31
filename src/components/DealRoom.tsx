@@ -140,13 +140,37 @@ export default function DealRoom({ song, open, onClose, onReserve, onBuy, teamId
 
   const submitComment = async () => {
     if (!dealRoomId || !commentText.trim()) return;
-    await fetch('/api/dealrooms/comments', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ dealRoomId, userId, content: commentText, isAdminQuestion }),
-    });
+    const text = commentText;
+    const isAdminQ = isAdminQuestion;
+
+    // Optimistic update — show comment immediately
+    const optimisticComment: Comment = {
+      id: Date.now(),
+      user_id: userId,
+      is_admin_response: false,
+      is_admin_question: isAdminQ,
+      content: text,
+      created_at: new Date().toISOString(),
+      full_name: userName || 'You',
+      avatar_url: '',
+    };
+    setComments(prev => [...prev, optimisticComment]);
     setCommentText('');
     setIsAdminQuestion(false);
+
+    try {
+      const res = await fetch('/api/dealrooms/comments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ dealRoomId, userId, content: text, isAdminQuestion: isAdminQ }),
+      });
+      if (!res.ok) {
+        console.error('Comment post failed:', await res.text());
+      }
+    } catch (err) {
+      console.error('Comment post error:', err);
+    }
+    // Reload from server to get the real data
     loadData();
   };
 
