@@ -76,7 +76,7 @@ export default function DealRoom({ song, open, onClose, onReserve, onBuy }: Deal
         {/* Song Hero */}
         <div className="px-5 py-5" style={{ background: 'var(--black)' }}>
           <div className="text-[8px] tracking-[2px] uppercase mb-1" style={{ fontFamily: "'DM Mono', monospace", color: 'rgba(255,255,255,0.45)' }}>Evaluating</div>
-          <div className="text-[32px] tracking-[2px] leading-none mb-1" style={{ fontFamily: "'Bebas Neue', sans-serif", color: 'var(--th-white)' }}>{song.title}</div>
+          <div className="text-[32px] tracking-[2px] leading-none mb-1" style={{ fontFamily: "'Bebas Neue', sans-serif", color: '#FFFFFF' }}>{song.title}</div>
           <div className="text-[11px] mb-4" style={{ color: 'rgba(255,255,255,0.6)' }}>{song.writers.join(' · ')}</div>
 
           {/* Hold box */}

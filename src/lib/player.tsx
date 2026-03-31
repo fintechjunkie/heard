@@ -10,6 +10,7 @@ interface PlayerState {
   progress: number;
   duration: number;
   currentTime: number;
+  previewMode: boolean;
 }
 
 interface PlayerActions {
@@ -19,6 +20,7 @@ interface PlayerActions {
   seek: (percent: number) => void;
   skipForward: (seconds?: number) => void;
   skipBack: (seconds?: number) => void;
+  setPreviewMode: (preview: boolean) => void;
 }
 
 const PlayerContext = createContext<(PlayerState & PlayerActions) | null>(null);
@@ -29,10 +31,18 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
+  const [previewMode, setPreviewMode] = useState(true);
   const howlRef = useRef<Howl | null>(null);
   const rafRef = useRef<number | null>(null);
   const activeSongIdRef = useRef<number | null>(null);
   const pendingSeekRef = useRef<number | undefined>(undefined);
+  const previewModeRef = useRef(true);
+
+  // Keep ref in sync with state
+  const updatePreviewMode = useCallback((preview: boolean) => {
+    setPreviewMode(preview);
+    previewModeRef.current = preview;
+  }, []);
 
   const stopProgress = useCallback(() => {
     if (rafRef.current) {
@@ -52,6 +62,13 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
           setCurrentTime(seekPos);
           setDuration(dur);
           setProgress((seekPos / dur) * 100);
+
+          // 20-second preview limit on main page
+          if (previewModeRef.current && seekPos >= 20) {
+            howlRef.current.pause();
+            setIsPlaying(false);
+            return; // Stop the animation loop
+          }
         }
         if (playing) {
           rafRef.current = requestAnimationFrame(update);
@@ -148,7 +165,12 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     if (howlRef.current) {
       const dur = howlRef.current.duration();
       if (dur > 0) {
-        const seekTime = (percent / 100) * dur;
+        let seekTime = (percent / 100) * dur;
+        // Cap at 20s in preview mode
+        if (previewModeRef.current && seekTime > 20) {
+          seekTime = 20;
+          percent = (20 / dur) * 100;
+        }
         howlRef.current.seek(seekTime);
         setCurrentTime(seekTime);
         setDuration(dur);
@@ -196,8 +218,8 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
 
   return (
     <PlayerContext.Provider value={{
-      activeSong, isPlaying, progress, duration, currentTime,
-      playSong, pause, toggle, seek, skipForward, skipBack,
+      activeSong, isPlaying, progress, duration, currentTime, previewMode,
+      playSong, pause, toggle, seek, skipForward, skipBack, setPreviewMode: updatePreviewMode,
     }}>
       {children}
     </PlayerContext.Provider>

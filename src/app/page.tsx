@@ -38,7 +38,6 @@ export default function Home() {
   // Panel states
   const [profileMemberId, setProfileMemberId] = useState<number | null>(null);
   const [dealRoomSongId, setDealRoomSongId] = useState<number | null>(null);
-  const [artistModeOpen, setArtistModeOpen] = useState(false);
 
   const filteredSongs = getFilteredSongs();
 
@@ -59,7 +58,7 @@ export default function Home() {
     showToast(`"${song?.title}" purchased. Contract sent to your inbox.`);
   }, [purchaseSong, showToast, songs]);
 
-  const tabTitle = activeTab === 'bank' ? 'Song Bank' : activeTab === 'saved' ? 'Saved' : activeTab === 'reserved' ? 'Reserved' : activeTab === 'purchased' ? 'Purchased' : '';
+  const tabTitle = activeTab === 'bank' ? 'Song Bank' : activeTab === 'reserved' ? 'Reserved' : activeTab === 'purchased' ? 'Purchased' : '';
 
   if (showSplash) {
     return (
@@ -78,11 +77,13 @@ export default function Home() {
 
   return (
     <div className="flex flex-col h-full overflow-hidden" style={{ background: 'var(--cream)' }}>
-      <TopNav onArtistMode={() => setArtistModeOpen(true)} />
+      <TopNav onArtistMode={() => {}} />
 
       {/* Main content */}
-      <div className="flex-1 overflow-y-auto scrollbar-hide" style={{ paddingBottom: 140 }}>
-        {activeTab === 'writers' ? (
+      <div className="flex-1 overflow-y-auto scrollbar-hide" style={{ paddingBottom: activeTab === 'pocket' ? 60 : 140 }}>
+        {activeTab === 'pocket' ? (
+          <ArtistMode open={true} onClose={() => store.setActiveTab('bank')} onOpenProfile={setProfileMemberId} inline />
+        ) : activeTab === 'writers' ? (
           <WritersTab onOpenProfile={setProfileMemberId} />
         ) : (
           <>
@@ -138,8 +139,7 @@ export default function Home() {
                 <div className="py-12 text-center" style={{ background: 'var(--th-white)' }}>
                   <p className="text-[24px] tracking-[2px]" style={{ fontFamily: "'Bebas Neue', sans-serif", color: 'var(--muted-l)' }}>No Songs</p>
                   <p className="text-[11px] mt-1" style={{ color: 'var(--muted)' }}>
-                    {activeTab === 'saved' ? 'Save songs to see them here.' :
-                     activeTab === 'reserved' ? 'Reserve a song to hold it for 72 hours.' :
+                    {activeTab === 'reserved' ? 'Reserve a song to hold it for 72 hours.' :
                      activeTab === 'purchased' ? 'Purchased songs will appear here.' :
                      'No songs match your filters.'}
                   </p>
@@ -226,11 +226,6 @@ export default function Home() {
         onClose={() => setDealRoomSongId(null)}
         onReserve={setReserveSongId}
         onBuy={setBuySongId}
-      />
-      <ArtistMode
-        open={artistModeOpen}
-        onClose={() => setArtistModeOpen(false)}
-        onOpenProfile={setProfileMemberId}
       />
     </div>
   );

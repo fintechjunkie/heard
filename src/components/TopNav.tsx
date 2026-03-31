@@ -76,22 +76,6 @@ export default function TopNav({ onArtistMode }: TopNavProps) {
             borderRadius: 3,
           }}>{profile?.tier === 'tier2' ? 'T2' : 'T1'}</span>
           <button
-            onClick={onArtistMode}
-            className="flex items-center gap-[6px] px-[10px] py-[5px] rounded-full cursor-pointer"
-            style={{
-              background: 'var(--b3)',
-              border: '1px solid var(--b4)',
-              fontFamily: "'DM Mono', monospace",
-              fontSize: 8,
-              letterSpacing: 1.5,
-              textTransform: 'uppercase',
-              color: 'rgba(255,255,255,0.55)',
-            }}
-          >
-            <span className="w-[5px] h-[5px] rounded-full" style={{ background: 'var(--violet)' }} />
-            Artist
-          </button>
-          <button
             onClick={() => setSearchOpen(!searchOpen)}
             className="w-[34px] h-[34px] rounded-full flex items-center justify-center text-[15px] cursor-pointer border-none"
             style={{ background: 'var(--b3)', color: 'rgba(255,255,255,0.55)' }}

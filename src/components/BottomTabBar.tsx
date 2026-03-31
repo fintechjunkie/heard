@@ -4,14 +4,14 @@ import { useStore } from '@/lib/store';
 
 const TABS = [
   { key: 'bank', icon: '▦', label: 'Bank' },
-  { key: 'saved', icon: '♡', label: 'Saved', badge: true },
+  { key: 'pocket', icon: '♫', label: 'Pocket', badge: true },
   { key: 'reserved', icon: '◷', label: 'Reserved' },
   { key: 'writers', icon: '◈', label: 'Writers' },
   { key: 'purchased', icon: '✓', label: 'Purchased' },
 ];
 
 export default function BottomTabBar() {
-  const { activeTab, setActiveTab, savedSongIds } = useStore();
+  const { activeTab, setActiveTab, artistQueue } = useStore();
 
   return (
     <div
@@ -43,15 +43,15 @@ export default function BottomTabBar() {
             }}>
               {tab.label}
             </span>
-            {tab.badge && savedSongIds.length > 0 && (
+            {tab.badge && artistQueue.length > 0 && (
               <span className="absolute -top-1 -right-2 text-[7px] min-w-[14px] h-[14px] flex items-center justify-center rounded-full"
                 style={{
-                  background: 'var(--coral)',
+                  background: 'var(--violet)',
                   color: 'white',
                   fontFamily: "'DM Mono', monospace",
                   fontWeight: 600,
                 }}>
-                {savedSongIds.length}
+                {artistQueue.length}
               </span>
             )}
           </button>

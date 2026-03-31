@@ -80,22 +80,12 @@ export default function SongCard({
           {String(index + 1).padStart(2, '0')}
         </span>
         <div className="flex gap-[6px] items-center">
-          <button onClick={handleSave} className={`w-[26px] h-[26px] rounded-full flex items-center justify-center text-[12px] cursor-pointer transition-all duration-150 ${isSaved ? 'saved' : ''}`}
-            style={{
-              border: isSaved
-                ? '1px solid var(--coral)'
-                : isPlayingSong ? '1px solid var(--b4)' : '1px solid var(--border)',
-              background: isSaved ? 'rgba(255,104,72,0.1)' : 'transparent',
-              color: isSaved ? 'var(--coral)' : isPlayingSong ? 'rgba(255,255,255,0.4)' : 'var(--muted)',
-            }}>
-            {isSaved ? '♥' : '♡'}
-          </button>
           <button onClick={(e) => {
               e.stopPropagation();
               toggleArtistQueue(song.id);
-              showToast(isQueued ? `"${song.title}" removed from artist queue.` : `"${song.title}" added to artist queue.`);
+              showToast(isQueued ? `"${song.title}" removed from Pocket Songs.` : `"${song.title}" added to Pocket Songs.`);
             }}
-            title="Queue for Artist Mode"
+            title="Add to Pocket Songs"
             className="flex flex-col items-center gap-[2px] cursor-pointer bg-transparent border-none"
             style={{ color: isQueued ? 'var(--violet)' : isPlayingSong ? 'rgba(255,255,255,0.4)' : 'var(--muted)' }}>
             <span className="w-[26px] h-[26px] rounded-full flex items-center justify-center"
@@ -107,7 +97,7 @@ export default function SongCard({
                 <path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
               </svg>
             </span>
-            <span className="text-[5px] tracking-[0.8px] uppercase" style={{ fontFamily: "'DM Mono', monospace" }}>Artist</span>
+            <span className="text-[5px] tracking-[0.8px] uppercase" style={{ fontFamily: "'DM Mono', monospace" }}>Pocket</span>
           </button>
           <button onClick={(e) => { e.stopPropagation(); onOpenDetail(song.id); }}
             title="Song Details"

@@ -29,14 +29,23 @@ interface ArtistModeProps {
   open: boolean;
   onClose: () => void;
   onOpenProfile?: (memberId: number) => void;
+  inline?: boolean;
 }
 
-export default function ArtistMode({ open, onClose, onOpenProfile }: ArtistModeProps) {
+export default function ArtistMode({ open, onClose, onOpenProfile, inline }: ArtistModeProps) {
   const { songs, artistQueue, artistReactions, setArtistReaction, showToast } = useStore();
-  const { activeSong, isPlaying, progress, toggle, playSong, skipForward, skipBack } = usePlayer();
+  const { activeSong, isPlaying, progress, toggle, playSong, skipForward, skipBack, setPreviewMode } = usePlayer();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [vizMode, setVizMode] = useState<VizMode>('waveform');
   const [activeTheme, setActiveTheme] = useState('default');
+
+  // Disable preview mode when in Pocket Songs, re-enable when leaving
+  useEffect(() => {
+    if (open || inline) {
+      setPreviewMode(false);
+    }
+    return () => { setPreviewMode(true); };
+  }, [open, inline, setPreviewMode]);
 
   // Queue-based song list
   const queuedSongs = songs.filter(s => artistQueue.includes(s.id));
@@ -103,8 +112,10 @@ export default function ArtistMode({ open, onClose, onOpenProfile }: ArtistModeP
 
   return (
     <div
-      className="absolute inset-0 z-[170] flex flex-col overflow-hidden"
-      style={{
+      className={inline ? "flex flex-col overflow-hidden h-full" : "absolute inset-0 z-[170] flex flex-col overflow-hidden"}
+      style={inline ? {
+        background: '#06060e',
+      } : {
         background: '#06060e',
         transform: open ? 'translateY(0)' : 'translateY(100%)',
         transition: open
@@ -116,22 +127,24 @@ export default function ArtistMode({ open, onClose, onOpenProfile }: ArtistModeP
       <div className="flex-shrink-0 flex items-center justify-between px-5 pt-4 pb-3">
         <div className="flex items-center gap-2">
           <span className="w-[6px] h-[6px] rounded-full animate-blink" style={{ background: effectiveColor }} />
-          <span className="text-[18px] tracking-[3px]" style={{ fontFamily: "'Bebas Neue', sans-serif", color: 'var(--th-white)' }}>Artist Mode</span>
+          <span className="text-[18px] tracking-[3px]" style={{ fontFamily: "'Bebas Neue', sans-serif", color: 'var(--th-white)' }}>Pocket Songs</span>
         </div>
         <div className="flex items-center gap-2">
           <span className="text-[8px] tracking-[1px]" style={{ fontFamily: "'DM Mono', monospace", color: effectiveColor }}>
             {queuedSongs.length} song{queuedSongs.length !== 1 ? 's' : ''}
           </span>
-          <button onClick={onClose}
-            className="px-[10px] py-[5px] rounded-full text-[8px] tracking-[1.5px] uppercase cursor-pointer"
-            style={{
-              fontFamily: "'DM Mono', monospace",
-              background: 'rgba(255,255,255,0.08)',
-              border: '1px solid rgba(255,255,255,0.15)',
-              color: 'rgba(255,255,255,0.55)',
-            }}>
-            ✕ Exit
-          </button>
+          {!inline && (
+            <button onClick={onClose}
+              className="px-[10px] py-[5px] rounded-full text-[8px] tracking-[1.5px] uppercase cursor-pointer"
+              style={{
+                fontFamily: "'DM Mono', monospace",
+                background: 'rgba(255,255,255,0.08)',
+                border: '1px solid rgba(255,255,255,0.15)',
+                color: 'rgba(255,255,255,0.55)',
+              }}>
+              ✕ Exit
+            </button>
+          )}
         </div>
       </div>
 
