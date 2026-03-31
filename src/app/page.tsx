@@ -77,7 +77,7 @@ export default function Home() {
 
   return (
     <div className="flex flex-col h-full overflow-hidden" style={{ background: 'var(--cream)' }}>
-      <TopNav onArtistMode={() => {}} />
+      {activeTab !== 'pocket' && <TopNav onArtistMode={() => {}} />}
 
       {/* Main content */}
       <div className="flex-1 overflow-y-auto scrollbar-hide" style={{ paddingBottom: activeTab === 'pocket' ? 60 : 140 }}>
