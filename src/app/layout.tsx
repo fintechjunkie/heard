@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { DM_Sans, DM_Mono } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
+import PhoneFrame from "@/components/PhoneFrame";
 
 const dmSans = DM_Sans({
   variable: "--font-dm-sans",
@@ -34,7 +35,7 @@ export default function RootLayout({
         />
       </head>
       <body>
-        <Providers>{children}</Providers>
+        <Providers><PhoneFrame>{children}</PhoneFrame></Providers>
       </body>
     </html>
   );

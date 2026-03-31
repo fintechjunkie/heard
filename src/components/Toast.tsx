@@ -7,7 +7,7 @@ export default function Toast() {
 
   return (
     <div
-      className={`fixed left-4 right-4 z-[200] px-4 py-3 rounded-lg shadow-lg pointer-events-none font-mono text-xs tracking-wide ${
+      className={`absolute left-4 right-4 z-[200] px-4 py-3 rounded-lg shadow-lg pointer-events-none font-mono text-xs tracking-wide ${
         toastMessage ? 'toast-visible' : 'toast-hidden'
       }`}
       style={{

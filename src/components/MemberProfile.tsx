@@ -18,7 +18,7 @@ export default function MemberProfile({ member, songs, open, onClose, onOpenDeta
 
   return (
     <div
-      className="fixed inset-0 z-[160] flex flex-col overflow-hidden"
+      className="absolute inset-0 z-[160] flex flex-col overflow-hidden"
       style={{
         background: 'var(--cream)',
         transform: open ? 'translateX(0)' : 'translateX(100%)',

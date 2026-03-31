@@ -2,9 +2,9 @@
 
 import { Song } from '@/data/types';
 import { MEMBERS } from '@/data/members';
+import { usePlayer } from '@/lib/player';
 import BottomSheet from './BottomSheet';
 import Waveform from './Waveform';
-// Player functionality handled by Waveform component internally
 
 interface SongDetailSheetProps {
   song: Song | null;
@@ -19,7 +19,9 @@ interface SongDetailSheetProps {
 export default function SongDetailSheet({
   song, open, onClose, onReserve, onBuy, onShare, onOpenProfile,
 }: SongDetailSheetProps) {
+  const { activeSong, isPlaying } = usePlayer();
   if (!song) return null;
+  const isCurrentlyPlaying = activeSong?.id === song.id && isPlaying;
 
   const songWriters = song.writer_ids.map(id => MEMBERS.find(m => m.id === id)).filter(Boolean);
 
@@ -32,11 +34,25 @@ export default function SongDetailSheet({
             style={{ fontFamily: "'DM Mono', monospace", color: 'rgba(255,255,255,0.45)' }}>
             {song.genre} · {song.bpm} BPM · {song.key}
           </div>
-          <div className="text-[32px] tracking-[2px] leading-none mb-1"
-            style={{ fontFamily: "'Bebas Neue', sans-serif", color: 'var(--th-white)' }}>
-            {song.title}
+          <div className="flex items-center gap-3">
+            <div className="text-[32px] tracking-[2px] leading-none flex-1"
+              style={{
+                fontFamily: "'Bebas Neue', sans-serif",
+                color: 'var(--th-white)',
+                filter: isCurrentlyPlaying ? 'drop-shadow(0 0 8px rgba(200,255,69,0.3))' : 'none',
+              }}>
+              {song.title}
+            </div>
+            {isCurrentlyPlaying && (
+              <div className="flex items-end gap-[3px] flex-shrink-0" style={{ height: 24 }}>
+                {[1, 2, 3, 1, 2, 3, 1, 2].map((v, i) => (
+                  <div key={i} className={`w-[3px] rounded-[1px] animate-eq-${v}`}
+                    style={{ height: '100%', background: 'var(--acid)', transformOrigin: 'bottom' }} />
+                ))}
+              </div>
+            )}
           </div>
-          <div className="text-[11px]" style={{ color: 'rgba(255,255,255,0.55)' }}>
+          <div className="text-[11px] mt-1" style={{ color: 'rgba(255,255,255,0.55)' }}>
             {song.writers.join(' · ')}
           </div>
         </div>

@@ -57,7 +57,7 @@ export default function DealRoom({ song, open, onClose, onReserve, onBuy }: Deal
 
   return (
     <div
-      className="fixed inset-0 z-[160] flex flex-col overflow-hidden"
+      className="absolute inset-0 z-[160] flex flex-col overflow-hidden"
       style={{
         background: 'var(--cream)',
         transform: open ? 'translateX(0)' : 'translateX(100%)',

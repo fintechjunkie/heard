@@ -91,7 +91,7 @@ export default function ArtistMode({ open, onClose }: ArtistModeProps) {
 
   return (
     <div
-      className="fixed inset-0 z-[170] flex flex-col overflow-hidden"
+      className="absolute inset-0 z-[170] flex flex-col overflow-hidden"
       style={{
         background: '#06060e',
         transform: open ? 'translateY(0)' : 'translateY(100%)',

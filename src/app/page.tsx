@@ -59,7 +59,7 @@ export default function Home() {
   const tabTitle = activeTab === 'bank' ? 'Song Bank' : activeTab === 'saved' ? 'Saved' : activeTab === 'reserved' ? 'Reserved' : activeTab === 'purchased' ? 'Purchased' : '';
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden" style={{ background: 'var(--cream)' }}>
+    <div className="flex flex-col h-full overflow-hidden" style={{ background: 'var(--cream)' }}>
       <TopNav onArtistMode={() => setArtistModeOpen(true)} />
 
       {/* Main content */}

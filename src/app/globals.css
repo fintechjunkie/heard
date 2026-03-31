@@ -48,6 +48,135 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* ═══════════════════════════════════════════════
+   PHONE FRAME — Desktop only
+═══════════════════════════════════════════════ */
+
+/* Mobile: no frame, just full screen */
+.phone-stage {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+}
+.phone-scale-wrap {
+  width: 100%;
+  height: 100%;
+}
+.phone-frame-el {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+}
+.phone-screen {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+.dynamic-island-el,
+.di-camera-el,
+.di-sensor-el {
+  display: none;
+}
+
+/* Desktop: centered iPhone frame */
+@media (min-width: 768px) {
+  body {
+    background: #f8f8f8;
+    overflow: hidden;
+  }
+  .phone-stage {
+    position: fixed;
+    inset: 0;
+    background: #f8f8f8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+  .phone-scale-wrap {
+    width: 393px;
+    height: 852px;
+    flex-shrink: 0;
+    transform-origin: center center;
+  }
+  .phone-frame-el {
+    width: 393px;
+    height: 852px;
+    background: #050505;
+    border-radius: 55px;
+    position: relative;
+    box-shadow:
+      0 0 0 1px #3a3a3a,
+      0 0 0 2.5px #111,
+      inset 0 0 0 1px #2a2a2a,
+      0 24px 60px rgba(0,0,0,.22),
+      0 8px 20px rgba(0,0,0,.14),
+      0 2px 6px rgba(0,0,0,.10);
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  /* Left side buttons */
+  .phone-frame-el::before {
+    content: '';
+    position: absolute;
+    left: -3px; top: 112px;
+    width: 3px; height: 32px;
+    background: #2a2a2a;
+    border-radius: 2px 0 0 2px;
+    box-shadow: 0 48px 0 0 #2a2a2a, 0 96px 0 0 #2a2a2a;
+  }
+  /* Right side power button */
+  .phone-frame-el::after {
+    content: '';
+    position: absolute;
+    right: -3px; top: 172px;
+    width: 3px; height: 72px;
+    background: #2a2a2a;
+    border-radius: 0 2px 2px 0;
+  }
+  /* Dynamic Island */
+  .dynamic-island-el {
+    display: block;
+    position: absolute;
+    top: 12px; left: 50%;
+    transform: translateX(-50%);
+    width: 126px; height: 36px;
+    background: #000;
+    border-radius: 20px;
+    z-index: 999;
+    box-shadow: inset 0 0 0 1px #1a1a1a;
+  }
+  .di-camera-el {
+    display: block;
+    position: absolute;
+    right: 20px; top: 50%;
+    transform: translateY(-50%);
+    width: 11px; height: 11px;
+    border-radius: 50%;
+    background: #0d0d0d;
+    border: 1px solid #1a1a1a;
+  }
+  .di-sensor-el {
+    display: block;
+    position: absolute;
+    right: 36px; top: 50%;
+    transform: translateY(-50%);
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: #0d1520;
+  }
+  .phone-screen {
+    position: absolute;
+    inset: 0;
+    border-radius: 55px;
+    overflow: hidden;
+    background: var(--cream);
+  }
+}
+
 /* Scrollbar hide utility */
 .scrollbar-hide {
   scrollbar-width: none;
@@ -107,4 +236,64 @@ body {
 .toast-visible {
   transform: translateY(0);
   transition: transform 350ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ═══════════════════════════════════════════════
+   PLAYER ANIMATIONS — Equalizer, glow, shimmer
+═══════════════════════════════════════════════ */
+
+@keyframes eq-bar-1 {
+  0%, 100% { transform: scaleY(0.3); }
+  25% { transform: scaleY(0.9); }
+  50% { transform: scaleY(0.5); }
+  75% { transform: scaleY(1.0); }
+}
+@keyframes eq-bar-2 {
+  0%, 100% { transform: scaleY(0.5); }
+  20% { transform: scaleY(1.0); }
+  45% { transform: scaleY(0.35); }
+  70% { transform: scaleY(0.8); }
+}
+@keyframes eq-bar-3 {
+  0%, 100% { transform: scaleY(0.4); }
+  30% { transform: scaleY(0.7); }
+  55% { transform: scaleY(1.0); }
+  80% { transform: scaleY(0.25); }
+}
+
+.animate-eq-1 {
+  animation: eq-bar-1 0.8s ease-in-out infinite;
+  transform-origin: bottom;
+}
+.animate-eq-2 {
+  animation: eq-bar-2 0.7s ease-in-out infinite;
+  transform-origin: bottom;
+}
+.animate-eq-3 {
+  animation: eq-bar-3 0.9s ease-in-out infinite;
+  transform-origin: bottom;
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(200,255,69,0.4); }
+  50% { box-shadow: 0 0 14px 4px rgba(200,255,69,0.2); }
+}
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+@keyframes progress-shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.animate-progress-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--acid) 0%,
+    #e0ff8a 40%,
+    var(--acid) 60%,
+    var(--acid) 100%
+  );
+  background-size: 200% 100%;
+  animation: progress-shimmer 2s linear infinite;
 }

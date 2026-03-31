@@ -13,9 +13,11 @@ export default function MiniPlayer({ onOpenDetail, onReserve, onBuy }: MiniPlaye
 
   if (!activeSong) return null;
 
+  const eqVariants = [1, 2, 3, 1, 2];
+
   return (
     <div
-      className="fixed left-0 right-0 z-[90] cursor-pointer"
+      className="absolute left-0 right-0 z-[90] cursor-pointer"
       style={{
         bottom: 58,
         background: 'var(--black)',
@@ -36,21 +38,40 @@ export default function MiniPlayer({ onOpenDetail, onReserve, onBuy }: MiniPlaye
       >
         <div className="absolute bottom-0 left-0 right-0 h-[3px]" style={{ background: 'var(--b3)' }}>
           <div
-            className="h-full transition-[width] duration-300"
-            style={{ width: `${progress}%`, background: 'var(--acid)' }}
+            className={`h-full transition-[width] duration-300 ${isPlaying ? 'animate-progress-shimmer' : ''}`}
+            style={{ width: `${progress}%`, background: isPlaying ? undefined : 'var(--acid)' }}
           />
         </div>
       </div>
 
       <div className="flex items-center gap-3 px-4 py-[10px]">
-        {/* Play/Pause */}
+        {/* Play/Pause with glow */}
         <button
           onClick={(e) => { e.stopPropagation(); toggle(activeSong); }}
-          className="w-[34px] h-[34px] rounded-full flex items-center justify-center text-[14px] flex-shrink-0 cursor-pointer border-none"
+          className={`w-[34px] h-[34px] rounded-full flex items-center justify-center text-[14px] flex-shrink-0 cursor-pointer border-none ${
+            isPlaying ? 'animate-pulse-glow' : ''
+          }`}
           style={{ background: 'var(--acid)', color: 'var(--black)' }}
         >
           {isPlaying ? '⏸' : '▶'}
         </button>
+
+        {/* Equalizer bars — only when playing */}
+        <div className="flex items-end gap-[2px] flex-shrink-0" style={{ height: 18, width: 20 }}>
+          {eqVariants.map((variant, i) => (
+            <div
+              key={i}
+              className={`w-[3px] rounded-[1px] ${isPlaying ? `animate-eq-${variant}` : ''}`}
+              style={{
+                height: '100%',
+                background: 'var(--acid)',
+                transform: isPlaying ? undefined : 'scaleY(0.2)',
+                transformOrigin: 'bottom',
+                transition: 'transform 0.3s ease',
+              }}
+            />
+          ))}
+        </div>
 
         {/* Song info */}
         <div className="flex-1 min-w-0">
