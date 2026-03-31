@@ -48,15 +48,38 @@ export default function AdminPage() {
   const [editingUser, setEditingUser] = useState<UserProfile | null>(null);
   const [editUserForm, setEditUserForm] = useState({ full_name: '', role: '', company: '', bio: '', tier: '' });
 
+  const loadSongs = useCallback(async () => {
+    try {
+      const res = await fetch('/api/songs');
+      if (res.ok) {
+        const data = await res.json();
+        setSongs(data);
+      }
+    } catch {
+      setSongs(SEED_SONGS);
+    }
+  }, []);
+
+  const loadMembers = useCallback(async () => {
+    try {
+      const res = await fetch('/api/members');
+      if (res.ok) {
+        const data = await res.json();
+        setMembers(data);
+      }
+    } catch {
+      setMembers(SEED_MEMBERS);
+    }
+  }, []);
+
   useEffect(() => {
-    setSongs(loadData('songs', SEED_SONGS));
-    setMembers(loadData('members', SEED_MEMBERS));
+    loadSongs();
+    loadMembers();
     setMounted(true);
-    // Check if already authed this session
     if (sessionStorage.getItem('theheard_admin') === 'true') {
       setAuthed(true);
     }
-  }, []);
+  }, [loadSongs, loadMembers]);
 
   const loadUsers = useCallback(async () => {
     setUsersLoading(true);
@@ -158,32 +181,39 @@ export default function AdminPage() {
     expiring: songs.filter(s => s.tier1_days_remaining <= 14 && s.status === 'available').length,
   };
 
-  const updateSong = (updated: Song) => {
-    const newSongs = songs.map(s => s.id === updated.id ? updated : s);
-    setSongs(newSongs);
-    saveData('songs', newSongs);
+  const updateSong = async (updated: Song) => {
+    await fetch('/api/songs', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updated),
+    });
+    loadSongs();
     setEditingSong(null);
   };
 
-  const addSong = (newSong: Song) => {
-    const withId = { ...newSong, id: Math.max(...songs.map(s => s.id)) + 1 };
-    const newSongs = [...songs, withId];
-    setSongs(newSongs);
-    saveData('songs', newSongs);
+  const addSong = async (newSong: Song) => {
+    await fetch('/api/songs', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newSong),
+    });
+    loadSongs();
     setEditingSong(null);
   };
 
-  const deleteSong = (id: number) => {
+  const deleteSong = async (id: number) => {
     if (!confirm('Delete this song?')) return;
-    const newSongs = songs.filter(s => s.id !== id);
-    setSongs(newSongs);
-    saveData('songs', newSongs);
+    await fetch(`/api/songs?id=${id}`, { method: 'DELETE' });
+    loadSongs();
   };
 
-  const updateMember = (updated: Member) => {
-    const newMembers = members.map(m => m.id === updated.id ? updated : m);
-    setMembers(newMembers);
-    saveData('members', newMembers);
+  const updateMember = async (updated: Member) => {
+    await fetch('/api/members', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updated),
+    });
+    loadMembers();
     setEditingMember(null);
   };
 

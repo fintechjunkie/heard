@@ -62,14 +62,8 @@ function saveToStorage(key: string, value: unknown) {
 }
 
 export function StoreProvider({ children }: { children: ReactNode }) {
-  const [songs, setSongsState] = useState<Song[]>(() => {
-    const stored = loadFromStorage<Song[]>('songs', SEED_SONGS);
-    // Validate stored songs have proper ids; fall back to seed if broken
-    const validStored = stored.filter(s => s.id != null && !isNaN(s.id));
-    if (validStored.length === 0 && SEED_SONGS.length > 0) return SEED_SONGS;
-    return validStored.length > 0 ? validStored : SEED_SONGS;
-  });
-  const [savedSongIds, setSavedSongIds] = useState<number[]>(() => loadFromStorage('saved', [1, 2, 6]));
+  const [songs, setSongsState] = useState<Song[]>(SEED_SONGS);
+  const [savedSongIds, setSavedSongIds] = useState<number[]>(() => loadFromStorage('saved', []));
   const [activeTab, setActiveTab] = useState('bank');
   const [searchQuery, setSearchQuery] = useState('');
   const [searchOpen, setSearchOpen] = useState(false);
@@ -83,8 +77,23 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [dealRoomReaction, setDealRoomReaction] = useState<string | null>(null);
   const [dealRoomNote, setDealRoomNote] = useState('');
 
-  // Persist to localStorage
-  useEffect(() => { saveToStorage('songs', songs); }, [songs]);
+  // Load songs from API on mount
+  useEffect(() => {
+    async function fetchSongs() {
+      try {
+        const res = await fetch('/api/songs');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.length > 0) setSongsState(data);
+        }
+      } catch {
+        // Keep seed data on error
+      }
+    }
+    fetchSongs();
+  }, []);
+
+  // Persist local preferences to localStorage
   useEffect(() => { saveToStorage('saved', savedSongIds); }, [savedSongIds]);
   useEffect(() => { saveToStorage('artistReactions', artistReactions); }, [artistReactions]);
   useEffect(() => { saveToStorage('artistQueue', artistQueue); }, [artistQueue]);
