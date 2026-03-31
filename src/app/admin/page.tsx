@@ -334,20 +334,41 @@ function SongForm({ song, members, onSave, onCancel }: { song: Song; members: Me
     setUploading(true);
     setUploadError(null);
     try {
-      const formData = new FormData();
-      formData.append('file', file);
+      let url: string;
+      const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
 
-      const res = await fetch('/api/upload', { method: 'POST', body: formData });
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.error || 'Upload failed');
+      if (isLocal) {
+        // Dev mode: send file to our API route which writes to public/audio/
+        const formData = new FormData();
+        formData.append('file', file);
+        const res = await fetch('/api/upload', { method: 'POST', body: formData });
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.error || 'Upload failed');
+        }
+        const data = await res.json();
+        url = data.url;
+      } else {
+        // Production: upload directly to Vercel Blob from the browser
+        const { upload } = await import('@vercel/blob/client');
+        // Sanitize filename
+        const rawName = file.name.replace(/\.[^.]+$/, '');
+        const ext = file.name.split('.').pop()?.toLowerCase() || 'wav';
+        const safeName = rawName.toLowerCase().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-').trim();
+        const filename = `audio/${safeName}.${ext}`;
+
+        const blob = await upload(filename, file, {
+          access: 'public',
+          handleUploadUrl: '/api/upload',
+        });
+        url = blob.url;
       }
-      const { url } = await res.json();
+
       setForm(prev => ({ ...prev, audio_url: url }));
 
       // Extract duration from audio file
       const audio = new Audio();
-      audio.src = url.startsWith('http') ? url : url;
+      audio.src = url;
       audio.onloadedmetadata = () => {
         setForm(prev => ({ ...prev, audio_duration_seconds: Math.round(audio.duration) }));
       };
