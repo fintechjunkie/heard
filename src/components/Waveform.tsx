@@ -118,6 +118,28 @@ export default function Waveform({
         </button>
       )}
 
+      {/* Restart button — only when song is active */}
+      {!hidePlayButton && isActive && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            playSong(song);
+          }}
+          className="flex-shrink-0 rounded-full flex items-center justify-center cursor-pointer border-none active:scale-90 transition-transform"
+          style={{
+            width: btnSize * 0.75,
+            height: btnSize * 0.75,
+            background: 'transparent',
+            border: isThisPlaying ? '1px solid rgba(200,255,69,0.3)' : '1px solid rgba(255,255,255,0.15)',
+            color: isThisPlaying ? 'var(--acid)' : 'rgba(255,255,255,0.5)',
+            fontSize: btnSize * 0.28,
+          }}
+          title="Restart song"
+        >
+          ↺
+        </button>
+      )}
+
       {/* Waveform bars */}
       <div
         className="flex-1 flex items-end gap-[1.5px] cursor-pointer"
