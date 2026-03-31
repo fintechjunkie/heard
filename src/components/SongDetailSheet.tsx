@@ -45,8 +45,8 @@ export default function SongDetailSheet({
             </div>
             {isCurrentlyPlaying && (
               <div className="flex items-end gap-[3px] flex-shrink-0" style={{ height: 24 }}>
-                {[1, 2, 3, 1, 2, 3, 1, 2].map((v, i) => (
-                  <div key={i} className={`w-[3px] rounded-[1px] animate-eq-${v}`}
+                {['animate-eq-1','animate-eq-2','animate-eq-3','animate-eq-1','animate-eq-2','animate-eq-3','animate-eq-1','animate-eq-2'].map((cls, i) => (
+                  <div key={i} className={`w-[3px] rounded-[1px] ${cls}`}
                     style={{ height: '100%', background: 'var(--acid)', transformOrigin: 'bottom' }} />
                 ))}
               </div>

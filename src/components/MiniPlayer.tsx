@@ -8,12 +8,13 @@ interface MiniPlayerProps {
   onBuy: (songId: number) => void;
 }
 
+// CSS class names must be written in full for Tailwind to detect them
+const EQ_CLASSES = ['animate-eq-1', 'animate-eq-2', 'animate-eq-3', 'animate-eq-1', 'animate-eq-2'];
+
 export default function MiniPlayer({ onOpenDetail, onReserve, onBuy }: MiniPlayerProps) {
   const { activeSong, isPlaying, progress, toggle, seek } = usePlayer();
 
   if (!activeSong) return null;
-
-  const eqVariants = [1, 2, 3, 1, 2];
 
   return (
     <div
@@ -58,10 +59,10 @@ export default function MiniPlayer({ onOpenDetail, onReserve, onBuy }: MiniPlaye
 
         {/* Equalizer bars — only when playing */}
         <div className="flex items-end gap-[2px] flex-shrink-0" style={{ height: 18, width: 20 }}>
-          {eqVariants.map((variant, i) => (
+          {EQ_CLASSES.map((cls, i) => (
             <div
               key={i}
-              className={`w-[3px] rounded-[1px] ${isPlaying ? `animate-eq-${variant}` : ''}`}
+              className={`w-[3px] rounded-[1px] ${isPlaying ? cls : ''}`}
               style={{
                 height: '100%',
                 background: 'var(--acid)',

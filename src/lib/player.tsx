@@ -29,6 +29,8 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const [currentTime, setCurrentTime] = useState(0);
   const howlRef = useRef<Howl | null>(null);
   const rafRef = useRef<number | null>(null);
+  const activeSongIdRef = useRef<number | null>(null);
+  const pendingSeekRef = useRef<number | undefined>(undefined);
 
   const stopProgress = useCallback(() => {
     if (rafRef.current) {
@@ -40,13 +42,18 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const startProgress = useCallback(() => {
     stopProgress();
     const update = () => {
-      if (howlRef.current && howlRef.current.playing()) {
-        const seek = howlRef.current.seek() as number;
+      if (howlRef.current) {
+        const playing = howlRef.current.playing();
+        const seekPos = howlRef.current.seek() as number;
         const dur = howlRef.current.duration();
-        setCurrentTime(seek);
-        setDuration(dur);
-        setProgress(dur > 0 ? (seek / dur) * 100 : 0);
-        rafRef.current = requestAnimationFrame(update);
+        if (dur > 0) {
+          setCurrentTime(seekPos);
+          setDuration(dur);
+          setProgress((seekPos / dur) * 100);
+        }
+        if (playing) {
+          rafRef.current = requestAnimationFrame(update);
+        }
       }
     };
     rafRef.current = requestAnimationFrame(update);
@@ -57,8 +64,12 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     if (howlRef.current) {
       howlRef.current.stop();
       howlRef.current.unload();
+      howlRef.current = null;
     }
     stopProgress();
+
+    // Store the pending seek for after load
+    pendingSeekRef.current = seekPercent;
 
     // Extract format hint from file extension
     const ext = song.audio_url.split('.').pop()?.toLowerCase();
@@ -68,18 +79,20 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       src: [song.audio_url],
       html5: true,
       format,
+      onload: () => {
+        const dur = howl.duration();
+        setDuration(dur);
+        // Apply pending seek after load when duration is known
+        if (pendingSeekRef.current !== undefined && pendingSeekRef.current > 0 && dur > 0) {
+          const seekTime = (pendingSeekRef.current / 100) * dur;
+          howl.seek(seekTime);
+          setCurrentTime(seekTime);
+          setProgress(pendingSeekRef.current);
+        }
+        pendingSeekRef.current = undefined;
+      },
       onplay: () => {
         setIsPlaying(true);
-        // If an initial seek was requested, apply it once playback starts
-        if (seekPercent !== undefined && seekPercent > 0) {
-          const dur = howl.duration();
-          if (dur > 0) {
-            const seekTime = (seekPercent / 100) * dur;
-            howl.seek(seekTime);
-            setCurrentTime(seekTime);
-            setProgress(seekPercent);
-          }
-        }
         startProgress();
       },
       onpause: () => {
@@ -92,16 +105,17 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
         setCurrentTime(0);
         stopProgress();
       },
-      onloaderror: () => {
-        // If audio file not found, still set as active for UI demo
-        console.warn(`Audio file not found: ${song.audio_url}`);
+      onloaderror: (_id: number, err: unknown) => {
+        console.warn(`Audio file not found: ${song.audio_url}`, err);
       },
     });
 
     howlRef.current = howl;
+    activeSongIdRef.current = song.id;
     setActiveSong(song);
     setProgress(seekPercent || 0);
     setCurrentTime(0);
+    setDuration(0);
     howl.play();
   }, [startProgress, stopProgress]);
 
@@ -114,25 +128,32 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   }, [stopProgress]);
 
   const toggle = useCallback((song: Song) => {
-    if (activeSong?.id === song.id) {
-      if (isPlaying) {
-        pause();
-      } else if (howlRef.current) {
-        howlRef.current.play();
+    // Use ref for immediate comparison (avoids stale closure)
+    if (activeSongIdRef.current === song.id) {
+      if (howlRef.current) {
+        if (howlRef.current.playing()) {
+          pause();
+        } else {
+          howlRef.current.play();
+        }
       }
     } else {
       playSong(song);
     }
-  }, [activeSong, isPlaying, pause, playSong]);
+  }, [pause, playSong]);
 
   const seek = useCallback((percent: number) => {
-    if (howlRef.current && duration > 0) {
-      const seekTime = (percent / 100) * duration;
-      howlRef.current.seek(seekTime);
-      setCurrentTime(seekTime);
-      setProgress(percent);
+    if (howlRef.current) {
+      const dur = howlRef.current.duration();
+      if (dur > 0) {
+        const seekTime = (percent / 100) * dur;
+        howlRef.current.seek(seekTime);
+        setCurrentTime(seekTime);
+        setDuration(dur);
+        setProgress(percent);
+      }
     }
-  }, [duration]);
+  }, []);
 
   // Cleanup on unmount
   useEffect(() => {
