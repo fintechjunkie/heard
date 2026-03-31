@@ -27,12 +27,23 @@ export default function Waveform({
 }: WaveformProps) {
   const { activeSong, isPlaying, progress, seek, toggle, playSong } = usePlayer();
   const isActive = activeSong?.id === song.id;
+  const isThisPlaying = isActive && isPlaying;
   const currentProgress = isActive ? progress : 0;
 
   const defaultFillColor = fillColor || 'var(--sky)';
   const defaultBaseColor = baseColor || (isActive ? 'rgba(255,255,255,0.2)' : 'rgba(140,135,120,0.25)');
 
-  const handleClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+  const handlePlayPause = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (isActive) {
+      toggle(song);
+    } else {
+      playSong(song);
+    }
+    onClick?.();
+  }, [isActive, toggle, playSong, song, onClick]);
+
+  const handleBarClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     e.stopPropagation();
 
     // Calculate click position as percentage
@@ -41,41 +52,60 @@ export default function Waveform({
     const clampedPercent = Math.max(0, Math.min(100, percent));
 
     if (isActive) {
-      // Song is already loaded — just seek
       seek(clampedPercent);
-      // If paused, also resume playback
       if (!isPlaying) {
         toggle(song);
       }
     } else {
-      // Different song — play it starting at the clicked position
       playSong(song, clampedPercent);
     }
 
-    // Still call onClick for any additional consumer behavior
     onClick?.();
   }, [isActive, isPlaying, seek, toggle, playSong, song, onClick]);
 
+  // Size the play button relative to waveform height
+  const btnSize = Math.max(28, height);
+
   return (
-    <div
-      className="flex items-end gap-[1.5px] cursor-pointer"
-      style={{ height }}
-      onClick={handleClick}
-    >
-      {Array.from({ length: barCount }, (_, i) => {
-        const pct = getBarHeight(i, song.id);
-        const isPlayed = i < Math.floor(barCount * (currentProgress / 100));
-        return (
-          <div
-            key={i}
-            className="flex-1 rounded-[2px] transition-colors duration-100"
-            style={{
-              height: `${pct}%`,
-              background: isPlayed ? defaultFillColor : defaultBaseColor,
-            }}
-          />
-        );
-      })}
+    <div className="relative flex items-center gap-[10px]" style={{ minHeight: btnSize }}>
+      {/* Play/Pause button */}
+      <button
+        onClick={handlePlayPause}
+        className={`flex-shrink-0 rounded-full flex items-center justify-center cursor-pointer border-none transition-all duration-200 ${
+          isThisPlaying ? 'animate-pulse-glow' : ''
+        }`}
+        style={{
+          width: btnSize,
+          height: btnSize,
+          background: isThisPlaying ? 'var(--acid)' : 'var(--black)',
+          color: isThisPlaying ? 'var(--black)' : 'var(--th-white)',
+          fontSize: btnSize * 0.38,
+        }}
+      >
+        {isThisPlaying ? '⏸' : '▶'}
+      </button>
+
+      {/* Waveform bars */}
+      <div
+        className="flex-1 flex items-end gap-[1.5px] cursor-pointer"
+        style={{ height }}
+        onClick={handleBarClick}
+      >
+        {Array.from({ length: barCount }, (_, i) => {
+          const pct = getBarHeight(i, song.id);
+          const isPlayed = i < Math.floor(barCount * (currentProgress / 100));
+          return (
+            <div
+              key={i}
+              className="flex-1 rounded-[2px] transition-colors duration-100"
+              style={{
+                height: `${pct}%`,
+                background: isPlayed ? defaultFillColor : defaultBaseColor,
+              }}
+            />
+          );
+        })}
+      </div>
     </div>
   );
 }
