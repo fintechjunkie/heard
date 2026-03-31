@@ -40,17 +40,17 @@ export async function POST(request: NextRequest) {
     });
 
     if (signUpError) {
-      return NextResponse.json({ error: signUpError.message }, { status: 400 });
+      return NextResponse.json({ error: '[signUp] ' + signUpError.message + ' | [admin] ' + adminError.message }, { status: 400 });
     }
 
     if (!signUpData.user) {
-      return NextResponse.json({ error: 'Failed to create user account' }, { status: 500 });
+      return NextResponse.json({ error: '[signUp] No user returned. Admin error was: ' + adminError.message }, { status: 500 });
     }
 
     userId = signUpData.user.id;
   } else {
     if (!adminData.user) {
-      return NextResponse.json({ error: 'Failed to create user account' }, { status: 500 });
+      return NextResponse.json({ error: '[admin] No user returned' }, { status: 500 });
     }
     userId = adminData.user.id;
   }
