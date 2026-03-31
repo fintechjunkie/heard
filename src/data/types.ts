@@ -39,6 +39,28 @@ export interface Member {
   hits: { t: string; a: string; s: string }[];
   member_type: 'founding' | 'general';
   joined_at: string;
+  avatar_url?: string;
+  banner_url?: string;
+}
+
+export interface Team {
+  id: number;
+  name: string;
+  description: string;
+  member_count?: number;
+  created_at: string;
+}
+
+export interface TeamMember {
+  id: number;
+  user_id: string;
+  role_in_team: string;
+  joined_at: string;
+  full_name: string;
+  email: string;
+  role: string;
+  tier: string;
+  avatar_url?: string;
 }
 
 export interface User {

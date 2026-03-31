@@ -5,6 +5,7 @@ import { MEMBERS } from '@/data/members';
 import { usePlayer } from '@/lib/player';
 import BottomSheet from './BottomSheet';
 import Waveform from './Waveform';
+import SongArt from './SongArt';
 
 interface SongDetailSheetProps {
   song: Song | null;
@@ -67,6 +68,9 @@ export default function SongDetailSheet({
 
         {/* Scrollable body */}
         <div className="flex-1 overflow-y-auto scrollbar-hide" style={{ background: 'var(--cream)' }}>
+          {/* Generative art */}
+          <SongArt songId={song.id} bpm={song.bpm} songKey={song.key} color={song.color} mood={song.mood} height={180} />
+
           {/* Preview waveform */}
           <div className="p-5">
             <div className="text-[8px] tracking-[2px] uppercase mb-2" style={{ fontFamily: "'DM Mono', monospace", color: '#5a5650' }}>Preview</div>
@@ -84,15 +88,20 @@ export default function SongDetailSheet({
                 style={{ borderBottom: '1px solid var(--border)' }}
                 onClick={() => { onClose(); setTimeout(() => onOpenProfile(member.id), 100); }}
               >
-                <div className="w-[32px] h-[32px] rounded-full flex items-center justify-center text-[10px] font-medium flex-shrink-0"
-                  style={{
-                    fontFamily: "'DM Mono', monospace",
-                    background: `${member.color}22`,
-                    color: member.color,
-                    border: `1px solid ${member.color}55`,
-                  }}>
-                  {member.initials}
-                </div>
+                {member.avatar_url ? (
+                  <img src={member.avatar_url} alt={member.name}
+                    className="w-[32px] h-[32px] rounded-full object-cover flex-shrink-0" />
+                ) : (
+                  <div className="w-[32px] h-[32px] rounded-full flex items-center justify-center text-[10px] font-medium flex-shrink-0"
+                    style={{
+                      fontFamily: "'DM Mono', monospace",
+                      background: `${member.color}22`,
+                      color: member.color,
+                      border: `1px solid ${member.color}55`,
+                    }}>
+                    {member.initials}
+                  </div>
+                )}
                 <div className="flex-1">
                   <div className="text-[13px] font-medium" style={{ color: 'var(--black)' }}>{member.name}</div>
                   <div className="text-[10px]" style={{ fontFamily: "'DM Mono', monospace", color: '#6a6660' }}>{member.role}</div>
@@ -156,7 +165,7 @@ export default function SongDetailSheet({
         </div>
 
         {/* Footer CTAs */}
-        <div className="flex-shrink-0 flex flex-col gap-2 px-5 pb-5 pt-3" style={{ background: 'var(--th-white)', borderTop: '1px solid var(--border)' }}>
+        <div className="flex-shrink-0 flex flex-col gap-2 px-5 pb-5 pt-3" style={{ background: '#F2EDE3', borderTop: '1px solid var(--border)', boxShadow: '0 -8px 20px rgba(0,0,0,0.08)' }}>
           <button onClick={() => { onClose(); onShare(song.id); }}
             className="w-full py-[12px] rounded-xl text-[10px] tracking-[1.5px] uppercase cursor-pointer"
             style={{ fontFamily: "'DM Mono', monospace", background: 'var(--b3)', color: 'var(--th-white)', border: 'none' }}>

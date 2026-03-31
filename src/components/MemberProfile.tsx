@@ -35,16 +35,32 @@ export default function MemberProfile({ member, songs, open, onClose, onOpenDeta
 
       <div className="flex-1 overflow-y-auto scrollbar-hide">
         {/* Hero */}
-        <div className="px-5 py-6 text-center" style={{ background: 'var(--black)' }}>
-          <div className="w-[64px] h-[64px] rounded-full flex items-center justify-center text-[18px] font-medium mx-auto mb-3"
-            style={{
-              fontFamily: "'DM Mono', monospace",
-              background: `${member.color}22`,
-              color: member.color,
-              border: `2px solid ${member.color}55`,
-            }}>
-            {member.initials}
-          </div>
+        <div className="relative text-center" style={{ background: 'var(--black)' }}>
+          {/* Banner image */}
+          {member.banner_url ? (
+            <div className="w-full h-[140px] overflow-hidden">
+              <img src={member.banner_url} alt="" className="w-full h-full object-cover" style={{ opacity: 0.6 }} />
+              <div className="absolute inset-0 h-[140px]" style={{ background: 'linear-gradient(to bottom, transparent 40%, var(--black) 100%)' }} />
+            </div>
+          ) : (
+            <div className="h-[20px]" />
+          )}
+          <div className={member.banner_url ? "px-5 pb-6 -mt-[40px] relative z-10" : "px-5 py-6"}>
+          {member.avatar_url ? (
+            <img src={member.avatar_url} alt={member.name}
+              className="w-[64px] h-[64px] rounded-full object-cover mx-auto mb-3"
+              style={{ border: `2px solid ${member.color}55` }} />
+          ) : (
+            <div className="w-[64px] h-[64px] rounded-full flex items-center justify-center text-[18px] font-medium mx-auto mb-3"
+              style={{
+                fontFamily: "'DM Mono', monospace",
+                background: `${member.color}22`,
+                color: member.color,
+                border: `2px solid ${member.color}55`,
+              }}>
+              {member.initials}
+            </div>
+          )}
           <div className="text-[10px] tracking-[1px] uppercase mb-1" style={{ fontFamily: "'DM Mono', monospace", color: member.color }}>{member.role}</div>
           <div className="text-[40px] tracking-[2px] leading-none mb-2" style={{ fontFamily: "'Bebas Neue', sans-serif", color: 'var(--th-white)' }}>{member.name}</div>
           <div className="text-[11px] mb-4" style={{ color: 'rgba(255,255,255,0.55)', lineHeight: 1.5 }}>{member.bio}</div>
@@ -59,6 +75,7 @@ export default function MemberProfile({ member, songs, open, onClose, onOpenDeta
                 <div className="text-[7px] tracking-[1.5px] uppercase" style={{ fontFamily: "'DM Mono', monospace", color: 'rgba(255,255,255,0.5)' }}>{s.label}</div>
               </div>
             ))}
+          </div>
           </div>
         </div>
 

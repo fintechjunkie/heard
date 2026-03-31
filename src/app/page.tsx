@@ -19,6 +19,7 @@ import SortSheet from '@/components/SortSheet';
 import MemberProfile from '@/components/MemberProfile';
 import DealRoom from '@/components/DealRoom';
 import ArtistMode from '@/components/ArtistMode';
+import TeamPicker from '@/components/TeamPicker';
 
 export default function Home() {
   const store = useStore();
@@ -38,6 +39,23 @@ export default function Home() {
   // Panel states
   const [profileMemberId, setProfileMemberId] = useState<number | null>(null);
   const [dealRoomSongId, setDealRoomSongId] = useState<number | null>(null);
+
+  // Team state
+  const [activeTeam, setActiveTeam] = useState<{ id: number; name: string } | null>(() => {
+    if (typeof window === 'undefined') return null;
+    try {
+      const stored = localStorage.getItem('theheard_activeTeam');
+      return stored ? JSON.parse(stored) : null;
+    } catch { return null; }
+  });
+  const [showTeamPicker, setShowTeamPicker] = useState(!activeTeam);
+
+  const handleTeamSelect = useCallback((teamId: number, teamName: string) => {
+    const team = { id: teamId, name: teamName };
+    setActiveTeam(team);
+    setShowTeamPicker(false);
+    localStorage.setItem('theheard_activeTeam', JSON.stringify(team));
+  }, []);
 
   const filteredSongs = getFilteredSongs();
 
@@ -77,7 +95,8 @@ export default function Home() {
 
   return (
     <div className="flex flex-col h-full overflow-hidden" style={{ background: 'var(--cream)' }}>
-      {activeTab !== 'pocket' && <TopNav onArtistMode={() => {}} />}
+      {showTeamPicker && <TeamPicker onSelect={handleTeamSelect} />}
+      {activeTab !== 'pocket' && <TopNav onArtistMode={() => {}} teamName={activeTeam?.name} onSwitchTeam={() => setShowTeamPicker(true)} />}
 
       {/* Main content */}
       <div className="flex-1 overflow-y-auto scrollbar-hide" style={{ paddingBottom: activeTab === 'pocket' ? 60 : 140 }}>

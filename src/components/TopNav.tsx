@@ -6,6 +6,8 @@ import { createClient } from '@/lib/supabase/client';
 
 interface TopNavProps {
   onArtistMode: () => void;
+  teamName?: string;
+  onSwitchTeam?: () => void;
 }
 
 interface UserProfile {
@@ -16,7 +18,7 @@ interface UserProfile {
   company: string;
 }
 
-export default function TopNav({ onArtistMode }: TopNavProps) {
+export default function TopNav({ onArtistMode, teamName, onSwitchTeam }: TopNavProps) {
   const { searchOpen, setSearchOpen, searchQuery, setSearchQuery, activeTab } = useStore();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [showProfile, setShowProfile] = useState(false);
@@ -63,9 +65,18 @@ export default function TopNav({ onArtistMode }: TopNavProps) {
     <div className="flex-shrink-0 relative z-50" style={{ background: 'var(--black)' }}>
       {/* Main nav row */}
       <div className="flex items-center justify-between" style={{ padding: '14px 20px 14px' }}>
-        <div className="flex items-center gap-2" style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 22, color: '#FFFFFF', letterSpacing: 4 }}>
-          <span className="w-[6px] h-[6px] rounded-full animate-blink" style={{ background: 'var(--acid)' }} />
-          HEARD
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2" style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 22, color: '#FFFFFF', letterSpacing: 4 }}>
+            <span className="w-[6px] h-[6px] rounded-full animate-blink" style={{ background: 'var(--acid)' }} />
+            HEARD
+          </div>
+          {teamName && (
+            <button onClick={onSwitchTeam}
+              className="text-[8px] tracking-[1px] uppercase px-2 py-[3px] rounded cursor-pointer border-none"
+              style={{ fontFamily: "'DM Mono', monospace", background: 'var(--b3)', color: 'rgba(255,255,255,0.5)', border: '1px solid var(--b4)' }}>
+              {teamName}
+            </button>
+          )}
         </div>
         <div className="flex items-center gap-[10px]">
           <span className="text-[8px] tracking-[1.5px] uppercase" style={{

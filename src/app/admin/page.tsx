@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Song, Member } from '@/data/types';
+import { Song, Member, Team, TeamMember } from '@/data/types';
 import { SONGS as SEED_SONGS } from '@/data/songs';
 import { MEMBERS as SEED_MEMBERS } from '@/data/members';
 interface UserProfile {
@@ -17,7 +17,7 @@ interface UserProfile {
   approved_at: string | null;
 }
 
-type AdminTab = 'dashboard' | 'songs' | 'members' | 'users' | 'seasons';
+type AdminTab = 'dashboard' | 'songs' | 'members' | 'users' | 'teams' | 'seasons';
 
 function loadData<T>(key: string, fallback: T): T {
   if (typeof window === 'undefined') return fallback;
@@ -47,6 +47,12 @@ export default function AdminPage() {
   const [usersLoading, setUsersLoading] = useState(false);
   const [editingUser, setEditingUser] = useState<UserProfile | null>(null);
   const [editUserForm, setEditUserForm] = useState({ full_name: '', role: '', company: '', bio: '', tier: '' });
+  const [teams, setTeams] = useState<Team[]>([]);
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
+  const [selectedTeamId, setSelectedTeamId] = useState<number | null>(null);
+  const [newTeamName, setNewTeamName] = useState('');
+  const [newTeamDesc, setNewTeamDesc] = useState('');
+  const [addUserToTeamId, setAddUserToTeamId] = useState('');
 
   const loadSongs = useCallback(async () => {
     try {
@@ -119,12 +125,70 @@ export default function AdminPage() {
     setEditingUser(null);
   };
 
-  // Load users when users tab is selected
-  useEffect(() => {
-    if (activeTab === 'users' && authed) {
-      loadUsers();
+  // Teams management
+  const loadTeams = useCallback(async () => {
+    try {
+      const res = await fetch('/api/teams');
+      if (res.ok) setTeams(await res.json());
+    } catch { /* ignore */ }
+  }, []);
+
+  const loadTeamMembers = useCallback(async (teamId: number) => {
+    try {
+      const res = await fetch(`/api/teams/members?teamId=${teamId}`);
+      if (res.ok) setTeamMembers(await res.json());
+    } catch { /* ignore */ }
+  }, []);
+
+  const createTeam = async () => {
+    if (!newTeamName.trim()) return;
+    await fetch('/api/teams', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: newTeamName, description: newTeamDesc }),
+    });
+    setNewTeamName('');
+    setNewTeamDesc('');
+    loadTeams();
+  };
+
+  const deleteTeam = async (id: number) => {
+    if (!confirm('Delete this team and all memberships?')) return;
+    await fetch(`/api/teams?id=${id}`, { method: 'DELETE' });
+    if (selectedTeamId === id) { setSelectedTeamId(null); setTeamMembers([]); }
+    loadTeams();
+  };
+
+  const addMemberToTeam = async () => {
+    if (!selectedTeamId || !addUserToTeamId) return;
+    const res = await fetch('/api/teams/members', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ team_id: selectedTeamId, user_id: addUserToTeamId }),
+    });
+    if (!res.ok) {
+      const data = await res.json();
+      alert(data.error || 'Failed to add');
     }
-  }, [activeTab, authed, loadUsers]);
+    setAddUserToTeamId('');
+    loadTeamMembers(selectedTeamId);
+  };
+
+  const removeMemberFromTeam = async (membershipId: number) => {
+    if (!selectedTeamId) return;
+    await fetch(`/api/teams/members?id=${membershipId}`, { method: 'DELETE' });
+    loadTeamMembers(selectedTeamId);
+  };
+
+  // Load data when tabs are selected
+  useEffect(() => {
+    if (activeTab === 'users' && authed) loadUsers();
+    if (activeTab === 'teams' && authed) { loadTeams(); loadUsers(); }
+  }, [activeTab, authed, loadUsers, loadTeams]);
+
+  useEffect(() => {
+    if (selectedTeamId) loadTeamMembers(selectedTeamId);
+  }, [selectedTeamId, loadTeamMembers]);
 
   // Populate edit form when user is selected
   useEffect(() => {
@@ -222,6 +286,7 @@ export default function AdminPage() {
     { key: 'songs', label: 'Songs' },
     { key: 'members', label: 'Members' },
     { key: 'users', label: 'Users' },
+    { key: 'teams', label: 'Teams' },
     { key: 'seasons', label: 'Seasons' },
   ];
 
@@ -511,6 +576,92 @@ export default function AdminPage() {
                     <button onClick={saveEditUser}
                       className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm cursor-pointer border-none">Save Changes</button>
                   </div>
+                </div>
+              </div>
+            )}
+          </>
+        )}
+
+        {activeTab === 'teams' && (
+          <>
+            <h2 className="text-2xl font-bold mb-6">Teams</h2>
+
+            {/* Create team */}
+            <div className="bg-white rounded-xl border border-gray-100 p-4 mb-6 max-w-lg">
+              <h3 className="text-sm font-medium mb-3">Create New Team</h3>
+              <div className="flex gap-2 mb-2">
+                <input value={newTeamName} onChange={e => setNewTeamName(e.target.value)}
+                  placeholder="Team name (e.g. Drake Team)"
+                  className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none" />
+                <button onClick={createTeam}
+                  className="px-4 py-2 bg-black text-white rounded-lg text-sm cursor-pointer border-none">Create</button>
+              </div>
+              <input value={newTeamDesc} onChange={e => setNewTeamDesc(e.target.value)}
+                placeholder="Description (optional)"
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none" />
+            </div>
+
+            {/* Teams list */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              {teams.map(team => (
+                <div key={team.id}
+                  className={`bg-white rounded-xl border p-4 cursor-pointer transition-all ${
+                    selectedTeamId === team.id ? 'border-black shadow-md' : 'border-gray-100 hover:border-gray-300'
+                  }`}
+                  onClick={() => setSelectedTeamId(team.id)}>
+                  <div className="flex items-center justify-between mb-2">
+                    <div>
+                      <div className="font-medium text-sm">{team.name}</div>
+                      {team.description && <div className="text-xs text-gray-400">{team.description}</div>}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-gray-400">{team.member_count || 0} members</span>
+                      <button onClick={(e) => { e.stopPropagation(); deleteTeam(team.id); }}
+                        className="text-red-400 text-xs cursor-pointer bg-transparent border-none hover:text-red-600">Delete</button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+              {teams.length === 0 && (
+                <div className="text-gray-400 text-sm py-8 text-center col-span-2">No teams yet. Create one above.</div>
+              )}
+            </div>
+
+            {/* Selected team members */}
+            {selectedTeamId && (
+              <div className="mt-6 bg-white rounded-xl border border-gray-100 p-4 max-w-lg">
+                <h3 className="text-sm font-medium mb-3">
+                  Members of &ldquo;{teams.find(t => t.id === selectedTeamId)?.name}&rdquo;
+                </h3>
+
+                {/* Add user to team */}
+                <div className="flex gap-2 mb-4">
+                  <select value={addUserToTeamId} onChange={e => setAddUserToTeamId(e.target.value)}
+                    className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none bg-white text-gray-800">
+                    <option value="">Select user to add...</option>
+                    {users.filter(u => u.status === 'approved').map(u => (
+                      <option key={u.id} value={u.id}>{u.full_name} ({u.email})</option>
+                    ))}
+                  </select>
+                  <button onClick={addMemberToTeam}
+                    className="px-4 py-2 bg-green-600 text-white rounded-lg text-sm cursor-pointer border-none">Add</button>
+                </div>
+
+                {/* Member list */}
+                <div className="space-y-2">
+                  {teamMembers.map(tm => (
+                    <div key={tm.id} className="flex items-center justify-between py-2 px-3 rounded-lg bg-gray-50">
+                      <div>
+                        <div className="text-sm font-medium">{tm.full_name}</div>
+                        <div className="text-xs text-gray-400">{tm.email} · {tm.role}</div>
+                      </div>
+                      <button onClick={() => removeMemberFromTeam(tm.id)}
+                        className="text-red-400 text-xs cursor-pointer bg-transparent border-none">Remove</button>
+                    </div>
+                  ))}
+                  {teamMembers.length === 0 && (
+                    <div className="text-gray-400 text-sm py-4 text-center">No members yet. Add users from the dropdown above.</div>
+                  )}
                 </div>
               </div>
             )}
