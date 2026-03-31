@@ -85,7 +85,7 @@ export default function LoginPage() {
             required
             className="w-full px-4 py-3 rounded-lg text-[13px] outline-none"
             style={{
-              background: 'var(--b2)',
+              background: 'var(--b3)',
               border: '1px solid var(--b4)',
               color: 'var(--th-white)',
               fontFamily: "'DM Sans', sans-serif",
@@ -99,7 +99,7 @@ export default function LoginPage() {
             required
             className="w-full px-4 py-3 rounded-lg text-[13px] outline-none"
             style={{
-              background: 'var(--b2)',
+              background: 'var(--b3)',
               border: '1px solid var(--b4)',
               color: 'var(--th-white)',
               fontFamily: "'DM Sans', sans-serif",

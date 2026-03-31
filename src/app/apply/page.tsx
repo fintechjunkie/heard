@@ -116,7 +116,7 @@ export default function ApplyPage() {
             placeholder="Full Name"
             required
             className="w-full px-4 py-3 rounded-lg text-[13px] outline-none"
-            style={{ background: 'var(--b2)', border: '1px solid var(--b4)', color: 'var(--th-white)', fontFamily: "'DM Sans', sans-serif" }}
+            style={{ background: 'var(--b3)', border: '1px solid var(--b4)', color: 'var(--th-white)', fontFamily: "'DM Sans', sans-serif" }}
           />
           <input
             type="email"
@@ -125,7 +125,7 @@ export default function ApplyPage() {
             placeholder="Email"
             required
             className="w-full px-4 py-3 rounded-lg text-[13px] outline-none"
-            style={{ background: 'var(--b2)', border: '1px solid var(--b4)', color: 'var(--th-white)', fontFamily: "'DM Sans', sans-serif" }}
+            style={{ background: 'var(--b3)', border: '1px solid var(--b4)', color: 'var(--th-white)', fontFamily: "'DM Sans', sans-serif" }}
           />
           <input
             type="password"
@@ -134,14 +134,14 @@ export default function ApplyPage() {
             placeholder="Create Password (min 6 characters)"
             required
             className="w-full px-4 py-3 rounded-lg text-[13px] outline-none"
-            style={{ background: 'var(--b2)', border: '1px solid var(--b4)', color: 'var(--th-white)', fontFamily: "'DM Sans', sans-serif" }}
+            style={{ background: 'var(--b3)', border: '1px solid var(--b4)', color: 'var(--th-white)', fontFamily: "'DM Sans', sans-serif" }}
           />
 
           <select
             value={form.role}
             onChange={(e) => setForm({ ...form, role: e.target.value })}
             className="w-full px-4 py-3 rounded-lg text-[13px] outline-none"
-            style={{ background: 'var(--b2)', border: '1px solid var(--b4)', color: 'var(--th-white)', fontFamily: "'DM Sans', sans-serif" }}
+            style={{ background: 'var(--b3)', border: '1px solid var(--b4)', color: 'var(--th-white)', fontFamily: "'DM Sans', sans-serif" }}
           >
             <option value="manager">Artist Manager</option>
             <option value="ar">A&R Representative</option>
@@ -155,7 +155,7 @@ export default function ApplyPage() {
             onChange={(e) => setForm({ ...form, company: e.target.value })}
             placeholder="Company / Label (optional)"
             className="w-full px-4 py-3 rounded-lg text-[13px] outline-none"
-            style={{ background: 'var(--b2)', border: '1px solid var(--b4)', color: 'var(--th-white)', fontFamily: "'DM Sans', sans-serif" }}
+            style={{ background: 'var(--b3)', border: '1px solid var(--b4)', color: 'var(--th-white)', fontFamily: "'DM Sans', sans-serif" }}
           />
 
           <textarea
@@ -164,7 +164,7 @@ export default function ApplyPage() {
             placeholder="Tell us briefly why you're interested (optional)"
             rows={3}
             className="w-full px-4 py-3 rounded-lg text-[13px] outline-none resize-none"
-            style={{ background: 'var(--b2)', border: '1px solid var(--b4)', color: 'var(--th-white)', fontFamily: "'DM Sans', sans-serif" }}
+            style={{ background: 'var(--b3)', border: '1px solid var(--b4)', color: 'var(--th-white)', fontFamily: "'DM Sans', sans-serif" }}
           />
 
           {error && (
