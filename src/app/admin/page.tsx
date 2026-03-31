@@ -1,9 +1,21 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Song, Member } from '@/data/types';
 import { SONGS as SEED_SONGS } from '@/data/songs';
 import { MEMBERS as SEED_MEMBERS } from '@/data/members';
+interface UserProfile {
+  id: string;
+  email: string;
+  full_name: string;
+  role: string;
+  tier: string;
+  status: string;
+  company: string;
+  bio: string;
+  applied_at: string;
+  approved_at: string | null;
+}
 
 type AdminTab = 'dashboard' | 'songs' | 'members' | 'users' | 'seasons';
 
@@ -31,6 +43,8 @@ export default function AdminPage() {
   const [editingSong, setEditingSong] = useState<Song | null>(null);
   const [editingMember, setEditingMember] = useState<Member | null>(null);
   const [mounted, setMounted] = useState(false);
+  const [users, setUsers] = useState<UserProfile[]>([]);
+  const [usersLoading, setUsersLoading] = useState(false);
 
   useEffect(() => {
     setSongs(loadData('songs', SEED_SONGS));
@@ -41,6 +55,45 @@ export default function AdminPage() {
       setAuthed(true);
     }
   }, []);
+
+  const loadUsers = useCallback(async () => {
+    setUsersLoading(true);
+    try {
+      const res = await fetch('/api/admin/users');
+      if (res.ok) {
+        const data = await res.json();
+        setUsers(data as UserProfile[]);
+      }
+    } catch {
+      // ignore
+    }
+    setUsersLoading(false);
+  }, []);
+
+  const updateUser = async (userId: string, updates: Record<string, unknown>) => {
+    await fetch('/api/admin/users', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId, updates }),
+    });
+    loadUsers();
+  };
+
+  const approveUser = (userId: string) =>
+    updateUser(userId, { status: 'approved', approved_at: new Date().toISOString(), tier: 'tier1' });
+
+  const rejectUser = (userId: string) =>
+    updateUser(userId, { status: 'rejected' });
+
+  const changeTier = (userId: string, tier: string) =>
+    updateUser(userId, { tier });
+
+  // Load users when users tab is selected
+  useEffect(() => {
+    if (activeTab === 'users' && authed) {
+      loadUsers();
+    }
+  }, [activeTab, authed, loadUsers]);
 
   const handleLogin = () => {
     // Simple password check - default "theheard" if no env var
@@ -263,26 +316,91 @@ export default function AdminPage() {
 
         {activeTab === 'users' && (
           <>
-            <h2 className="text-2xl font-bold mb-6">Users (Read-Only)</h2>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold">Users ({users.length})</h2>
+              <button onClick={loadUsers}
+                className="px-3 py-1 text-xs text-gray-500 border border-gray-200 rounded-lg cursor-pointer bg-white">
+                {usersLoading ? 'Loading...' : 'Refresh'}
+              </button>
+            </div>
+
+            {/* Pending applications */}
+            {users.filter(u => u.status === 'pending').length > 0 && (
+              <div className="mb-6">
+                <h3 className="text-sm font-medium text-amber-600 mb-3">Pending Applications ({users.filter(u => u.status === 'pending').length})</h3>
+                <div className="space-y-3">
+                  {users.filter(u => u.status === 'pending').map(u => (
+                    <div key={u.id} className="bg-amber-50 border border-amber-200 rounded-xl p-4">
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <div className="font-medium text-sm">{u.full_name || 'No name'}</div>
+                          <div className="text-xs text-gray-500">{u.email}</div>
+                          <div className="text-xs text-gray-400 mt-1">
+                            {u.role} {u.company ? `· ${u.company}` : ''} · Applied {new Date(u.applied_at).toLocaleDateString()}
+                          </div>
+                          {u.bio && <div className="text-xs text-gray-500 mt-2 italic">&ldquo;{u.bio}&rdquo;</div>}
+                        </div>
+                        <div className="flex gap-2 flex-shrink-0">
+                          <button onClick={() => approveUser(u.id)}
+                            className="px-3 py-1.5 bg-green-600 text-white rounded-lg text-xs cursor-pointer border-none">
+                            Approve
+                          </button>
+                          <button onClick={() => rejectUser(u.id)}
+                            className="px-3 py-1.5 bg-red-500 text-white rounded-lg text-xs cursor-pointer border-none">
+                            Reject
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Approved users */}
             <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-gray-100">
-                    {['Name', 'Email', 'Role', 'Tier', 'Saved', 'Reserved', 'Purchased'].map(h => (
+                    {['Name', 'Email', 'Role', 'Tier', 'Status', 'Actions'].map(h => (
                       <th key={h} className="text-left px-4 py-3 text-xs text-gray-500 font-medium">{h}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
-                  <tr className="border-b border-gray-50">
-                    <td className="px-4 py-3 font-medium">Marcus Johnson</td>
-                    <td className="px-4 py-3">marcus@mgmt.co</td>
-                    <td className="px-4 py-3">Artist Manager</td>
-                    <td className="px-4 py-3"><span className="px-2 py-1 rounded-full text-xs bg-green-50 text-green-700">Tier 1</span></td>
-                    <td className="px-4 py-3">3</td>
-                    <td className="px-4 py-3">{stats.reserved}</td>
-                    <td className="px-4 py-3">{stats.purchased}</td>
-                  </tr>
+                  {users.filter(u => u.status !== 'pending').map(u => (
+                    <tr key={u.id} className="border-b border-gray-50 hover:bg-gray-50">
+                      <td className="px-4 py-3 font-medium">{u.full_name || '—'}</td>
+                      <td className="px-4 py-3 text-gray-600">{u.email}</td>
+                      <td className="px-4 py-3">{u.role}</td>
+                      <td className="px-4 py-3">
+                        <select value={u.tier} onChange={(e) => changeTier(u.id, e.target.value)}
+                          className="text-xs px-2 py-1 rounded border border-gray-200 bg-white cursor-pointer">
+                          <option value="tier1">Tier 1</option>
+                          <option value="tier2">Tier 2</option>
+                        </select>
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className={`px-2 py-1 rounded-full text-xs ${
+                          u.status === 'approved' ? 'bg-green-50 text-green-700' :
+                          u.status === 'rejected' ? 'bg-red-50 text-red-600' :
+                          u.status === 'suspended' ? 'bg-gray-100 text-gray-600' :
+                          'bg-amber-50 text-amber-700'
+                        }`}>{u.status}</span>
+                      </td>
+                      <td className="px-4 py-3">
+                        {u.status === 'rejected' && (
+                          <button onClick={() => approveUser(u.id)} className="text-green-600 text-xs cursor-pointer bg-transparent border-none">Approve</button>
+                        )}
+                        {u.status === 'approved' && (
+                          <button onClick={() => rejectUser(u.id)} className="text-red-500 text-xs cursor-pointer bg-transparent border-none">Suspend</button>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                  {users.filter(u => u.status !== 'pending').length === 0 && (
+                    <tr><td colSpan={6} className="px-4 py-8 text-center text-gray-400 text-sm">No approved users yet</td></tr>
+                  )}
                 </tbody>
               </table>
             </div>
