@@ -53,6 +53,8 @@ export default function AdminPage() {
   const [newTeamName, setNewTeamName] = useState('');
   const [newTeamDesc, setNewTeamDesc] = useState('');
   const [addUserToTeamId, setAddUserToTeamId] = useState('');
+  const [editingTeam, setEditingTeam] = useState<Team | null>(null);
+  const [editTeamForm, setEditTeamForm] = useState({ name: '', description: '' });
 
   const loadSongs = useCallback(async () => {
     try {
@@ -156,6 +158,17 @@ export default function AdminPage() {
     if (!confirm('Delete this team and all memberships?')) return;
     await fetch(`/api/teams?id=${id}`, { method: 'DELETE' });
     if (selectedTeamId === id) { setSelectedTeamId(null); setTeamMembers([]); }
+    loadTeams();
+  };
+
+  const saveEditTeam = async () => {
+    if (!editingTeam) return;
+    await fetch('/api/teams', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: editingTeam.id, name: editTeamForm.name, description: editTeamForm.description }),
+    });
+    setEditingTeam(null);
     loadTeams();
   };
 
@@ -616,6 +629,8 @@ export default function AdminPage() {
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="text-xs text-gray-400">{team.member_count || 0} members</span>
+                      <button onClick={(e) => { e.stopPropagation(); setEditingTeam(team); setEditTeamForm({ name: team.name, description: team.description }); }}
+                        className="text-blue-600 text-xs cursor-pointer bg-transparent border-none">Edit</button>
                       <button onClick={(e) => { e.stopPropagation(); deleteTeam(team.id); }}
                         className="text-red-400 text-xs cursor-pointer bg-transparent border-none hover:text-red-600">Delete</button>
                     </div>
@@ -626,6 +641,36 @@ export default function AdminPage() {
                 <div className="text-gray-400 text-sm py-8 text-center col-span-2">No teams yet. Create one above.</div>
               )}
             </div>
+
+            {/* Edit Team Modal */}
+            {editingTeam && (
+              <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                <div className="bg-white rounded-xl p-6 w-full max-w-md mx-4">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-bold">Edit Team</h3>
+                    <button onClick={() => setEditingTeam(null)} className="text-gray-400 text-xl cursor-pointer bg-transparent border-none">✕</button>
+                  </div>
+                  <div className="space-y-3">
+                    <div>
+                      <label className="block text-xs text-gray-500 mb-1">Team Name</label>
+                      <input value={editTeamForm.name} onChange={e => setEditTeamForm({ ...editTeamForm, name: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none" />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-500 mb-1">Description</label>
+                      <input value={editTeamForm.description} onChange={e => setEditTeamForm({ ...editTeamForm, description: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none" />
+                    </div>
+                  </div>
+                  <div className="flex gap-2 mt-5">
+                    <button onClick={() => setEditingTeam(null)}
+                      className="flex-1 px-4 py-2 border border-gray-200 rounded-lg text-sm cursor-pointer bg-white text-gray-600">Cancel</button>
+                    <button onClick={saveEditTeam}
+                      className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm cursor-pointer border-none">Save Changes</button>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Selected team members */}
             {selectedTeamId && (
