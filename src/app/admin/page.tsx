@@ -629,7 +629,7 @@ export default function AdminPage() {
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="text-xs text-gray-400">{team.member_count || 0} members</span>
-                      <button onClick={(e) => { e.stopPropagation(); setEditingTeam(team); setEditTeamForm({ name: team.name, description: team.description }); }}
+                      <button onClick={(e) => { e.stopPropagation(); setEditingTeam(team); setEditTeamForm({ name: team.name, description: team.description }); loadTeamMembers(team.id); }}
                         className="text-blue-600 text-xs cursor-pointer bg-transparent border-none">Edit</button>
                       <button onClick={(e) => { e.stopPropagation(); deleteTeam(team.id); }}
                         className="text-red-400 text-xs cursor-pointer bg-transparent border-none hover:text-red-600">Delete</button>
@@ -645,12 +645,12 @@ export default function AdminPage() {
             {/* Edit Team Modal */}
             {editingTeam && (
               <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-                <div className="bg-white rounded-xl p-6 w-full max-w-md mx-4">
+                <div className="bg-white rounded-xl p-6 w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-lg font-bold">Edit Team</h3>
-                    <button onClick={() => setEditingTeam(null)} className="text-gray-400 text-xl cursor-pointer bg-transparent border-none">✕</button>
+                    <button onClick={() => { setEditingTeam(null); setTeamMembers([]); }} className="text-gray-400 text-xl cursor-pointer bg-transparent border-none">✕</button>
                   </div>
-                  <div className="space-y-3">
+                  <div className="space-y-3 mb-5">
                     <div>
                       <label className="block text-xs text-gray-500 mb-1">Team Name</label>
                       <input value={editTeamForm.name} onChange={e => setEditTeamForm({ ...editTeamForm, name: e.target.value })}
@@ -662,8 +662,58 @@ export default function AdminPage() {
                         className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none" />
                     </div>
                   </div>
-                  <div className="flex gap-2 mt-5">
-                    <button onClick={() => setEditingTeam(null)}
+
+                  {/* Team Members */}
+                  <div className="border-t border-gray-100 pt-4 mb-4">
+                    <h4 className="text-sm font-medium mb-3">Team Members ({teamMembers.length})</h4>
+
+                    {/* Add member */}
+                    <div className="flex gap-2 mb-3">
+                      <select value={addUserToTeamId} onChange={e => setAddUserToTeamId(e.target.value)}
+                        className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none bg-white text-gray-800">
+                        <option value="">Add a user...</option>
+                        {users.filter(u => u.status === 'approved' && !teamMembers.some(tm => tm.user_id === u.id)).map(u => (
+                          <option key={u.id} value={u.id}>{u.full_name} ({u.email})</option>
+                        ))}
+                      </select>
+                      <button onClick={async () => {
+                          if (!addUserToTeamId) return;
+                          await fetch('/api/teams/members', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ team_id: editingTeam.id, user_id: addUserToTeamId }),
+                          });
+                          setAddUserToTeamId('');
+                          loadTeamMembers(editingTeam.id);
+                          loadTeams();
+                        }}
+                        className="px-4 py-2 bg-green-600 text-white rounded-lg text-sm cursor-pointer border-none">Add</button>
+                    </div>
+
+                    {/* Member list */}
+                    <div className="space-y-2">
+                      {teamMembers.map(tm => (
+                        <div key={tm.id} className="flex items-center justify-between py-2 px-3 rounded-lg bg-gray-50">
+                          <div>
+                            <div className="text-sm font-medium">{tm.full_name}</div>
+                            <div className="text-xs text-gray-400">{tm.email} · {tm.role}</div>
+                          </div>
+                          <button onClick={async () => {
+                              await fetch(`/api/teams/members?id=${tm.id}`, { method: 'DELETE' });
+                              loadTeamMembers(editingTeam.id);
+                              loadTeams();
+                            }}
+                            className="text-red-400 text-xs cursor-pointer bg-transparent border-none hover:text-red-600">Remove</button>
+                        </div>
+                      ))}
+                      {teamMembers.length === 0 && (
+                        <div className="text-gray-400 text-sm py-3 text-center">No members yet</div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2">
+                    <button onClick={() => { setEditingTeam(null); setTeamMembers([]); }}
                       className="flex-1 px-4 py-2 border border-gray-200 rounded-lg text-sm cursor-pointer bg-white text-gray-600">Cancel</button>
                     <button onClick={saveEditTeam}
                       className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm cursor-pointer border-none">Save Changes</button>
