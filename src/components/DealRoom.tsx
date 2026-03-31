@@ -57,19 +57,22 @@ export default function DealRoom({ song, open, onClose, onReserve, onBuy, teamId
   const commentsEndRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-  // Get current user
-  useEffect(() => {
-    async function getUser() {
-      const supabase = createClient();
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        setUserId(user.id);
-        const { data } = await supabase.from('profiles').select('full_name').eq('id', user.id).single();
-        if (data) setUserName(data.full_name);
-      }
+  // Get current user — try on mount and keep trying
+  const getUserId = useCallback(async (): Promise<{ id: string; name: string } | null> => {
+    if (userId && userName) return { id: userId, name: userName };
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      setUserId(user.id);
+      const { data } = await supabase.from('profiles').select('full_name').eq('id', user.id).single();
+      const name = data?.full_name || 'You';
+      setUserName(name);
+      return { id: user.id, name };
     }
-    getUser();
-  }, []);
+    return null;
+  }, [userId, userName]);
+
+  useEffect(() => { getUserId(); }, [getUserId]);
 
   // Check if deal room exists for this song+team
   const checkDealRoom = useCallback(async () => {
@@ -119,19 +122,31 @@ export default function DealRoom({ song, open, onClose, onReserve, onBuy, teamId
   useEffect(() => { if (dealRoomId && userId) loadData(); }, [userId, dealRoomId, loadData]);
 
   // Sync Pocket reaction → Deal Room on open
+  const pocketSyncedRef = useRef(false);
   useEffect(() => {
-    if (!open || !dealRoomId || !userId || !pocketReaction || myReaction) return;
-    // If user has a Pocket reaction but no Deal Room reaction, auto-sync it
+    if (!open) { pocketSyncedRef.current = false; return; }
+    if (!dealRoomId || !pocketReaction || myReaction || pocketSyncedRef.current) return;
+    pocketSyncedRef.current = true;
     (async () => {
-      await fetch('/api/dealrooms/reactions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ dealRoomId, userId, reaction: pocketReaction }),
-      });
-      setMyReaction(pocketReaction);
-      loadData();
+      const user = await getUserId();
+      if (!user) return;
+      try {
+        await fetch('/api/dealrooms/reactions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ dealRoomId, userId: user.id, reaction: pocketReaction }),
+        });
+        setMyReaction(pocketReaction);
+        setReactions(prev => {
+          const without = prev.filter(r => r.user_id !== user.id);
+          return [...without, { id: Date.now(), user_id: user.id, reaction: pocketReaction, full_name: user.name, avatar_url: '' }];
+        });
+        setTimeout(() => loadData(), 500);
+      } catch (err) {
+        console.error('Pocket sync error:', err);
+      }
     })();
-  }, [open, dealRoomId, userId, pocketReaction, myReaction, loadData]);
+  }, [open, dealRoomId, pocketReaction, myReaction, getUserId, loadData]);
   useEffect(() => {
     // Scroll only the DealRoom's own scroll container — NOT parent containers
     if (scrollContainerRef.current) {
@@ -141,10 +156,11 @@ export default function DealRoom({ song, open, onClose, onReserve, onBuy, teamId
 
   const startDealRoom = async () => {
     if (!song || !teamId) return;
+    const user = await getUserId();
     const res = await fetch('/api/dealrooms', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ songId: song.id, teamId, createdBy: userId }),
+      body: JSON.stringify({ songId: song.id, teamId, createdBy: user?.id || null }),
     });
     if (res.ok) {
       const data = await res.json();
@@ -154,33 +170,55 @@ export default function DealRoom({ song, open, onClose, onReserve, onBuy, teamId
   };
 
   const submitReaction = async (reaction: string) => {
-    if (!dealRoomId || !userId) return;
+    if (!dealRoomId) return;
+    const user = await getUserId();
+    if (!user) { console.error('Not authenticated — cannot vote'); return; }
+
     const newReaction = myReaction === reaction ? null : reaction;
-    if (newReaction) {
-      await fetch('/api/dealrooms/reactions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ dealRoomId, userId, reaction: newReaction }),
-      });
-    }
+
+    // Optimistic update — update counts immediately
     setMyReaction(newReaction);
-    loadData();
+    if (newReaction) {
+      setReactions(prev => {
+        const without = prev.filter(r => r.user_id !== user.id);
+        return [...without, { id: Date.now(), user_id: user.id, reaction: newReaction, full_name: user.name, avatar_url: '' }];
+      });
+    } else {
+      setReactions(prev => prev.filter(r => r.user_id !== user.id));
+    }
+
+    // Persist to server
+    try {
+      if (newReaction) {
+        const res = await fetch('/api/dealrooms/reactions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ dealRoomId, userId: user.id, reaction: newReaction }),
+        });
+        if (!res.ok) console.error('Reaction post failed:', await res.text());
+      }
+    } catch (err) {
+      console.error('Reaction error:', err);
+    }
+    // Reload from server after a moment
+    setTimeout(() => loadData(), 500);
   };
 
   const submitComment = async () => {
     if (!dealRoomId || !commentText.trim()) return;
+    const user = await getUserId();
     const text = commentText;
     const isAdminQ = isAdminQuestion;
 
     // Optimistic update — show comment immediately
     const optimisticComment: Comment = {
       id: Date.now(),
-      user_id: userId,
+      user_id: user?.id || null,
       is_admin_response: false,
       is_admin_question: isAdminQ,
       content: text,
       created_at: new Date().toISOString(),
-      full_name: userName || 'You',
+      full_name: user?.name || 'You',
       avatar_url: '',
     };
     setComments(prev => [...prev, optimisticComment]);
@@ -191,7 +229,7 @@ export default function DealRoom({ song, open, onClose, onReserve, onBuy, teamId
       const res = await fetch('/api/dealrooms/comments', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ dealRoomId, userId, content: text, isAdminQuestion: isAdminQ }),
+        body: JSON.stringify({ dealRoomId, userId: user?.id || null, content: text, isAdminQuestion: isAdminQ }),
       });
       if (!res.ok) {
         console.error('Comment post failed:', await res.text());
@@ -200,7 +238,7 @@ export default function DealRoom({ song, open, onClose, onReserve, onBuy, teamId
       console.error('Comment post error:', err);
     }
     // Delay reload to let Supabase commit the write
-    setTimeout(() => loadData(), 800);
+    setTimeout(() => loadData(), 1000);
   };
 
   const deactivateDealRoom = async () => {
