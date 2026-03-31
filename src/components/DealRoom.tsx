@@ -183,9 +183,6 @@ export default function DealRoom({ song, open, onClose, onReserve, onBuy, teamId
   if (!song) return null;
 
   const isHeld = song.status === 'reserved';
-  const positiveCt = reactions.filter(r => ['musthave', 'hit', 'love'].includes(r.reaction)).length;
-  const unsureCt = reactions.filter(r => r.reaction === 'notsure').length;
-  const passCt = reactions.filter(r => r.reaction === 'notforme').length;
   const totalReactions = reactions.length;
 
   return (
@@ -238,76 +235,52 @@ export default function DealRoom({ song, open, onClose, onReserve, onBuy, teamId
           </div>
         ) : (
           <>
-            {/* Consensus */}
-            {totalReactions > 0 && (
-              <div className="mx-5 mt-4 rounded-xl p-4" style={{ background: 'var(--th-white)', border: '1px solid var(--border)' }}>
-                <div className="text-[8px] tracking-[2px] uppercase mb-2" style={{ fontFamily: "'DM Mono', monospace", color: '#5a5650' }}>
-                  Team Consensus · {totalReactions} vote{totalReactions !== 1 ? 's' : ''}
-                </div>
-                <div className="flex gap-[2px] mb-2 rounded-full overflow-hidden" style={{ height: 8 }}>
-                  {positiveCt > 0 && <div style={{ flex: positiveCt, background: '#B57BFF' }} />}
-                  {unsureCt > 0 && <div style={{ flex: unsureCt, background: '#6a6660' }} />}
-                  {passCt > 0 && <div style={{ flex: passCt, background: 'var(--coral)' }} />}
-                </div>
-                <div className="flex gap-4 text-[8px]" style={{ fontFamily: "'DM Mono', monospace", color: '#6a6660' }}>
-                  <span>● Positive {positiveCt}</span>
-                  <span>● Not Sure {unsureCt}</span>
-                  <span>● Pass {passCt}</span>
-                </div>
-              </div>
-            )}
-
-            {/* Team reactions */}
-            <div className="mx-5 mt-4">
-              <div className="text-[8px] tracking-[2px] uppercase mb-2" style={{ fontFamily: "'DM Mono', monospace", color: '#5a5650' }}>Team</div>
-              {reactions.map(r => (
-                <div key={r.id} className="flex items-center justify-between py-2 px-3 mb-2 rounded-xl"
-                  style={{ background: 'var(--th-white)', border: '1px solid var(--border)' }}>
-                  <div className="flex items-center gap-3">
-                    <div className="w-[28px] h-[28px] rounded-full flex items-center justify-center text-[9px] font-medium"
-                      style={{ background: 'rgba(90,180,255,0.12)', color: 'var(--sky)', fontFamily: "'DM Mono', monospace" }}>
-                      {r.full_name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)}
-                    </div>
-                    <span className="text-[12px] font-medium">{r.full_name}</span>
-                  </div>
-                  {(() => {
-                    const rxDef = DEAL_REACTIONS.find(dr => dr.key === r.reaction);
-                    return rxDef ? (
-                      <span className="px-2 py-1 rounded-md text-[8px] tracking-[1px] uppercase"
-                        style={{ fontFamily: "'DM Mono', monospace", background: rxDef.bg, color: rxDef.color, border: `1px solid ${rxDef.border}` }}>
-                        {rxDef.emoji} {rxDef.label}
-                      </span>
-                    ) : (
-                      <span className="px-2 py-1 rounded-md text-[8px] tracking-[1px] uppercase bg-gray-50 text-gray-500"
-                        style={{ fontFamily: "'DM Mono', monospace" }}>
-                        {r.reaction}
-                      </span>
-                    );
-                  })()}
-                </div>
-              ))}
-            </div>
-
-            {/* My reaction */}
+            {/* Team Reactions — clickable buttons with counts */}
             <div className="mx-5 mt-4">
               <div className="text-[8px] tracking-[2px] uppercase mb-2" style={{ fontFamily: "'DM Mono', monospace", color: '#5a5650' }}>
-                My Reaction
+                Team Reactions · {totalReactions} vote{totalReactions !== 1 ? 's' : ''}
               </div>
               <div className="grid grid-cols-5 gap-[6px]">
-                {DEAL_REACTIONS.map(r => (
-                  <button key={r.key} onClick={() => submitReaction(r.key)}
-                    className="py-[10px] rounded-xl text-center cursor-pointer"
-                    style={{
-                      fontFamily: "'DM Mono', monospace",
-                      background: myReaction === r.key ? r.bg : 'var(--th-white)',
-                      border: myReaction === r.key ? `1.5px solid ${r.border}` : '1px solid var(--border)',
-                      color: myReaction === r.key ? r.color : '#6a6660',
-                    }}>
-                    <span className="text-[16px] block">{r.emoji}</span>
-                    <span className="text-[7px] tracking-[0.5px] uppercase block mt-[2px]">{r.label}</span>
-                  </button>
-                ))}
+                {DEAL_REACTIONS.map(r => {
+                  const count = reactions.filter(rx => rx.reaction === r.key).length;
+                  const isMine = myReaction === r.key;
+                  const voters = reactions.filter(rx => rx.reaction === r.key);
+                  return (
+                    <button key={r.key} onClick={() => submitReaction(r.key)}
+                      className="py-[10px] rounded-xl text-center cursor-pointer transition-all duration-150"
+                      style={{
+                        fontFamily: "'DM Mono', monospace",
+                        background: isMine ? r.bg : count > 0 ? `${r.bg.replace('0.1', '0.04').replace('0.08', '0.03')}` : '#FAFAF7',
+                        border: isMine ? `2px solid ${r.border}` : count > 0 ? `1px solid ${r.border}` : '1px solid var(--border)',
+                        color: isMine ? r.color : count > 0 ? r.color : '#6a6660',
+                        boxShadow: isMine ? `0 0 8px ${r.border}` : 'none',
+                      }}
+                      title={voters.length > 0 ? voters.map(v => v.full_name).join(', ') : undefined}
+                    >
+                      <span className="text-[18px] block">{r.emoji}</span>
+                      <span className="text-[12px] font-bold block mt-[1px]">{count > 0 ? count : ''}</span>
+                      <span className="text-[6px] tracking-[0.5px] uppercase block mt-[1px]">{r.label}</span>
+                    </button>
+                  );
+                })}
               </div>
+              {/* Who voted — expandable list under the buttons */}
+              {totalReactions > 0 && (
+                <div className="flex flex-wrap gap-[6px] mt-3">
+                  {reactions.map(r => {
+                    const rxDef = DEAL_REACTIONS.find(dr => dr.key === r.reaction);
+                    return (
+                      <div key={r.id} className="flex items-center gap-[4px] px-[8px] py-[4px] rounded-full"
+                        style={{ background: rxDef ? rxDef.bg : '#f5f5f5', border: `1px solid ${rxDef ? rxDef.border : 'var(--border)'}` }}>
+                        <span className="text-[10px]">{rxDef?.emoji}</span>
+                        <span className="text-[8px] font-medium" style={{ color: rxDef?.color || '#6a6660' }}>
+                          {r.full_name.split(' ')[0]}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
 
             {/* Comments */}
