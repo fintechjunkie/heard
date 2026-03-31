@@ -11,7 +11,8 @@ const TABS = [
 ];
 
 export default function BottomTabBar() {
-  const { activeTab, setActiveTab, artistQueue } = useStore();
+  const { activeTab, setActiveTab, artistQueue, songs } = useStore();
+  const validQueueCount = artistQueue.filter(id => songs.some(s => s.id === id)).length;
 
   return (
     <div
@@ -43,7 +44,7 @@ export default function BottomTabBar() {
             }}>
               {tab.label}
             </span>
-            {tab.badge && artistQueue.length > 0 && (
+            {tab.badge && validQueueCount > 0 && (
               <span className="absolute -top-1 -right-2 text-[7px] min-w-[14px] h-[14px] flex items-center justify-center rounded-full"
                 style={{
                   background: 'var(--violet)',
@@ -51,7 +52,7 @@ export default function BottomTabBar() {
                   fontFamily: "'DM Mono', monospace",
                   fontWeight: 600,
                 }}>
-                {artistQueue.length}
+                {validQueueCount}
               </span>
             )}
           </button>
