@@ -56,7 +56,7 @@ export default function ShareSheet({ song, open, onClose }: ShareSheetProps) {
           />
           <button onClick={handleAdd}
             className="px-3 py-[10px] rounded-lg text-[9px] tracking-[1px] uppercase cursor-pointer border-none"
-            style={{ fontFamily: "'DM Mono', monospace", background: 'var(--black)', color: 'var(--th-white)' }}>
+            style={{ fontFamily: "'DM Mono', monospace", background: 'var(--black)', color: '#FFFFFF' }}>
             + Add
           </button>
         </div>

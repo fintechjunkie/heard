@@ -77,7 +77,7 @@ export default function MiniPlayer({ onOpenDetail, onReserve, onBuy }: MiniPlaye
         {/* Song info */}
         <div className="flex-1 min-w-0">
           <div className="truncate text-[14px] tracking-[1px]"
-            style={{ fontFamily: "'Bebas Neue', sans-serif", color: 'var(--th-white)' }}>
+            style={{ fontFamily: "'Bebas Neue', sans-serif", color: '#FFFFFF' }}>
             {activeSong.title}
           </div>
           <div className="truncate text-[9px] tracking-[0.5px]"

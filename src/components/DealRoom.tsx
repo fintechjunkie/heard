@@ -69,8 +69,8 @@ export default function DealRoom({ song, open, onClose, onReserve, onBuy }: Deal
       {/* Nav */}
       <div className="flex-shrink-0 flex items-center justify-between px-4 py-3" style={{ background: 'var(--black)' }}>
         <div className="flex items-center gap-3">
-          <button onClick={onClose} className="text-[18px] cursor-pointer bg-transparent border-none" style={{ color: 'var(--th-white)' }}>←</button>
-          <span className="text-[14px] font-medium" style={{ fontFamily: "'DM Mono', monospace", color: 'var(--th-white)' }}>Deal Room</span>
+          <button onClick={onClose} className="text-[18px] cursor-pointer bg-transparent border-none" style={{ color: '#FFFFFF' }}>←</button>
+          <span className="text-[14px] font-medium" style={{ fontFamily: "'DM Mono', monospace", color: '#FFFFFF' }}>Deal Room</span>
         </div>
         <button onClick={onClose} className="w-[28px] h-[28px] rounded-full flex items-center justify-center cursor-pointer border-none text-[12px]"
           style={{ background: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.6)' }}>

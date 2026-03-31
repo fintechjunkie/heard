@@ -125,7 +125,7 @@ export default function ArtistMode({ open, onClose, onOpenProfile, inline }: Art
       <div className="flex-shrink-0 flex items-center justify-between px-5 pt-4 pb-3">
         <div className="flex items-center gap-2">
           <span className="w-[6px] h-[6px] rounded-full animate-blink" style={{ background: effectiveColor }} />
-          <span className="text-[18px] tracking-[3px]" style={{ fontFamily: "'Bebas Neue', sans-serif", color: 'var(--th-white)' }}>Pocket Songs</span>
+          <span className="text-[18px] tracking-[3px]" style={{ fontFamily: "'Bebas Neue', sans-serif", color: '#FFFFFF' }}>Pocket Songs</span>
         </div>
         <div className="flex items-center gap-2">
           <span className="text-[8px] tracking-[1px]" style={{ fontFamily: "'DM Mono', monospace", color: effectiveColor }}>

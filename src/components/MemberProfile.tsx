@@ -62,13 +62,13 @@ export default function MemberProfile({ member, songs, open, onClose, onOpenDeta
             </div>
           )}
           <div className="text-[10px] tracking-[1px] uppercase mb-1" style={{ fontFamily: "'DM Mono', monospace", color: member.color }}>{member.role}</div>
-          <div className="text-[40px] tracking-[2px] leading-none mb-2" style={{ fontFamily: "'Bebas Neue', sans-serif", color: 'var(--th-white)' }}>{member.name}</div>
+          <div className="text-[40px] tracking-[2px] leading-none mb-2" style={{ fontFamily: "'Bebas Neue', sans-serif", color: '#FFFFFF' }}>{member.name}</div>
           <div className="text-[11px] mb-4" style={{ color: 'rgba(255,255,255,0.55)', lineHeight: 1.5 }}>{member.bio}</div>
           <div className="flex justify-center gap-8">
             {[
               { val: member.streams, label: 'Streams', color: member.color },
-              { val: member.awards.length.toString(), label: 'Awards', color: 'var(--th-white)' },
-              { val: memberSongs.length.toString(), label: 'In Bank', color: 'var(--th-white)' },
+              { val: member.awards.length.toString(), label: 'Awards', color: '#FFFFFF' },
+              { val: memberSongs.length.toString(), label: 'In Bank', color: '#FFFFFF' },
             ].map(s => (
               <div key={s.label} className="text-center">
                 <div className="text-[22px] tracking-[1px]" style={{ fontFamily: "'Bebas Neue', sans-serif", color: s.color }}>{s.val}</div>
@@ -126,7 +126,7 @@ export default function MemberProfile({ member, songs, open, onClose, onOpenDeta
                   <div className="flex items-center justify-between">
                     <span className="text-[14px] font-medium" style={{ fontFamily: "'Bebas Neue', sans-serif" }}>$85K</span>
                     <button className="px-3 py-1 rounded-md text-[8px] tracking-[1px] uppercase cursor-pointer border-none"
-                      style={{ fontFamily: "'DM Mono', monospace", background: 'var(--black)', color: 'var(--th-white)' }}>
+                      style={{ fontFamily: "'DM Mono', monospace", background: 'var(--black)', color: '#FFFFFF' }}>
                       Details
                     </button>
                   </div>

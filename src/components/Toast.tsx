@@ -14,7 +14,7 @@ export default function Toast() {
         bottom: 90,
         background: 'var(--black)',
         borderLeft: '3px solid var(--acid)',
-        color: 'var(--th-white)',
+        color: '#FFFFFF',
         fontFamily: "'DM Mono', monospace",
       }}
     >
