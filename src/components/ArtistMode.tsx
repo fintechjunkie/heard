@@ -180,7 +180,7 @@ export default function ArtistMode({ open, onClose, onOpenProfile, inline }: Art
           {queuedSongs.map((s, i) => (
             <button
               key={s.id}
-              onClick={() => { setCurrentIndex(i); playSong(s); }}
+              onClick={() => { setCurrentIndex(i); }}
               className="flex-shrink-0 whitespace-nowrap px-[10px] py-[5px] rounded-full text-[7px] tracking-[0.5px] uppercase cursor-pointer transition-all duration-150"
               style={{
                 fontFamily: "'DM Mono', monospace",
