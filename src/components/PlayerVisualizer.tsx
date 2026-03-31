@@ -4,9 +4,9 @@ import { useRef, useCallback } from 'react';
 import { Song } from '@/data/types';
 import Waveform from './Waveform';
 
-export type VizMode = 'waveform' | 'vinyl' | 'spectrum' | 'orb';
-const VIZ_MODES: VizMode[] = ['waveform', 'vinyl', 'spectrum', 'orb'];
-const VIZ_LABELS = ['Waveform', 'Vinyl', 'Spectrum', 'Orb'];
+export type VizMode = 'waveform' | 'vinyl' | 'spectrum' | 'kaleidoscope';
+const VIZ_MODES: VizMode[] = ['waveform', 'vinyl', 'spectrum', 'kaleidoscope'];
+const VIZ_LABELS = ['Waveform', 'Vinyl', 'Spectrum', 'Prism'];
 
 const SPECTRUM_CLASSES = [
   'animate-spectrum-1', 'animate-spectrum-2', 'animate-spectrum-3',
@@ -79,8 +79,8 @@ export default function PlayerVisualizer({
           <SpectrumViz color={color} isPlaying={isPlaying} />
         )}
 
-        {mode === 'orb' && (
-          <OrbViz color={color} isPlaying={isPlaying} />
+        {mode === 'kaleidoscope' && (
+          <KaleidoscopeViz color={color} isPlaying={isPlaying} progress={progress} />
         )}
       </div>
 
@@ -227,60 +227,82 @@ function SpectrumViz({ color, isPlaying }: { color: string; isPlaying: boolean }
   );
 }
 
-/* ── Orb ── */
-function OrbViz({ color, isPlaying }: { color: string; isPlaying: boolean }) {
+/* ── Kaleidoscope / Prism ── */
+function KaleidoscopeViz({ color, isPlaying, progress }: { color: string; isPlaying: boolean; progress: number }) {
+  // Multi-colored rotating rings with shifting hues
+  const rings = [
+    { size: 150, blur: 8, hue: 0, speed: '4s', dir: 'normal' },
+    { size: 120, blur: 12, hue: 60, speed: '5.5s', dir: 'reverse' },
+    { size: 90, blur: 6, hue: 120, speed: '3.5s', dir: 'normal' },
+    { size: 60, blur: 10, hue: 180, speed: '6s', dir: 'reverse' },
+    { size: 35, blur: 4, hue: 240, speed: '2.8s', dir: 'normal' },
+  ];
+
   return (
-    <div className="relative flex items-center justify-center" style={{ width: 200, height: 160, overflow: 'hidden' }}>
-      {/* Main orb */}
+    <div className="relative flex items-center justify-center" style={{ width: 180, height: 160, overflow: 'hidden' }}>
+      {rings.map((ring, i) => (
+        <div
+          key={i}
+          className="absolute rounded-full"
+          style={{
+            width: ring.size,
+            height: ring.size,
+            background: `conic-gradient(
+              from ${progress * 3.6 + ring.hue}deg,
+              #FF6848cc,
+              #FFB830cc,
+              #C8FF45cc,
+              #5AB4FFcc,
+              #B57BFFcc,
+              #FF6BAAdd,
+              #FF6848cc
+            )`,
+            filter: `blur(${ring.blur}px) hue-rotate(${ring.hue + (isPlaying ? 0 : 0)}deg)`,
+            opacity: isPlaying ? 0.7 - i * 0.08 : 0.15,
+            animation: isPlaying ? `vinyl-spin ${ring.speed} linear infinite` : 'none',
+            animationDirection: ring.dir,
+            transform: isPlaying ? undefined : `scale(${0.4 + i * 0.05})`,
+            transition: 'opacity 0.6s, transform 0.6s',
+            willChange: 'transform, opacity',
+            mixBlendMode: i > 0 ? 'screen' : undefined,
+          }}
+        />
+      ))}
+      {/* Center crystal */}
       <div
-        className={`absolute rounded-full ${isPlaying ? 'animate-orb-1' : ''}`}
+        className="absolute rounded-full"
         style={{
-          width: 130, height: 130,
-          background: `radial-gradient(circle at 40% 40%, ${color}cc, ${color}44, transparent)`,
-          filter: 'blur(15px)',
-          willChange: 'transform, opacity',
-          opacity: isPlaying ? undefined : 0.25,
-          transform: isPlaying ? undefined : 'scale(0.6)',
-          transition: 'opacity 0.6s, transform 0.6s',
+          width: 24,
+          height: 24,
+          background: `conic-gradient(from ${progress * 7.2}deg, ${color}, #FF6848, #FFB830, #C8FF45, #5AB4FF, #B57BFF, ${color})`,
+          opacity: isPlaying ? 1 : 0.3,
+          boxShadow: isPlaying
+            ? `0 0 15px ${color}88, 0 0 30px rgba(200,255,69,0.3), 0 0 45px rgba(90,180,255,0.2)`
+            : 'none',
+          transition: 'opacity 0.6s, box-shadow 0.6s',
         }}
       />
-      {/* Secondary orb */}
-      <div
-        className={`absolute rounded-full ${isPlaying ? 'animate-orb-2' : ''}`}
-        style={{
-          width: 100, height: 100,
-          top: 5, left: 25,
-          background: `radial-gradient(circle at 60% 30%, ${color}88, transparent)`,
-          filter: 'blur(20px) hue-rotate(30deg)',
-          willChange: 'transform, opacity',
-          opacity: isPlaying ? undefined : 0.15,
-          transform: isPlaying ? undefined : 'scale(0.5)',
-          transition: 'opacity 0.6s, transform 0.6s',
-        }}
-      />
-      {/* Tertiary orb */}
-      <div
-        className={`absolute rounded-full ${isPlaying ? 'animate-orb-3' : ''}`}
-        style={{
-          width: 80, height: 80,
-          bottom: 5, right: 20,
-          background: `radial-gradient(circle at 50% 60%, ${color}66, transparent)`,
-          filter: 'blur(25px) hue-rotate(-20deg)',
-          willChange: 'transform, opacity',
-          opacity: isPlaying ? undefined : 0.1,
-          transform: isPlaying ? undefined : 'scale(0.4)',
-          transition: 'opacity 0.6s, transform 0.6s',
-        }}
-      />
-      {/* Center bright spot */}
-      {isPlaying && (
-        <div className="absolute rounded-full" style={{
-          width: 20, height: 20,
-          background: `radial-gradient(circle, ${color}ff, ${color}44, transparent)`,
-          filter: 'blur(5px)',
-          animation: 'blink 1.5s ease-in-out infinite',
-        }} />
-      )}
+      {/* Progress ring */}
+      <svg width={160} height={160} className="absolute" style={{ transform: 'rotate(-90deg)' }}>
+        <circle cx={80} cy={80} r={76}
+          fill="none"
+          stroke="url(#prism-gradient)"
+          strokeWidth={2}
+          strokeDasharray={2 * Math.PI * 76}
+          strokeDashoffset={2 * Math.PI * 76 * (1 - progress / 100)}
+          strokeLinecap="round"
+          style={{ transition: 'stroke-dashoffset 0.3s ease' }}
+        />
+        <defs>
+          <linearGradient id="prism-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#FF6848" />
+            <stop offset="25%" stopColor="#FFB830" />
+            <stop offset="50%" stopColor="#C8FF45" />
+            <stop offset="75%" stopColor="#5AB4FF" />
+            <stop offset="100%" stopColor="#B57BFF" />
+          </linearGradient>
+        </defs>
+      </svg>
     </div>
   );
 }

@@ -29,7 +29,15 @@ export default function SongDetailSheet({
     <BottomSheet open={open} onClose={onClose} fullHeight>
       <div className="h-full flex flex-col overflow-hidden">
         {/* Black header */}
-        <div style={{ background: 'var(--black)', padding: '20px 20px 16px' }}>
+        <div className="relative" style={{ background: 'var(--black)', padding: '20px 20px 16px' }}>
+          {/* Close button */}
+          <button
+            onClick={onClose}
+            className="absolute top-3 right-3 w-[28px] h-[28px] rounded-full flex items-center justify-center cursor-pointer border-none z-10"
+            style={{ background: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.6)', fontSize: 14 }}
+          >
+            ✕
+          </button>
           <div className="text-[8px] tracking-[2px] uppercase mb-1"
             style={{ fontFamily: "'DM Mono', monospace", color: 'rgba(255,255,255,0.45)' }}>
             {song.genre} · {song.bpm} BPM · {song.key}
