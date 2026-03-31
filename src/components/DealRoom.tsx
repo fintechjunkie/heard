@@ -9,6 +9,7 @@ interface DealRoomProps {
   song: Song | null;
   open: boolean;
   onClose: () => void;
+  onBack?: () => void;
   onReserve: (songId: number) => void;
   onBuy: (songId: number) => void;
   teamId?: number;
@@ -42,7 +43,7 @@ const DEAL_REACTIONS = [
   { key: 'notforme', emoji: '✕', label: 'Pass', color: '#FF6848', bg: 'rgba(255,104,72,0.1)', bgLight: 'rgba(255,104,72,0.04)', border: 'rgba(255,104,72,0.2)' },
 ];
 
-export default function DealRoom({ song, open, onClose, onReserve, onBuy, teamId, pocketReaction }: DealRoomProps) {
+export default function DealRoom({ song, open, onClose, onBack, onReserve, onBuy, teamId, pocketReaction }: DealRoomProps) {
   const [dealRoomId, setDealRoomId] = useState<number | null>(null);
   const [dealRoomExists, setDealRoomExists] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -275,7 +276,7 @@ export default function DealRoom({ song, open, onClose, onReserve, onBuy, teamId
       {/* Nav */}
       <div className="flex-shrink-0 flex items-center justify-between px-4 py-3" style={{ background: 'var(--black)' }}>
         <div className="flex items-center gap-3">
-          <button onClick={onClose} className="text-[18px] cursor-pointer bg-transparent border-none" style={{ color: '#FFFFFF' }}>←</button>
+          <button onClick={onBack || onClose} className="text-[18px] cursor-pointer bg-transparent border-none" style={{ color: '#FFFFFF' }}>←</button>
           <span className="text-[14px] font-medium" style={{ fontFamily: "'DM Mono', monospace", color: '#FFFFFF' }}>Deal Room</span>
         </div>
         <button onClick={onClose} className="w-[28px] h-[28px] rounded-full flex items-center justify-center cursor-pointer border-none text-[12px]"
@@ -293,26 +294,25 @@ export default function DealRoom({ song, open, onClose, onReserve, onBuy, teamId
       </div>
 
       {/* Content */}
-      <div ref={scrollContainerRef} className="flex-1 overflow-y-auto scrollbar-hide pb-4">
-        {loading ? (
-          <div className="py-12 text-center text-gray-400 text-sm">Loading...</div>
-        ) : !dealRoomExists ? (
-          /* No deal room yet */
-          <div className="py-12 text-center px-8">
-            <div className="text-[32px] mb-3" style={{ opacity: 0.3 }}>🤝</div>
-            <p className="text-[11px] leading-relaxed mb-4" style={{ fontFamily: "'DM Mono', monospace", color: 'var(--muted)' }}>
-              No deal room exists for this song yet. Start one to collaborate with your team.
-            </p>
-            <button onClick={startDealRoom}
-              className="px-6 py-3 rounded-xl text-[10px] tracking-[1.5px] uppercase cursor-pointer border-none"
-              style={{ fontFamily: "'DM Mono', monospace", background: 'var(--sky)', color: 'var(--black)' }}>
-              Start Deal Room
-            </button>
-          </div>
-        ) : (
-          <>
-            {/* Team Reactions — clickable buttons with counts */}
-            <div className="mx-5 mt-4">
+      {loading ? (
+        <div className="flex-1 py-12 text-center text-gray-400 text-sm">Loading...</div>
+      ) : !dealRoomExists ? (
+        /* No deal room yet */
+        <div className="flex-1 py-12 text-center px-8">
+          <div className="text-[32px] mb-3" style={{ opacity: 0.3 }}>🤝</div>
+          <p className="text-[11px] leading-relaxed mb-4" style={{ fontFamily: "'DM Mono', monospace", color: 'var(--muted)' }}>
+            No deal room exists for this song yet. Start one to collaborate with your team.
+          </p>
+          <button onClick={startDealRoom}
+            className="px-6 py-3 rounded-xl text-[10px] tracking-[1.5px] uppercase cursor-pointer border-none"
+            style={{ fontFamily: "'DM Mono', monospace", background: 'var(--sky)', color: 'var(--black)' }}>
+            Start Deal Room
+          </button>
+        </div>
+      ) : (
+        <>
+          {/* Team Reactions — pinned, not scrollable */}
+          <div className="flex-shrink-0 mx-5 mt-4">
               <div className="text-[8px] tracking-[2px] uppercase mb-2" style={{ fontFamily: "'DM Mono', monospace", color: '#5a5650' }}>
                 Team Reactions · {totalReactions} vote{totalReactions !== 1 ? 's' : ''}
               </div>
@@ -359,12 +359,13 @@ export default function DealRoom({ song, open, onClose, onReserve, onBuy, teamId
               )}
             </div>
 
-            {/* Comments */}
-            <div className="mx-5 mt-4">
+          {/* Comments — this section scrolls */}
+          <div ref={scrollContainerRef} className="flex-1 overflow-y-auto scrollbar-hide">
+            <div className="mx-5 mt-3 pb-4">
               <div className="text-[8px] tracking-[2px] uppercase mb-2" style={{ fontFamily: "'DM Mono', monospace", color: '#5a5650' }}>
                 Discussion ({comments.length})
               </div>
-              <div className="space-y-2 mb-3">
+              <div className="space-y-2">
                 {comments.map(c => (
                   <div key={c.id} className={`rounded-xl px-3 py-2 ${c.is_admin_response ? 'ml-0' : c.user_id === userId ? 'ml-8' : 'mr-8'}`}
                     style={{
@@ -390,11 +391,10 @@ export default function DealRoom({ song, open, onClose, onReserve, onBuy, teamId
                 )}
                 <div ref={commentsEndRef} />
               </div>
-
             </div>
-          </>
-        )}
-      </div>
+          </div>
+        </>
+      )}
 
       {/* Comment input — fixed above CTAs so it never scrolls away */}
       {dealRoomExists && (

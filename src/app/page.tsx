@@ -274,6 +274,7 @@ export default function Home() {
         song={findSong(dealRoomSongId)}
         open={dealRoomSongId !== null}
         onClose={() => setDealRoomSongId(null)}
+        onBack={() => { setDealRoomSongId(null); setShowDealRoomsList(true); }}
         onReserve={setReserveSongId}
         onBuy={setBuySongId}
         teamId={activeTeam?.id}
