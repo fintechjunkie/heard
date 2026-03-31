@@ -38,9 +38,10 @@ export default function BottomTabBar() {
             <span className="text-[18px]">{tab.icon}</span>
             <span style={{
               fontFamily: "'DM Mono', monospace",
-              fontSize: 7,
-              letterSpacing: 1.5,
+              fontSize: 9,
+              letterSpacing: 1,
               textTransform: 'uppercase',
+              color: isActive ? 'var(--acid)' : 'rgba(255,255,255,0.55)',
             }}>
               {tab.label}
             </span>
