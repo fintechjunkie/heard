@@ -16,7 +16,7 @@ const dmMono = DM_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "The Heard — Song Marketplace",
+  title: "Heard — Song Marketplace",
   description: "A private, invitation-only song marketplace for the music industry.",
 };
 

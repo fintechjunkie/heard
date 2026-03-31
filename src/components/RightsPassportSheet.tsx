@@ -25,9 +25,9 @@ export default function RightsPassportSheet({ song, open, onClose }: RightsPassp
   if (!song) return null;
 
   const handleCopy = () => {
-    const txt = `THE HEARD — RIGHTS PASSPORT\n"${song.title}"\n\n` +
+    const txt = `HEARD — RIGHTS PASSPORT\n"${song.title}"\n\n` +
       CERTIFICATIONS.map(c => `✓ ${c.name}\n  ${c.sub}`).join('\n\n') +
-      '\n\nDrafted by Loeb & Loeb LLP · theheard.com';
+      '\n\nDrafted by Loeb & Loeb LLP · heard.com';
     navigator.clipboard.writeText(txt).catch(() => {});
     onClose();
     showToast('Rights Passport copied — paste it to your attorney.');

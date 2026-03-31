@@ -15,7 +15,7 @@ export default function TopNav({ onArtistMode }: TopNavProps) {
       <div className="flex items-center justify-between" style={{ padding: '14px 20px 14px' }}>
         <div className="flex items-center gap-2" style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 22, color: 'var(--th-white)', letterSpacing: 4 }}>
           <span className="w-[6px] h-[6px] rounded-full animate-blink" style={{ background: 'var(--acid)' }} />
-          THE HEARD
+          HEARD
         </div>
         <div className="flex items-center gap-[10px]">
           <span className="text-[8px] tracking-[1.5px] uppercase" style={{

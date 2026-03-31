@@ -69,7 +69,7 @@ export default function BuyFlowSheet({ song, open, onClose, onComplete }: BuyFlo
               <div className="rounded-xl p-4 mb-4 text-[10px] leading-[1.6] overflow-y-auto max-h-[300px] scrollbar-hide"
                 style={{ background: 'var(--black)', color: 'rgba(255,255,255,0.7)' }}>
                 <p className="font-medium text-white mb-3">STANDARDIZED SALE CONTRACT</p>
-                <p className="mb-2">This agreement is entered into between the songwriter(s)/producer(s) (&quot;Seller&quot;) and the purchasing party (&quot;Buyer&quot;) through The Heard marketplace platform.</p>
+                <p className="mb-2">This agreement is entered into between the songwriter(s)/producer(s) (&quot;Seller&quot;) and the purchasing party (&quot;Buyer&quot;) through the Heard marketplace platform.</p>
                 <p className="mb-2">1. RIGHTS TRANSFER: Seller hereby assigns and transfers to Buyer all rights, title, and interest in the musical composition, including but not limited to publishing rights, mechanical rights, and synchronization rights.</p>
                 <p className="mb-2">2. TERRITORIES: The assignment covers worldwide territories and all formats, both existing and future.</p>
                 <p className="mb-2">3. CONSIDERATION: The purchase price of $85,000.00 USD shall be paid in full upon execution of this agreement.</p>
@@ -97,7 +97,7 @@ export default function BuyFlowSheet({ song, open, onClose, onComplete }: BuyFlo
                 Step 2 — Payment
               </div>
               <p className="text-[10px] mb-4" style={{ color: 'var(--muted)', lineHeight: 1.5 }}>
-                Payment processed securely. Credentials stored by your firm, not by The Heard.
+                Payment processed securely. Credentials stored by your firm, not by Heard.
               </p>
               <div className="flex flex-col gap-3">
                 {['Firm / Cardholder Name', 'Card Number', 'Expiry', 'CVV', 'Billing Email'].map(label => (

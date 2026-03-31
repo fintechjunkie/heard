@@ -58,7 +58,7 @@ export default function AdminPage() {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: '#f5f5f5' }}>
         <div className="bg-white rounded-xl p-8 shadow-sm max-w-sm w-full">
-          <h1 className="text-2xl font-bold mb-1">The Heard</h1>
+          <h1 className="text-2xl font-bold mb-1">Heard</h1>
           <p className="text-sm text-gray-500 mb-6">Admin Panel</p>
           <input
             type="password"
@@ -125,7 +125,7 @@ export default function AdminPage() {
     <div className="min-h-screen flex" style={{ background: '#f5f5f5' }}>
       {/* Sidebar */}
       <div className="w-56 bg-white border-r border-gray-200 p-4 flex-shrink-0">
-        <div className="text-lg font-bold mb-1">The Heard</div>
+        <div className="text-lg font-bold mb-1">Heard</div>
         <div className="text-xs text-gray-400 mb-6">Admin Panel</div>
         {TABS.map(tab => (
           <button key={tab.key}
