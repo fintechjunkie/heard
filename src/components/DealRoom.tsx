@@ -67,9 +67,15 @@ export default function DealRoom({ song, open, onClose, onReserve, onBuy }: Deal
       }}
     >
       {/* Nav */}
-      <div className="flex-shrink-0 flex items-center gap-3 px-4 py-3" style={{ background: 'var(--black)' }}>
-        <button onClick={onClose} className="text-[18px] cursor-pointer bg-transparent border-none" style={{ color: 'var(--th-white)' }}>←</button>
-        <span className="text-[14px] font-medium" style={{ fontFamily: "'DM Mono', monospace", color: 'var(--th-white)' }}>Deal Room</span>
+      <div className="flex-shrink-0 flex items-center justify-between px-4 py-3" style={{ background: 'var(--black)' }}>
+        <div className="flex items-center gap-3">
+          <button onClick={onClose} className="text-[18px] cursor-pointer bg-transparent border-none" style={{ color: 'var(--th-white)' }}>←</button>
+          <span className="text-[14px] font-medium" style={{ fontFamily: "'DM Mono', monospace", color: 'var(--th-white)' }}>Deal Room</span>
+        </div>
+        <button onClick={onClose} className="w-[28px] h-[28px] rounded-full flex items-center justify-center cursor-pointer border-none text-[12px]"
+          style={{ background: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.6)' }}>
+          ✕
+        </button>
       </div>
 
       <div className="flex-1 overflow-y-auto scrollbar-hide pb-[120px]">
@@ -237,7 +243,7 @@ export default function DealRoom({ song, open, onClose, onReserve, onBuy }: Deal
       </div>
 
       {/* Footer CTAs */}
-      <div className="absolute bottom-0 left-0 right-0 flex flex-col gap-2 px-5 pb-5 pt-3" style={{ background: 'var(--th-white)', borderTop: '1px solid var(--border)' }}>
+      <div className="absolute bottom-0 left-0 right-0 flex flex-col gap-2 px-5 pb-5 pt-3" style={{ background: '#F2EDE3', borderTop: '1px solid var(--border)', boxShadow: '0 -8px 20px rgba(0,0,0,0.08)' }}>
         <button
           onClick={() => { onClose(); setTimeout(() => onReserve(song.id), 100); }}
           className="w-full py-[12px] rounded-xl text-[10px] tracking-[1.5px] uppercase cursor-pointer border-none"
