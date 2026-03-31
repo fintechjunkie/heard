@@ -24,6 +24,9 @@ export default function Home() {
   const store = useStore();
   const { songs, activeTab, getFilteredSongs, reserveSong, purchaseSong, showToast } = store;
 
+  // Splash screen
+  const [showSplash, setShowSplash] = useState(true);
+
   // Sheet states
   const [detailSongId, setDetailSongId] = useState<number | null>(null);
   const [reserveSongId, setReserveSongId] = useState<number | null>(null);
@@ -57,6 +60,21 @@ export default function Home() {
   }, [purchaseSong, showToast, songs]);
 
   const tabTitle = activeTab === 'bank' ? 'Song Bank' : activeTab === 'saved' ? 'Saved' : activeTab === 'reserved' ? 'Reserved' : activeTab === 'purchased' ? 'Purchased' : '';
+
+  if (showSplash) {
+    return (
+      <div
+        className="splash-screen"
+        onClick={() => setShowSplash(false)}
+      >
+        <div className="splash-content">
+          <div className="splash-logo">HEARD</div>
+          <div className="splash-pip" />
+          <div className="splash-enter">enter now</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-full overflow-hidden" style={{ background: 'var(--cream)' }}>
