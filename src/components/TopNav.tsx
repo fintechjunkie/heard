@@ -1,13 +1,63 @@
 'use client';
 
+import { useState, useEffect, useRef } from 'react';
 import { useStore } from '@/lib/store';
+import { createClient } from '@/lib/supabase/client';
 
 interface TopNavProps {
   onArtistMode: () => void;
 }
 
+interface UserProfile {
+  full_name: string;
+  email: string;
+  role: string;
+  tier: string;
+  company: string;
+}
+
 export default function TopNav({ onArtistMode }: TopNavProps) {
   const { searchOpen, setSearchOpen, searchQuery, setSearchQuery, activeTab } = useStore();
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [showProfile, setShowProfile] = useState(false);
+  const profileRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const supabase = createClient();
+    async function loadProfile() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data } = await supabase
+          .from('profiles')
+          .select('full_name, email, role, tier, company')
+          .eq('id', user.id)
+          .single();
+        if (data) setProfile(data);
+      }
+    }
+    loadProfile();
+  }, []);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
+        setShowProfile(false);
+      }
+    }
+    if (showProfile) document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, [showProfile]);
+
+  const handleLogout = async () => {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    window.location.href = '/login';
+  };
+
+  const initials = profile?.full_name
+    ? profile.full_name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
+    : '??';
 
   return (
     <div className="flex-shrink-0 relative z-50" style={{ background: 'var(--black)' }}>
@@ -24,7 +74,7 @@ export default function TopNav({ onArtistMode }: TopNavProps) {
             border: '1px solid var(--acid)',
             padding: '3px 8px',
             borderRadius: 3,
-          }}>T1</span>
+          }}>{profile?.tier === 'tier2' ? 'T2' : 'T1'}</span>
           <button
             onClick={onArtistMode}
             className="flex items-center gap-[6px] px-[10px] py-[5px] rounded-full cursor-pointer"
@@ -48,11 +98,68 @@ export default function TopNav({ onArtistMode }: TopNavProps) {
           >
             ⌕
           </button>
-          <div
-            className="w-[34px] h-[34px] rounded-full flex items-center justify-center text-[10px] font-semibold"
-            style={{ background: 'var(--acid)', color: 'var(--black)', fontFamily: "'DM Mono', monospace" }}
-          >
-            MJ
+          <div className="relative" ref={profileRef}>
+            <button
+              onClick={() => setShowProfile(!showProfile)}
+              className="w-[34px] h-[34px] rounded-full flex items-center justify-center text-[10px] font-semibold cursor-pointer border-none"
+              style={{ background: 'var(--acid)', color: 'var(--black)', fontFamily: "'DM Mono', monospace" }}
+            >
+              {initials}
+            </button>
+
+            {showProfile && (
+              <div className="absolute right-0 top-[42px] w-[260px] rounded-xl overflow-hidden z-[100]"
+                style={{ background: 'var(--b2)', border: '1px solid var(--b4)', boxShadow: '0 12px 40px rgba(0,0,0,0.6)' }}>
+                {/* Profile header */}
+                <div className="p-4 border-b" style={{ borderColor: 'var(--b4)' }}>
+                  <div className="flex items-center gap-3">
+                    <div className="w-[40px] h-[40px] rounded-full flex items-center justify-center text-[13px] font-semibold flex-shrink-0"
+                      style={{ background: 'var(--acid)', color: 'var(--black)', fontFamily: "'DM Mono', monospace" }}>
+                      {initials}
+                    </div>
+                    <div className="min-w-0">
+                      <div className="text-[13px] font-medium truncate" style={{ color: 'var(--th-white)', fontFamily: "'DM Sans', sans-serif" }}>
+                        {profile?.full_name || 'Loading...'}
+                      </div>
+                      <div className="text-[10px] truncate" style={{ color: 'rgba(255,255,255,0.4)', fontFamily: "'DM Mono', monospace" }}>
+                        {profile?.email}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Profile details */}
+                <div className="p-4 space-y-2 border-b" style={{ borderColor: 'var(--b4)' }}>
+                  <div className="flex justify-between">
+                    <span className="text-[9px] uppercase tracking-[1px]" style={{ color: 'rgba(255,255,255,0.35)', fontFamily: "'DM Mono', monospace" }}>Role</span>
+                    <span className="text-[11px]" style={{ color: 'var(--th-white)', fontFamily: "'DM Sans', sans-serif" }}>
+                      {profile?.role === 'manager' ? 'Artist Manager' : profile?.role === 'ar' ? 'A&R' : profile?.role === 'artist' ? 'Artist' : profile?.role || '—'}
+                    </span>
+                  </div>
+                  {profile?.company && (
+                    <div className="flex justify-between">
+                      <span className="text-[9px] uppercase tracking-[1px]" style={{ color: 'rgba(255,255,255,0.35)', fontFamily: "'DM Mono', monospace" }}>Company</span>
+                      <span className="text-[11px]" style={{ color: 'var(--th-white)', fontFamily: "'DM Sans', sans-serif" }}>{profile.company}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between">
+                    <span className="text-[9px] uppercase tracking-[1px]" style={{ color: 'rgba(255,255,255,0.35)', fontFamily: "'DM Mono', monospace" }}>Tier</span>
+                    <span className="text-[9px] px-2 py-[2px] rounded-full" style={{ background: 'rgba(200,255,69,0.15)', color: 'var(--acid)', fontFamily: "'DM Mono', monospace" }}>
+                      {profile?.tier === 'tier1' ? 'Tier 1' : profile?.tier === 'tier2' ? 'Tier 2' : profile?.tier || '—'}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Logout */}
+                <button
+                  onClick={handleLogout}
+                  className="w-full text-left px-4 py-3 text-[10px] tracking-[1px] uppercase cursor-pointer border-none"
+                  style={{ background: 'transparent', color: 'var(--coral)', fontFamily: "'DM Mono', monospace" }}
+                >
+                  Sign Out
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>
