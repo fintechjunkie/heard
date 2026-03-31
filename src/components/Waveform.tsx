@@ -15,6 +15,7 @@ interface WaveformProps {
   baseColor?: string;
   height?: number;
   onClick?: () => void;
+  hidePlayButton?: boolean;
 }
 
 export default function Waveform({
@@ -24,9 +25,10 @@ export default function Waveform({
   baseColor,
   height = 32,
   onClick,
+  hidePlayButton = false,
 }: WaveformProps) {
   const { activeSong, isPlaying, progress, seek, toggle, playSong } = usePlayer();
-  const isActive = activeSong?.id === song.id;
+  const isActive = activeSong?.id === song.id && song.id != null;
   const isThisPlaying = isActive && isPlaying;
   const currentProgress = isActive ? progress : 0;
 
@@ -45,8 +47,6 @@ export default function Waveform({
 
   const handleBarClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     e.stopPropagation();
-
-    // Calculate click position as percentage
     const rect = e.currentTarget.getBoundingClientRect();
     const percent = ((e.clientX - rect.left) / rect.width) * 100;
     const clampedPercent = Math.max(0, Math.min(100, percent));
@@ -59,31 +59,44 @@ export default function Waveform({
     } else {
       playSong(song, clampedPercent);
     }
-
     onClick?.();
   }, [isActive, isPlaying, seek, toggle, playSong, song, onClick]);
 
-  // Size the play button relative to waveform height
   const btnSize = Math.max(28, height);
 
   return (
     <div className="relative flex items-center gap-[10px]" style={{ minHeight: btnSize }}>
       {/* Play/Pause button */}
-      <button
-        onClick={handlePlayPause}
-        className={`flex-shrink-0 rounded-full flex items-center justify-center cursor-pointer border-none transition-all duration-200 ${
-          isThisPlaying ? 'animate-pulse-glow' : ''
-        }`}
-        style={{
-          width: btnSize,
-          height: btnSize,
-          background: isThisPlaying ? 'var(--acid)' : 'var(--black)',
-          color: isThisPlaying ? 'var(--black)' : 'var(--th-white)',
-          fontSize: btnSize * 0.38,
-        }}
-      >
-        {isThisPlaying ? '⏸' : '▶'}
-      </button>
+      {!hidePlayButton && (
+        <button
+          onClick={handlePlayPause}
+          className={`flex-shrink-0 rounded-full flex items-center justify-center cursor-pointer transition-all duration-200 ${
+            isThisPlaying ? 'animate-pulse-glow border-none' : ''
+          }`}
+          style={{
+            width: btnSize,
+            height: btnSize,
+            background: isThisPlaying
+              ? 'var(--acid)'
+              : isActive
+                ? 'var(--b3)'
+                : 'transparent',
+            border: isThisPlaying
+              ? 'none'
+              : isActive
+                ? '1px solid var(--b4)'
+                : '1.5px solid var(--border)',
+            color: isThisPlaying
+              ? 'var(--black)'
+              : isActive
+                ? 'var(--th-white)'
+                : 'var(--muted)',
+            fontSize: btnSize * 0.34,
+          }}
+        >
+          {isThisPlaying ? '⏸' : '▶'}
+        </button>
+      )}
 
       {/* Waveform bars */}
       <div

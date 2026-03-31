@@ -61,9 +61,10 @@ function saveToStorage(key: string, value: unknown) {
 export function StoreProvider({ children }: { children: ReactNode }) {
   const [songs, setSongsState] = useState<Song[]>(() => {
     const stored = loadFromStorage<Song[]>('songs', SEED_SONGS);
-    // If stored is empty but seed data has songs, use seed data
-    // (handles devices that cached an empty array before songs were added)
-    return stored.length > 0 ? stored : SEED_SONGS.length > 0 ? SEED_SONGS : stored;
+    // Validate stored songs have proper ids; fall back to seed if broken
+    const validStored = stored.filter(s => s.id != null && !isNaN(s.id));
+    if (validStored.length === 0 && SEED_SONGS.length > 0) return SEED_SONGS;
+    return validStored.length > 0 ? validStored : SEED_SONGS;
   });
   const [savedSongIds, setSavedSongIds] = useState<number[]>(() => loadFromStorage('saved', [1, 2, 6]));
   const [activeTab, setActiveTab] = useState('bank');
