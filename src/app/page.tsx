@@ -5,7 +5,6 @@ import { useStore } from '@/lib/store';
 import { MEMBERS } from '@/data/members';
 import TopNav from '@/components/TopNav';
 import BottomTabBar from '@/components/BottomTabBar';
-import MiniPlayer from '@/components/MiniPlayer';
 import Toast from '@/components/Toast';
 import SongCard from '@/components/SongCard';
 import StatsStrip from '@/components/StatsStrip';
@@ -167,14 +166,6 @@ export default function Home() {
         )}
       </div>
 
-      {/* Mini Player — hidden on Pocket Songs tab (has its own controls) */}
-      {activeTab !== 'pocket' && (
-        <MiniPlayer
-          onOpenDetail={setDetailSongId}
-          onReserve={setReserveSongId}
-          onBuy={setBuySongId}
-        />
-      )}
 
       {/* Bottom Tab Bar */}
       <BottomTabBar />
