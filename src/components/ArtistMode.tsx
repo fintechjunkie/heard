@@ -29,10 +29,11 @@ interface ArtistModeProps {
   open: boolean;
   onClose: () => void;
   onOpenProfile?: (memberId: number) => void;
+  onOpenDetail?: (songId: number) => void;
   inline?: boolean;
 }
 
-export default function ArtistMode({ open, onClose, onOpenProfile, inline }: ArtistModeProps) {
+export default function ArtistMode({ open, onClose, onOpenProfile, onOpenDetail, inline }: ArtistModeProps) {
   const { songs, artistQueue, artistReactions, setArtistReaction, showToast } = useStore();
   const { activeSong, isPlaying, progress, toggle, playSong, skipForward, skipBack, setPreviewMode } = usePlayer();
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -222,9 +223,26 @@ export default function ArtistMode({ open, onClose, onOpenProfile, inline }: Art
                   </button>
                 )}
                 <div className="flex-1 min-w-0">
-                  <div className="text-[8px] tracking-[1.5px] uppercase mb-1"
-                    style={{ fontFamily: "'DM Mono', monospace", color: 'rgba(255,255,255,0.5)' }}>
-                    {song.genre} · {song.bpm} bpm · {song.key}
+                  <div className="flex items-center justify-between mb-1">
+                    <div className="text-[8px] tracking-[1.5px] uppercase"
+                      style={{ fontFamily: "'DM Mono', monospace", color: 'rgba(255,255,255,0.5)' }}>
+                      {song.genre} · {song.bpm} bpm · {song.key}
+                    </div>
+                    {onOpenDetail && (
+                      <button
+                        onClick={(e) => { e.stopPropagation(); onOpenDetail(song.id); }}
+                        className="flex items-center gap-[5px] px-[10px] py-[4px] rounded-full cursor-pointer border-none active:scale-95 transition-transform"
+                        style={{
+                          background: 'rgba(255,255,255,0.08)',
+                          border: '1px solid rgba(255,255,255,0.15)',
+                        }}
+                      >
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.6)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>
+                        </svg>
+                        <span className="text-[7px] tracking-[1px] uppercase" style={{ fontFamily: "'DM Mono', monospace", color: 'rgba(255,255,255,0.5)' }}>Info</span>
+                      </button>
+                    )}
                   </div>
                   <div className="text-[38px] tracking-[2px] leading-[0.95] truncate"
                     style={{ fontFamily: "'Bebas Neue', sans-serif", color: 'white' }}>

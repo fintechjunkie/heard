@@ -326,8 +326,8 @@ export default function DealRoom({ song, open, onClose, onReserve, onBuy, teamId
               onChange={e => setCommentText(e.target.value)}
               onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submitComment(); } }}
               placeholder={isAdminQuestion ? 'Message to Heard admin...' : 'Add a comment...'}
-              className="flex-1 px-3 py-2 rounded-lg text-[11px] outline-none"
-              style={{ background: 'var(--th-white)', border: '1px solid var(--border)', fontFamily: "'DM Sans', sans-serif", minHeight: 36 }}
+              className="flex-1 px-3 py-2 rounded-lg outline-none"
+              style={{ background: '#FAFAF7', border: '1px solid var(--border)', fontFamily: "'DM Sans', sans-serif", fontSize: 16, minHeight: 36, color: 'var(--black)' }}
             />
             <button onClick={submitComment}
               className="px-3 py-2 rounded-lg text-[9px] tracking-[1px] uppercase cursor-pointer border-none"

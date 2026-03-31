@@ -36,6 +36,7 @@ export default function Home() {
   // Panel states
   const [profileMemberId, setProfileMemberId] = useState<number | null>(null);
   const [dealRoomSongId, setDealRoomSongId] = useState<number | null>(null);
+  const [detailOpenedFromPocket, setDetailOpenedFromPocket] = useState(false);
 
   // Team state
   const [activeTeam, setActiveTeam] = useState<{ id: number; name: string } | null>(() => {
@@ -148,7 +149,7 @@ export default function Home() {
       {/* Main content */}
       <div className="flex-1 overflow-y-auto scrollbar-hide" style={{ paddingBottom: activeTab === 'pocket' ? 60 : 140 }}>
         {activeTab === 'pocket' ? (
-          <ArtistMode open={true} onClose={() => store.setActiveTab('bank')} onOpenProfile={setProfileMemberId} inline />
+          <ArtistMode open={true} onClose={() => store.setActiveTab('bank')} onOpenProfile={setProfileMemberId} onOpenDetail={(songId) => { setDetailOpenedFromPocket(true); setDetailSongId(songId); }} inline />
         ) : activeTab === 'writers' ? (
           <WritersTab onOpenProfile={setProfileMemberId} />
         ) : (
@@ -227,10 +228,16 @@ export default function Home() {
       <SongDetailSheet
         song={findSong(detailSongId)}
         open={detailSongId !== null}
-        onClose={() => setDetailSongId(null)}
+        onClose={() => {
+          setDetailSongId(null);
+          if (detailOpenedFromPocket) {
+            setDetailOpenedFromPocket(false);
+            store.setActiveTab('pocket');
+          }
+        }}
         onReserve={setReserveSongId}
         onBuy={setBuySongId}
-        onOpenProfile={(mid) => { setDetailSongId(null); setTimeout(() => setProfileMemberId(mid), 100); }}
+        onOpenProfile={(mid) => { setDetailSongId(null); setDetailOpenedFromPocket(false); setTimeout(() => setProfileMemberId(mid), 100); }}
       />
       <ReserveSheet
         song={findSong(reserveSongId)}
