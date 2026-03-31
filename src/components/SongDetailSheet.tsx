@@ -6,6 +6,7 @@ import { usePlayer } from '@/lib/player';
 import BottomSheet from './BottomSheet';
 import Waveform from './Waveform';
 import SongArt from './SongArt';
+import HoldCountdown from './HoldCountdown';
 
 interface SongDetailSheetProps {
   song: Song | null;
@@ -70,6 +71,13 @@ export default function SongDetailSheet({
           {/* Scroll hint — subtle text below the waveform */}
           {/* Generative art */}
           <SongArt songId={song.id} bpm={song.bpm} songKey={song.key} color={song.color} mood={song.mood} height={140} />
+
+          {/* Hold countdown if reserved */}
+          {song.status === 'reserved' && song.reserved_until && (
+            <div className="px-5 pt-3">
+              <HoldCountdown reservedUntil={song.reserved_until} compact />
+            </div>
+          )}
 
           {/* Preview waveform */}
           <div className="p-5 pb-2">

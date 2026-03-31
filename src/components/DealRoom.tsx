@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Song } from '@/data/types';
 import { createClient } from '@/lib/supabase/client';
+import HoldCountdown from './HoldCountdown';
 
 interface DealRoomProps {
   song: Song | null;
@@ -176,7 +177,8 @@ export default function DealRoom({ song, open, onClose, onReserve, onBuy, teamId
       <div className="px-5 py-4" style={{ background: 'var(--black)' }}>
         <div className="text-[8px] tracking-[2px] uppercase mb-1" style={{ fontFamily: "'DM Mono', monospace", color: 'rgba(255,255,255,0.45)' }}>Evaluating</div>
         <div className="text-[32px] tracking-[2px] leading-none mb-1" style={{ fontFamily: "'Bebas Neue', sans-serif", color: '#FFFFFF' }}>{song.title}</div>
-        <div className="text-[11px]" style={{ color: 'rgba(255,255,255,0.6)' }}>{song.writers.join(' · ')}</div>
+        <div className="text-[11px] mb-3" style={{ color: 'rgba(255,255,255,0.6)' }}>{song.writers.join(' · ')}</div>
+        {isHeld && <HoldCountdown reservedUntil={song.reserved_until} />}
       </div>
 
       {/* Content */}
