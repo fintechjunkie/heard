@@ -19,27 +19,47 @@ export async function POST(request: NextRequest) {
 
   const supabase = getAdminClient();
 
-  // Create the auth user
-  const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+  // Try admin.createUser first, fall back to signUp
+  let userId: string;
+
+  const { data: adminData, error: adminError } = await supabase.auth.admin.createUser({
     email,
     password,
     email_confirm: true,
     user_metadata: { full_name: fullName },
   });
 
-  if (authError) {
-    return NextResponse.json({ error: authError.message }, { status: 400 });
+  if (adminError) {
+    // Fall back to regular signUp (works with newer sb_secret_ keys)
+    const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: { full_name: fullName },
+      },
+    });
+
+    if (signUpError) {
+      return NextResponse.json({ error: signUpError.message }, { status: 400 });
+    }
+
+    if (!signUpData.user) {
+      return NextResponse.json({ error: 'Failed to create user account' }, { status: 500 });
+    }
+
+    userId = signUpData.user.id;
+  } else {
+    if (!adminData.user) {
+      return NextResponse.json({ error: 'Failed to create user account' }, { status: 500 });
+    }
+    userId = adminData.user.id;
   }
 
-  if (!authData.user) {
-    return NextResponse.json({ error: 'Failed to create user' }, { status: 500 });
-  }
-
-  // Upsert profile (in case trigger didn't fire)
+  // Upsert profile
   const { error: profileError } = await supabase
     .from('profiles')
     .upsert({
-      id: authData.user.id,
+      id: userId,
       email,
       full_name: fullName,
       role: role || 'manager',
@@ -51,8 +71,8 @@ export async function POST(request: NextRequest) {
     }, { onConflict: 'id' });
 
   if (profileError) {
-    return NextResponse.json({ error: 'Database error saving profile: ' + profileError.message }, { status: 500 });
+    return NextResponse.json({ error: 'Profile creation failed: ' + profileError.message }, { status: 500 });
   }
 
-  return NextResponse.json({ success: true, userId: authData.user.id });
+  return NextResponse.json({ success: true, userId });
 }
