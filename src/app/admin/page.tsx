@@ -832,7 +832,7 @@ function MemberForm({ member, onSave, onCancel }: { member: Member; onSave: (m: 
           </div>
         </div>
         <div className="flex gap-3 mt-6">
-          <button onClick={() => onSave({ ...form, mood: moodText.split(',').map(s => s.trim()).filter(Boolean) })}
+          <button onClick={() => onSave(form)}
             className="px-6 py-2 bg-black text-white rounded-lg text-sm cursor-pointer border-none">Save</button>
           <button onClick={onCancel}
             className="px-6 py-2 bg-gray-100 text-gray-600 rounded-lg text-sm cursor-pointer border-none">Cancel</button>
