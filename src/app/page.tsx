@@ -230,6 +230,7 @@ export default function Home() {
       <ArtistMode
         open={artistModeOpen}
         onClose={() => setArtistModeOpen(false)}
+        onOpenProfile={setProfileMemberId}
       />
     </div>
   );

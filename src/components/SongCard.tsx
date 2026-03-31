@@ -28,9 +28,10 @@ export default function SongCard({
   song, index, onOpenDetail, onOpenDealRoom, onOpenShare,
   onOpenRightsPassport, onOpenProfile, onReserve,
 }: SongCardProps) {
-  const { savedSongIds, toggleSave, showToast, artistReactions } = useStore();
+  const { savedSongIds, toggleSave, artistQueue, toggleArtistQueue, showToast, artistReactions } = useStore();
   const { activeSong, isPlaying } = usePlayer();
   const isSaved = savedSongIds.includes(song.id);
+  const isQueued = artistQueue.includes(song.id);
   const isActive = activeSong?.id === song.id && isPlaying;
   const isPlayingSong = activeSong?.id === song.id;
 
@@ -88,6 +89,25 @@ export default function SongCard({
               color: isSaved ? 'var(--coral)' : isPlayingSong ? 'rgba(255,255,255,0.4)' : 'var(--muted)',
             }}>
             {isSaved ? '♥' : '♡'}
+          </button>
+          <button onClick={(e) => {
+              e.stopPropagation();
+              toggleArtistQueue(song.id);
+              showToast(isQueued ? `"${song.title}" removed from artist queue.` : `"${song.title}" added to artist queue.`);
+            }}
+            title="Queue for Artist Mode"
+            className="flex flex-col items-center gap-[2px] cursor-pointer bg-transparent border-none"
+            style={{ color: isQueued ? 'var(--violet)' : isPlayingSong ? 'rgba(255,255,255,0.4)' : 'var(--muted)' }}>
+            <span className="w-[26px] h-[26px] rounded-full flex items-center justify-center"
+              style={{
+                border: isQueued ? '1px solid var(--violet)' : isPlayingSong ? '1px solid var(--b4)' : '1px solid var(--border)',
+                background: isQueued ? 'rgba(181,123,255,0.12)' : 'transparent',
+              }}>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
+              </svg>
+            </span>
+            <span className="text-[5px] tracking-[0.8px] uppercase" style={{ fontFamily: "'DM Mono', monospace" }}>Artist</span>
           </button>
           <button onClick={(e) => { e.stopPropagation(); onOpenDetail(song.id); }}
             title="Song Details"

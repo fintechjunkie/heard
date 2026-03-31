@@ -7,6 +7,7 @@ import { SONGS as SEED_SONGS } from '@/data/songs';
 interface StoreState {
   songs: Song[];
   savedSongIds: number[];
+  artistQueue: number[];
   activeTab: string;
   searchQuery: string;
   searchOpen: boolean;
@@ -32,6 +33,8 @@ interface StoreActions {
   showToast: (message: string) => void;
   setArtistReaction: (songId: number, reaction: string | null) => void;
   setDealRoomReaction: (reaction: string | null) => void;
+  toggleArtistQueue: (songId: number) => void;
+  clearArtistQueue: () => void;
   setDealRoomNote: (note: string) => void;
   getFilteredSongs: () => Song[];
   getStats: () => { available: number; held: number; bought: number };
@@ -76,6 +79,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [artistReactions, setArtistReactionsState] = useState<Record<number, string>>(
     () => loadFromStorage('artistReactions', { 1: 'musthave' })
   );
+  const [artistQueue, setArtistQueue] = useState<number[]>(() => loadFromStorage('artistQueue', []));
   const [dealRoomReaction, setDealRoomReaction] = useState<string | null>(null);
   const [dealRoomNote, setDealRoomNote] = useState('');
 
@@ -83,6 +87,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   useEffect(() => { saveToStorage('songs', songs); }, [songs]);
   useEffect(() => { saveToStorage('saved', savedSongIds); }, [savedSongIds]);
   useEffect(() => { saveToStorage('artistReactions', artistReactions); }, [artistReactions]);
+  useEffect(() => { saveToStorage('artistQueue', artistQueue); }, [artistQueue]);
 
   const setSongs = useCallback((newSongs: Song[]) => {
     setSongsState(newSongs);
@@ -136,6 +141,16 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           }
         : s
     ));
+  }, []);
+
+  const toggleArtistQueue = useCallback((songId: number) => {
+    setArtistQueue(prev =>
+      prev.includes(songId) ? prev.filter(id => id !== songId) : [...prev, songId]
+    );
+  }, []);
+
+  const clearArtistQueue = useCallback(() => {
+    setArtistQueue([]);
   }, []);
 
   const showToast = useCallback((message: string) => {
@@ -225,10 +240,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   return (
     <StoreContext.Provider value={{
-      songs, savedSongIds, activeTab, searchQuery, searchOpen,
+      songs, savedSongIds, artistQueue, activeTab, searchQuery, searchOpen,
       activeGenre, sortMode, toastMessage, artistReactions,
       dealRoomReaction, dealRoomNote,
-      setSongs, toggleSave, reserveSong, purchaseSong, releaseReserve,
+      setSongs, toggleSave, toggleArtistQueue, clearArtistQueue,
+      reserveSong, purchaseSong, releaseReserve,
       setActiveTab, setSearchQuery, setSearchOpen, setActiveGenre,
       setSortMode, showToast, setArtistReaction, setDealRoomReaction,
       setDealRoomNote, getFilteredSongs, getStats,
