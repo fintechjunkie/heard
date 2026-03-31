@@ -63,7 +63,7 @@ export default function TopNav({ onArtistMode }: TopNavProps) {
     <div className="flex-shrink-0 relative z-50" style={{ background: 'var(--black)' }}>
       {/* Main nav row */}
       <div className="flex items-center justify-between" style={{ padding: '14px 20px 14px' }}>
-        <div className="flex items-center gap-2" style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 22, color: 'var(--th-white)', letterSpacing: 4 }}>
+        <div className="flex items-center gap-2" style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 22, color: '#FFFFFF', letterSpacing: 4 }}>
           <span className="w-[6px] h-[6px] rounded-full animate-blink" style={{ background: 'var(--acid)' }} />
           HEARD
         </div>
@@ -102,7 +102,7 @@ export default function TopNav({ onArtistMode }: TopNavProps) {
                       {initials}
                     </div>
                     <div className="min-w-0">
-                      <div className="text-[13px] font-medium truncate" style={{ color: 'var(--th-white)', fontFamily: "'DM Sans', sans-serif" }}>
+                      <div className="text-[13px] font-medium truncate" style={{ color: '#FFFFFF', fontFamily: "'DM Sans', sans-serif" }}>
                         {profile?.full_name || 'Loading...'}
                       </div>
                       <div className="text-[10px] truncate" style={{ color: 'rgba(255,255,255,0.4)', fontFamily: "'DM Mono', monospace" }}>
@@ -116,14 +116,14 @@ export default function TopNav({ onArtistMode }: TopNavProps) {
                 <div className="p-4 space-y-2 border-b" style={{ borderColor: 'var(--b4)' }}>
                   <div className="flex justify-between">
                     <span className="text-[9px] uppercase tracking-[1px]" style={{ color: 'rgba(255,255,255,0.35)', fontFamily: "'DM Mono', monospace" }}>Role</span>
-                    <span className="text-[11px]" style={{ color: 'var(--th-white)', fontFamily: "'DM Sans', sans-serif" }}>
+                    <span className="text-[11px]" style={{ color: '#FFFFFF', fontFamily: "'DM Sans', sans-serif" }}>
                       {profile?.role === 'manager' ? 'Artist Manager' : profile?.role === 'ar' ? 'A&R' : profile?.role === 'artist' ? 'Artist' : profile?.role || '—'}
                     </span>
                   </div>
                   {profile?.company && (
                     <div className="flex justify-between">
                       <span className="text-[9px] uppercase tracking-[1px]" style={{ color: 'rgba(255,255,255,0.35)', fontFamily: "'DM Mono', monospace" }}>Company</span>
-                      <span className="text-[11px]" style={{ color: 'var(--th-white)', fontFamily: "'DM Sans', sans-serif" }}>{profile.company}</span>
+                      <span className="text-[11px]" style={{ color: '#FFFFFF', fontFamily: "'DM Sans', sans-serif" }}>{profile.company}</span>
                     </div>
                   )}
                   <div className="flex justify-between">
@@ -159,7 +159,7 @@ export default function TopNav({ onArtistMode }: TopNavProps) {
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search songs, writers, BPM, key…"
             className="bg-transparent border-none outline-none text-[14px] w-full"
-            style={{ color: 'var(--th-white)', fontFamily: "'DM Sans', sans-serif" }}
+            style={{ color: '#FFFFFF', fontFamily: "'DM Sans', sans-serif" }}
           />
           {searchQuery && (
             <button onClick={() => setSearchQuery('')} className="text-[12px] cursor-pointer bg-transparent border-none" style={{ color: 'rgba(255,255,255,0.4)' }}>✕</button>
