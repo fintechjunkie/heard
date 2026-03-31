@@ -53,6 +53,7 @@ export default function DealRoom({ song, open, onClose, onReserve, onBuy, teamId
   const [userId, setUserId] = useState<string | null>(null);
   const [userName, setUserName] = useState('');
   const commentsEndRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   // Get current user
   useEffect(() => {
@@ -108,7 +109,12 @@ export default function DealRoom({ song, open, onClose, onReserve, onBuy, teamId
 
   useEffect(() => { if (open) checkDealRoom(); }, [open, checkDealRoom]);
   useEffect(() => { if (dealRoomId) loadData(); }, [dealRoomId, loadData]);
-  useEffect(() => { commentsEndRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [comments]);
+  useEffect(() => {
+    // Scroll only the DealRoom's own scroll container — NOT parent containers
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight;
+    }
+  }, [comments]);
 
   const startDealRoom = async () => {
     if (!song || !teamId) return;
@@ -214,7 +220,7 @@ export default function DealRoom({ song, open, onClose, onReserve, onBuy, teamId
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto scrollbar-hide pb-4">
+      <div ref={scrollContainerRef} className="flex-1 overflow-y-auto scrollbar-hide pb-4">
         {loading ? (
           <div className="py-12 text-center text-gray-400 text-sm">Loading...</div>
         ) : !dealRoomExists ? (
