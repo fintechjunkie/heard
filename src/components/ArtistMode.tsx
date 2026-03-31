@@ -33,7 +33,7 @@ interface ArtistModeProps {
 
 export default function ArtistMode({ open, onClose, onOpenProfile }: ArtistModeProps) {
   const { songs, artistQueue, artistReactions, setArtistReaction, showToast } = useStore();
-  const { activeSong, isPlaying, progress, toggle, playSong } = usePlayer();
+  const { activeSong, isPlaying, progress, toggle, playSong, skipForward, skipBack } = usePlayer();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [vizMode, setVizMode] = useState<VizMode>('waveform');
   const [activeTheme, setActiveTheme] = useState('default');
@@ -266,11 +266,24 @@ export default function ArtistMode({ open, onClose, onOpenProfile }: ArtistModeP
                 />
               </div>
 
-              {/* Play row */}
-              <div className="flex items-center gap-3 mb-4">
+              {/* Transport controls */}
+              <div className="flex items-center justify-center gap-4 mb-3">
+                {/* Rewind 10s */}
+                <button
+                  onClick={(e) => { e.stopPropagation(); skipBack(10); }}
+                  className="w-[38px] h-[38px] rounded-full flex items-center justify-center cursor-pointer border-none active:scale-90 transition-transform"
+                  style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)' }}
+                >
+                  <div className="flex flex-col items-center">
+                    <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', lineHeight: 1 }}>↺</span>
+                    <span style={{ fontSize: 6, fontFamily: "'DM Mono', monospace", color: 'rgba(255,255,255,0.4)', lineHeight: 1 }}>10</span>
+                  </div>
+                </button>
+
+                {/* Play/Pause */}
                 <button
                   onClick={(e) => { e.stopPropagation(); toggle(song); }}
-                  className={`w-[52px] h-[52px] rounded-full flex items-center justify-center text-[20px] cursor-pointer border-none flex-shrink-0 active:scale-[0.92] transition-transform ${
+                  className={`w-[56px] h-[56px] rounded-full flex items-center justify-center text-[22px] cursor-pointer border-none flex-shrink-0 active:scale-[0.92] transition-transform ${
                     isSongPlaying && isPlaying ? 'animate-pulse-glow' : ''
                   }`}
                   style={{
@@ -281,19 +294,23 @@ export default function ArtistMode({ open, onClose, onOpenProfile }: ArtistModeP
                 >
                   {isSongPlaying && isPlaying ? '⏸' : '▶'}
                 </button>
-                <div className="flex-1 mx-1">
-                  <div className="text-[8px] tracking-[2px] uppercase mb-1"
-                    style={{ fontFamily: "'DM Mono', monospace", color: 'rgba(255,255,255,0.35)' }}>
-                    {currentIndex + 1} / {queuedSongs.length}
+
+                {/* Skip 10s */}
+                <button
+                  onClick={(e) => { e.stopPropagation(); skipForward(10); }}
+                  className="w-[38px] h-[38px] rounded-full flex items-center justify-center cursor-pointer border-none active:scale-90 transition-transform"
+                  style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)' }}
+                >
+                  <div className="flex flex-col items-center">
+                    <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', lineHeight: 1 }}>↻</span>
+                    <span style={{ fontSize: 6, fontFamily: "'DM Mono', monospace", color: 'rgba(255,255,255,0.4)', lineHeight: 1 }}>10</span>
                   </div>
-                  <div className="h-[4px] rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.08)' }}>
-                    <div className="h-full rounded-full transition-[width] duration-300"
-                      style={{ width: `${currentProgress}%`, background: effectiveColor, boxShadow: `0 0 6px ${effectiveColor}66` }} />
-                  </div>
-                </div>
+                </button>
+
+                {/* Flag */}
                 <button
                   onClick={(e) => { e.stopPropagation(); handleFlag(song.id); }}
-                  className="w-[44px] h-[44px] rounded-full flex items-center justify-center text-[18px] cursor-pointer border-none flex-shrink-0"
+                  className="w-[38px] h-[38px] rounded-full flex items-center justify-center text-[16px] cursor-pointer border-none flex-shrink-0"
                   style={{
                     background: song.artistFlagged ? 'rgba(181,123,255,0.15)' : 'rgba(255,255,255,0.06)',
                     border: song.artistFlagged ? '1px solid rgba(181,123,255,0.4)' : '1px solid rgba(255,255,255,0.1)',
@@ -302,6 +319,19 @@ export default function ArtistMode({ open, onClose, onOpenProfile }: ArtistModeP
                 >
                   {song.artistFlagged ? '♥' : '♡'}
                 </button>
+              </div>
+
+              {/* Progress bar */}
+              <div className="mb-4">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-[7px]" style={{ fontFamily: "'DM Mono', monospace", color: 'rgba(255,255,255,0.3)' }}>
+                    {currentIndex + 1} / {queuedSongs.length}
+                  </span>
+                </div>
+                <div className="h-[4px] rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.08)' }}>
+                  <div className="h-full rounded-full transition-[width] duration-300"
+                    style={{ width: `${currentProgress}%`, background: effectiveColor, boxShadow: `0 0 6px ${effectiveColor}66` }} />
+                </div>
               </div>
 
               {/* Reactions */}

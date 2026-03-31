@@ -17,6 +17,8 @@ interface PlayerActions {
   pause: () => void;
   toggle: (song: Song) => void;
   seek: (percent: number) => void;
+  skipForward: (seconds?: number) => void;
+  skipBack: (seconds?: number) => void;
 }
 
 const PlayerContext = createContext<(PlayerState & PlayerActions) | null>(null);
@@ -155,6 +157,32 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  const skipForward = useCallback((seconds = 10) => {
+    if (howlRef.current) {
+      const dur = howlRef.current.duration();
+      const cur = howlRef.current.seek() as number;
+      if (dur > 0) {
+        const newTime = Math.min(dur, cur + seconds);
+        howlRef.current.seek(newTime);
+        setCurrentTime(newTime);
+        setProgress((newTime / dur) * 100);
+      }
+    }
+  }, []);
+
+  const skipBack = useCallback((seconds = 10) => {
+    if (howlRef.current) {
+      const dur = howlRef.current.duration();
+      const cur = howlRef.current.seek() as number;
+      if (dur > 0) {
+        const newTime = Math.max(0, cur - seconds);
+        howlRef.current.seek(newTime);
+        setCurrentTime(newTime);
+        setProgress((newTime / dur) * 100);
+      }
+    }
+  }, []);
+
   // Cleanup on unmount
   useEffect(() => {
     return () => {
@@ -169,7 +197,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   return (
     <PlayerContext.Provider value={{
       activeSong, isPlaying, progress, duration, currentTime,
-      playSong, pause, toggle, seek,
+      playSong, pause, toggle, seek, skipForward, skipBack,
     }}>
       {children}
     </PlayerContext.Provider>
