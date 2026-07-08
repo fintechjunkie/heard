@@ -286,11 +286,11 @@ export default function DealRoom({ song, open, onClose, onBack, onReserve, onBuy
       </div>
 
       {/* Song header */}
-      <div className="px-5 py-4" style={{ background: 'var(--black)' }}>
+      <div className="px-5 py-3" style={{ background: 'var(--black)' }}>
         <div className="text-caption tracking-[2px] uppercase mb-1" style={{ fontFamily: "'DM Mono', monospace", color: 'rgba(255,255,255,0.45)' }}>Evaluating</div>
         <div className="text-[32px] tracking-[2px] leading-none mb-1" style={{ fontFamily: "'Bebas Neue', sans-serif", color: '#FFFFFF' }}>{song.title}</div>
-        <div className="text-body mb-3" style={{ color: 'rgba(255,255,255,0.6)' }}>{song.writers.join(' · ')}</div>
-        {isHeld && <HoldCountdown reservedUntil={song.reserved_until} />}
+        <div className="text-body" style={{ color: 'rgba(255,255,255,0.6)' }}>{song.writers.join(' · ')}</div>
+        {isHeld && <div className="mt-2"><HoldCountdown reservedUntil={song.reserved_until} /></div>}
       </div>
 
       {/* Content */}
@@ -312,8 +312,8 @@ export default function DealRoom({ song, open, onClose, onBack, onReserve, onBuy
       ) : (
         <>
           {/* Team Reactions — pinned, not scrollable */}
-          <div className="flex-shrink-0 mx-5 mt-4">
-              <div className="text-caption tracking-[2px] uppercase mb-2" style={{ fontFamily: "'DM Mono', monospace", color: '#5a5650' }}>
+          <div className="flex-shrink-0 mx-5 mt-3">
+              <div className="text-caption tracking-[2px] uppercase mb-1.5" style={{ fontFamily: "'DM Mono', monospace", color: '#5a5650' }}>
                 Team Reactions · {totalReactions} vote{totalReactions !== 1 ? 's' : ''}
               </div>
               <div className="grid grid-cols-5 gap-[6px]">
@@ -323,7 +323,7 @@ export default function DealRoom({ song, open, onClose, onBack, onReserve, onBuy
                   const voters = reactions.filter(rx => rx.reaction === r.key);
                   return (
                     <button key={r.key} onClick={() => submitReaction(r.key)}
-                      className="py-[10px] rounded-xl text-center cursor-pointer transition-all duration-150"
+                      className="py-[6px] rounded-lg text-center cursor-pointer transition-all duration-150"
                       style={{
                         fontFamily: "'DM Mono', monospace",
                         background: isMine ? r.bg : count > 0 ? r.bgLight : '#FAFAF7',
@@ -333,9 +333,9 @@ export default function DealRoom({ song, open, onClose, onBack, onReserve, onBuy
                       }}
                       title={voters.length > 0 ? voters.map(v => v.full_name).join(', ') : undefined}
                     >
-                      <span className="text-[18px] block">{r.emoji}</span>
-                      <span className="text-[12px] font-bold block mt-[1px]">{count > 0 ? count : ''}</span>
-                      <span className="text-micro tracking-[0.5px] uppercase block mt-[1px]">{r.label}</span>
+                      <span className="text-[17px] block leading-none">{r.emoji}</span>
+                      <span className="text-caption font-bold block mt-[2px] leading-none">{count > 0 ? count : '·'}</span>
+                      <span className="text-micro tracking-[0.5px] uppercase block mt-[2px] leading-none">{r.label}</span>
                     </button>
                   );
                 })}
@@ -423,21 +423,25 @@ export default function DealRoom({ song, open, onClose, onBack, onReserve, onBuy
 
       {/* Footer CTAs */}
       {dealRoomExists && (
-        <div className="flex-shrink-0 flex flex-col gap-2 px-5 pb-5 pt-2" style={{ background: '#F2EDE3' }}>
-          <button
-            onClick={() => { onClose(); setTimeout(() => onReserve(song.id), 100); }}
-            className="w-full py-[12px] rounded-xl text-label tracking-[1.5px] uppercase cursor-pointer border-none"
-            style={{ fontFamily: "'DM Mono', monospace", background: 'var(--sky)', color: 'var(--black)', opacity: isHeld ? 0.5 : 1 }}
-            disabled={isHeld}
-          >
-            {isHeld ? '⏱ Hold Active' : 'Reserve · 72-Hour Hold'}
-          </button>
-          <button
-            onClick={() => { onClose(); setTimeout(() => onBuy(song.id), 100); }}
-            className="w-full py-[12px] rounded-xl text-label tracking-[1.5px] uppercase cursor-pointer border-none"
-            style={{ fontFamily: "'DM Mono', monospace", background: 'var(--coral)', color: 'white' }}>
-            Buy Now — $85,000
-          </button>
+        <div className="flex-shrink-0 flex flex-col gap-2 px-5 pb-4 pt-2" style={{ background: '#F2EDE3' }}>
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              onClick={() => { onClose(); setTimeout(() => onReserve(song.id), 100); }}
+              className="py-[9px] rounded-xl cursor-pointer border-none flex flex-col items-center leading-tight"
+              style={{ fontFamily: "'DM Mono', monospace", background: 'var(--sky)', color: 'var(--black)', opacity: isHeld ? 0.5 : 1 }}
+              disabled={isHeld}
+            >
+              <span className="text-label tracking-[1px] uppercase">{isHeld ? 'Hold Active' : 'Reserve'}</span>
+              <span className="text-micro tracking-[0.5px] uppercase" style={{ opacity: 0.7 }}>{isHeld ? '⏱ 72-hr' : '72-Hour Hold'}</span>
+            </button>
+            <button
+              onClick={() => { onClose(); setTimeout(() => onBuy(song.id), 100); }}
+              className="py-[9px] rounded-xl cursor-pointer border-none flex flex-col items-center leading-tight"
+              style={{ fontFamily: "'DM Mono', monospace", background: 'var(--coral)', color: 'white' }}>
+              <span className="text-label tracking-[1px] uppercase">Buy Now</span>
+              <span className="text-micro tracking-[0.5px] uppercase" style={{ opacity: 0.85 }}>$85,000</span>
+            </button>
+          </div>
           {!showDeactivateConfirm ? (
             <button
               onClick={() => setShowDeactivateConfirm(true)}

@@ -223,15 +223,15 @@ export default function ArtistMode({ open, onClose, onOpenProfile, onOpenDetail,
                   </button>
                 )}
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between mb-1">
-                    <div className="text-caption tracking-[1.5px] uppercase"
+                  <div className="flex items-center justify-between gap-2 mb-1">
+                    <div className="text-caption tracking-[1.5px] uppercase truncate min-w-0"
                       style={{ fontFamily: "'DM Mono', monospace", color: 'rgba(255,255,255,0.5)' }}>
                       {song.genre} · {song.bpm} bpm · {song.key}
                     </div>
                     {onOpenDetail && (
                       <button
                         onClick={(e) => { e.stopPropagation(); onOpenDetail(song.id); }}
-                        className="flex items-center gap-[5px] px-[10px] py-[4px] rounded-full cursor-pointer border-none active:scale-95 transition-transform"
+                        className="flex items-center gap-[5px] px-[10px] py-[4px] rounded-full cursor-pointer border-none active:scale-95 transition-transform flex-shrink-0"
                         style={{
                           background: 'rgba(255,255,255,0.08)',
                           border: '1px solid rgba(255,255,255,0.15)',

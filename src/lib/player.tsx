@@ -42,50 +42,15 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const pendingSeekRef = useRef<number | undefined>(undefined);
   const previewModeRef = useRef(true);
 
-  // ── Web Audio analyser (for audio-reactive visualizers) ──
-  const audioCtxRef = useRef<AudioContext | null>(null);
-  const analyserRef = useRef<AnalyserNode | null>(null);
-  const freqRef = useRef<Uint8Array<ArrayBuffer> | null>(null);
-  const connectedNodeRef = useRef<HTMLMediaElement | null>(null);
-
-  // Lazily build a shared AudioContext + AnalyserNode and splice the playing
-  // <audio> element into it: source → analyser → destination. Wrapped in
-  // try/catch so any failure (no Web Audio, CORS-tainted stream) leaves the
-  // analyser null and the visualizer falls back to a synthetic signal.
-  const setupAnalyser = useCallback((howl: Howl) => {
-    try {
-      const w = window as unknown as { AudioContext?: typeof AudioContext; webkitAudioContext?: typeof AudioContext };
-      const AC = w.AudioContext || w.webkitAudioContext;
-      if (!AC) return;
-      if (!audioCtxRef.current) audioCtxRef.current = new AC();
-      const actx = audioCtxRef.current;
-      if (actx.state === 'suspended') actx.resume();
-      if (!analyserRef.current) {
-        const an = actx.createAnalyser();
-        an.fftSize = 128; // 64 frequency bins
-        an.smoothingTimeConstant = 0.82;
-        an.connect(actx.destination);
-        analyserRef.current = an;
-        freqRef.current = new Uint8Array(an.frequencyBinCount);
-      }
-      // Howler's HTML5 audio element lives on a private field.
-      const node = (howl as unknown as { _sounds?: Array<{ _node?: HTMLMediaElement }> })
-        ._sounds?.[0]?._node;
-      if (node && node !== connectedNodeRef.current) {
-        try { node.crossOrigin = 'anonymous'; } catch { /* ignore */ }
-        const src = actx.createMediaElementSource(node);
-        src.connect(analyserRef.current);
-        connectedNodeRef.current = node;
-      }
-    } catch { /* analyser unavailable — visualizer uses synthetic fallback */ }
-  }, []);
-
-  const getFrequencyData = useCallback((): Uint8Array | null => {
-    const an = analyserRef.current;
-    if (!an || !freqRef.current) return null;
-    an.getByteFrequencyData(freqRef.current);
-    return freqRef.current;
-  }, []);
+  // NOTE: Real Web Audio analysis is intentionally NOT wired up. Splicing
+  // Howler's <audio> element into an AnalyserNode (source → analyser →
+  // destination) silences cross-origin media — and the master files are served
+  // from Vercel Blob (cross-origin) — unless CORS is negotiated before the
+  // element loads, which Howler's html5 mode doesn't let us do cleanly. Doing
+  // it muted playback in production. So getFrequencyData() returns null and the
+  // visualizer runs on its synthetic signal. Revisit only with same-origin
+  // audio or a verified CORS pipeline (see design-pass notes).
+  const getFrequencyData = useCallback((): Uint8Array | null => null, []);
 
   // Keep ref in sync with state
   const updatePreviewMode = useCallback((preview: boolean) => {
@@ -162,7 +127,6 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       onplay: () => {
         setIsPlaying(true);
         startProgress();
-        setupAnalyser(howl);
       },
       onpause: () => {
         setIsPlaying(false);
@@ -186,7 +150,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     setCurrentTime(0);
     setDuration(0);
     howl.play();
-  }, [startProgress, stopProgress, setupAnalyser]);
+  }, [startProgress, stopProgress]);
 
   const pause = useCallback(() => {
     if (howlRef.current) {
@@ -263,10 +227,6 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
         howlRef.current.unload();
       }
       stopProgress();
-      if (audioCtxRef.current) {
-        audioCtxRef.current.close().catch(() => {});
-        audioCtxRef.current = null;
-      }
     };
   }, [stopProgress]);
 
