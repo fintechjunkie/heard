@@ -38,7 +38,7 @@ export default function BottomTabBar() {
             <span className="text-[18px]">{tab.icon}</span>
             <span style={{
               fontFamily: "'DM Mono', monospace",
-              fontSize: 9,
+              fontSize: 13,
               letterSpacing: 1,
               textTransform: 'uppercase',
               color: isActive ? 'var(--acid)' : 'rgba(255,255,255,0.55)',
@@ -46,7 +46,7 @@ export default function BottomTabBar() {
               {tab.label}
             </span>
             {tab.badge && validQueueCount > 0 && (
-              <span className="absolute -top-1 -right-2 text-[7px] min-w-[14px] h-[14px] flex items-center justify-center rounded-full"
+              <span className="absolute -top-1 -right-2 text-micro min-w-[14px] h-[14px] flex items-center justify-center rounded-full"
                 style={{
                   background: 'var(--violet)',
                   color: 'white',

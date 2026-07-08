@@ -68,13 +68,13 @@ export default function SongCard({
     >
       {/* Status ribbons */}
       {song.status === 'reserved' && (
-        <span className="absolute top-0 right-0 text-[7px] tracking-[2px] uppercase px-2 py-[3px] font-medium"
+        <span className="absolute top-0 right-0 text-micro tracking-[2px] uppercase px-2 py-[3px] font-medium"
           style={{ fontFamily: "'DM Mono', monospace", background: 'var(--sky)', color: 'var(--black)' }}>
           Reserved
         </span>
       )}
       {song.status === 'purchased' && (
-        <span className="absolute top-0 right-0 text-[7px] tracking-[2px] uppercase px-2 py-[3px] font-medium"
+        <span className="absolute top-0 right-0 text-micro tracking-[2px] uppercase px-2 py-[3px] font-medium"
           style={{ fontFamily: "'DM Mono', monospace", background: 'var(--acid)', color: 'var(--black)' }}>
           Purchased
         </span>
@@ -82,7 +82,7 @@ export default function SongCard({
 
       {/* Row 1: Number + Actions */}
       <div className="flex items-start justify-between mb-[2px]">
-        <span className="text-[8px] tracking-[2px]"
+        <span className="text-caption tracking-[2px]"
           style={{
             fontFamily: "'DM Mono', monospace",
             color: isPlayingSong ? 'rgba(255,255,255,0.3)' : 'var(--muted-l)',
@@ -107,7 +107,7 @@ export default function SongCard({
                 <path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
               </svg>
             </span>
-            <span className="text-[5px] tracking-[0.8px] uppercase" style={{ fontFamily: "'DM Mono', monospace" }}>Pocket</span>
+            <span className="text-micro tracking-[0.8px] uppercase" style={{ fontFamily: "'DM Mono', monospace" }}>Pocket</span>
           </button>
           <button onClick={(e) => { e.stopPropagation(); onOpenDetail(song.id); }}
             title="Song Details"
@@ -119,7 +119,7 @@ export default function SongCard({
                 <circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>
               </svg>
             </span>
-            <span className="text-[5px] tracking-[0.8px] uppercase" style={{ fontFamily: "'DM Mono', monospace" }}>Info</span>
+            <span className="text-micro tracking-[0.8px] uppercase" style={{ fontFamily: "'DM Mono', monospace" }}>Info</span>
           </button>
           <button onClick={(e) => { e.stopPropagation(); onOpenDealRoom(song.id); }}
             title="Deal Room"
@@ -131,7 +131,7 @@ export default function SongCard({
                 <rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a4 4 0 0 0-8 0v2"/>
               </svg>
             </span>
-            <span className="text-[5px] tracking-[0.8px] uppercase" style={{ fontFamily: "'DM Mono', monospace" }}>Deals</span>
+            <span className="text-micro tracking-[0.8px] uppercase" style={{ fontFamily: "'DM Mono', monospace" }}>Deals</span>
           </button>
         </div>
       </div>
@@ -161,13 +161,13 @@ export default function SongCard({
             <span key={i}>
               <button
                 onClick={(e) => { e.stopPropagation(); if (memberId) onOpenProfile(memberId); }}
-                className="text-[11px] cursor-pointer bg-transparent border-none underline"
+                className="text-body cursor-pointer bg-transparent border-none underline"
                 style={{ color: isPlayingSong ? 'rgba(255,255,255,0.55)' : '#5a5650' }}
               >
                 {w}
               </button>
               {i < song.writers.length - 1 && (
-                <span style={{ color: isPlayingSong ? 'rgba(255,255,255,0.3)' : '#8C8778', fontSize: 11 }}> · </span>
+                <span style={{ color: isPlayingSong ? 'rgba(255,255,255,0.3)' : '#8C8778', fontSize: 15 }}> · </span>
               )}
             </span>
           );
@@ -187,7 +187,7 @@ export default function SongCard({
 
       {/* Row 5: Tags */}
       <div className="flex items-center gap-[5px] flex-wrap mb-[6px]">
-        <span className="px-[8px] py-[2px] rounded-full text-[8px] tracking-[1px] uppercase"
+        <span className="px-[8px] py-[2px] rounded-full text-caption tracking-[1px] uppercase"
           style={{
             fontFamily: "'DM Mono', monospace",
             background: isPlayingSong ? 'var(--b3)' : 'rgba(10,10,10,0.08)',
@@ -197,7 +197,7 @@ export default function SongCard({
           {song.genre}
         </span>
         {song.days_in_bank <= 30 && song.status !== 'purchased' && (
-          <span className="px-[8px] py-[2px] rounded-full text-[8px] tracking-[1px] uppercase animate-tag-pulse"
+          <span className="px-[8px] py-[2px] rounded-full text-caption tracking-[1px] uppercase animate-tag-pulse"
             style={{
               fontFamily: "'DM Mono', monospace",
               background: 'rgba(255,184,48,0.15)',
@@ -208,7 +208,7 @@ export default function SongCard({
           </span>
         )}
         {song.mood.map(m => (
-          <span key={m} className="px-[6px] py-[2px] rounded-full text-[7px] tracking-[0.5px]"
+          <span key={m} className="px-[6px] py-[2px] rounded-full text-micro tracking-[0.5px]"
             style={{
               fontFamily: "'DM Mono', monospace",
               background: 'rgba(181,123,255,0.08)',
@@ -220,7 +220,7 @@ export default function SongCard({
         ))}
         <button
           onClick={(e) => { e.stopPropagation(); onOpenRightsPassport(song.id); }}
-          className="ml-auto px-[8px] py-[2px] rounded-full text-[7px] tracking-[1px] uppercase cursor-pointer border-none"
+          className="ml-auto px-[8px] py-[2px] rounded-full text-micro tracking-[1px] uppercase cursor-pointer border-none"
           style={{
             fontFamily: "'DM Mono', monospace",
             background: 'rgba(42,122,42,0.1)',
@@ -232,7 +232,7 @@ export default function SongCard({
       </div>
 
       {/* Row 6: Window strip */}
-      <div className="flex items-center gap-[6px] text-[9px]"
+      <div className="flex items-center gap-[6px] text-caption"
         style={{ color: isPlayingSong ? 'rgba(255,255,255,0.4)' : '#6a6660' }}>
         {song.status === 'purchased' ? (
           <span style={{ color: '#2a7a2a' }}>Rights Transferred · Closed</span>
@@ -255,7 +255,7 @@ export default function SongCard({
             border: '1px solid rgba(181,123,255,0.2)',
           }}>
           <span className="w-[5px] h-[5px] rounded-full animate-blink" style={{ background: 'var(--violet)' }} />
-          <span className="text-[9px]" style={{ color: 'rgba(181,123,255,0.9)', fontFamily: "'DM Mono', monospace" }}>
+          <span className="text-caption" style={{ color: 'rgba(181,123,255,0.9)', fontFamily: "'DM Mono', monospace" }}>
             {reactionData
               ? `${reactionData.emoji} Artist: ${reactionData.label} · ${song.artistFlagTime || 'Just now'}`
               : `♥ Flagged · ${song.artistFlagTime || 'Just now'}`}
@@ -271,7 +271,7 @@ export default function SongCard({
             releaseReserve(song.id);
             showToast(`"${song.title}" reserve released. Song is back on the market.`);
           }}
-          className="mt-[8px] w-full py-[8px] rounded-lg text-[9px] tracking-[1.5px] uppercase cursor-pointer"
+          className="mt-[8px] w-full py-[8px] rounded-lg text-caption tracking-[1.5px] uppercase cursor-pointer"
           style={{
             fontFamily: "'DM Mono', monospace",
             background: 'transparent',

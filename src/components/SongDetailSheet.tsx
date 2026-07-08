@@ -39,7 +39,7 @@ export default function SongDetailSheet({
           >
             ✕
           </button>
-          <div className="text-[8px] tracking-[2px] uppercase mb-1"
+          <div className="text-caption tracking-[2px] uppercase mb-1"
             style={{ fontFamily: "'DM Mono', monospace", color: 'rgba(255,255,255,0.45)' }}>
             {song.genre} · {song.bpm} BPM · {song.key}
           </div>
@@ -61,7 +61,7 @@ export default function SongDetailSheet({
               </div>
             )}
           </div>
-          <div className="text-[11px] mt-1" style={{ color: 'rgba(255,255,255,0.55)' }}>
+          <div className="text-body mt-1" style={{ color: 'rgba(255,255,255,0.55)' }}>
             {song.writers.join(' · ')}
           </div>
         </div>
@@ -81,14 +81,14 @@ export default function SongDetailSheet({
 
           {/* Preview waveform */}
           <div className="p-5 pb-2">
-            <div className="text-[8px] tracking-[2px] uppercase mb-2" style={{ fontFamily: "'DM Mono', monospace", color: '#5a5650' }}>Preview</div>
+            <div className="text-caption tracking-[2px] uppercase mb-2" style={{ fontFamily: "'DM Mono', monospace", color: '#5a5650' }}>Preview</div>
             <Waveform song={song} barCount={52} height={48} />
           </div>
 
           {/* Scroll indicator */}
           <div className="flex items-center justify-center gap-2 pb-3">
             <div className="h-[1px] flex-1 mx-5" style={{ background: 'var(--border)' }} />
-            <span className="text-[7px] tracking-[1.5px] uppercase flex-shrink-0 animate-pulse"
+            <span className="text-micro tracking-[1.5px] uppercase flex-shrink-0 animate-pulse"
               style={{ fontFamily: "'DM Mono', monospace", color: 'var(--muted)' }}>
               ↓ Scroll for details ↓
             </span>
@@ -97,7 +97,7 @@ export default function SongDetailSheet({
 
           {/* Songwriters & Producers */}
           <div className="px-5 pb-4">
-            <div className="text-[8px] tracking-[2px] uppercase mb-2" style={{ fontFamily: "'DM Mono', monospace", color: '#5a5650' }}>
+            <div className="text-caption tracking-[2px] uppercase mb-2" style={{ fontFamily: "'DM Mono', monospace", color: '#5a5650' }}>
               Songwriters & Producers
             </div>
             {songWriters.map(member => member && (
@@ -110,7 +110,7 @@ export default function SongDetailSheet({
                   <img src={member.avatar_url} alt={member.name}
                     className="w-[32px] h-[32px] rounded-full object-cover flex-shrink-0" />
                 ) : (
-                  <div className="w-[32px] h-[32px] rounded-full flex items-center justify-center text-[10px] font-medium flex-shrink-0"
+                  <div className="w-[32px] h-[32px] rounded-full flex items-center justify-center text-label font-medium flex-shrink-0"
                     style={{
                       fontFamily: "'DM Mono', monospace",
                       background: `${member.color}22`,
@@ -122,7 +122,7 @@ export default function SongDetailSheet({
                 )}
                 <div className="flex-1">
                   <div className="text-[13px] font-medium" style={{ color: 'var(--black)' }}>{member.name}</div>
-                  <div className="text-[10px]" style={{ fontFamily: "'DM Mono', monospace", color: '#6a6660' }}>{member.role}</div>
+                  <div className="text-label" style={{ fontFamily: "'DM Mono', monospace", color: '#6a6660' }}>{member.role}</div>
                 </div>
                 <span style={{ color: 'var(--muted-l)', fontSize: 14 }}>›</span>
               </div>
@@ -131,7 +131,7 @@ export default function SongDetailSheet({
 
           {/* Song Details */}
           <div className="px-5 pb-4">
-            <div className="text-[8px] tracking-[2px] uppercase mb-2" style={{ fontFamily: "'DM Mono', monospace", color: '#5a5650' }}>
+            <div className="text-caption tracking-[2px] uppercase mb-2" style={{ fontFamily: "'DM Mono', monospace", color: '#5a5650' }}>
               Song Details
             </div>
             <div className="rounded-xl overflow-hidden" style={{ border: '1px solid var(--border)' }}>
@@ -147,8 +147,8 @@ export default function SongDetailSheet({
               ].map(([label, value], i) => (
                 <div key={i} className="flex items-center justify-between px-3 py-[9px]"
                   style={{ background: 'var(--th-white)', borderBottom: '1px solid var(--border)' }}>
-                  <span className="text-[10px]" style={{ fontFamily: "'DM Mono', monospace", color: '#6a6660' }}>{label}</span>
-                  <span className="text-[11px] font-medium" style={{
+                  <span className="text-label" style={{ fontFamily: "'DM Mono', monospace", color: '#6a6660' }}>{label}</span>
+                  <span className="text-body font-medium" style={{
                     color: label === 'Added' ? 'var(--amber)' : label === 'Available' && value === 'Yes' ? '#2a7a2a' : 'var(--black)',
                   }}>{value}</span>
                 </div>
@@ -158,7 +158,7 @@ export default function SongDetailSheet({
 
           {/* What You Receive */}
           <div className="px-5 pb-4">
-            <div className="text-[8px] tracking-[2px] uppercase mb-2" style={{ fontFamily: "'DM Mono', monospace", color: '#5a5650' }}>
+            <div className="text-caption tracking-[2px] uppercase mb-2" style={{ fontFamily: "'DM Mono', monospace", color: '#5a5650' }}>
               What You Receive
             </div>
             <div className="rounded-xl overflow-hidden" style={{ border: '1px solid var(--border)' }}>
@@ -171,8 +171,8 @@ export default function SongDetailSheet({
               ].map(([label, value], i) => (
                 <div key={i} className="flex items-center justify-between px-3 py-[9px]"
                   style={{ background: 'var(--th-white)', borderBottom: '1px solid var(--border)' }}>
-                  <span className="text-[10px]" style={{ fontFamily: "'DM Mono', monospace", color: '#6a6660' }}>{label}</span>
-                  <span className="text-[11px] font-medium" style={{ color: 'var(--black)' }}>{value}</span>
+                  <span className="text-label" style={{ fontFamily: "'DM Mono', monospace", color: '#6a6660' }}>{label}</span>
+                  <span className="text-body font-medium" style={{ color: 'var(--black)' }}>{value}</span>
                 </div>
               ))}
             </div>
@@ -181,7 +181,7 @@ export default function SongDetailSheet({
           {/* Legal Document */}
           {song.legal_doc_url && (
             <div className="px-5 pb-4">
-              <div className="text-[8px] tracking-[2px] uppercase mb-2" style={{ fontFamily: "'DM Mono', monospace", color: '#5a5650' }}>
+              <div className="text-caption tracking-[2px] uppercase mb-2" style={{ fontFamily: "'DM Mono', monospace", color: '#5a5650' }}>
                 Legal
               </div>
               <a
@@ -194,7 +194,7 @@ export default function SongDetailSheet({
                 <span className="text-[18px]">📄</span>
                 <div className="flex-1">
                   <div className="text-[12px] font-medium" style={{ color: 'var(--black)' }}>Song Agreement</div>
-                  <div className="text-[9px]" style={{ fontFamily: "'DM Mono', monospace", color: '#6a6660' }}>View standardized contract</div>
+                  <div className="text-caption" style={{ fontFamily: "'DM Mono', monospace", color: '#6a6660' }}>View standardized contract</div>
                 </div>
                 <span style={{ color: 'var(--muted-l)', fontSize: 14 }}>↗</span>
               </a>
@@ -208,17 +208,17 @@ export default function SongDetailSheet({
         {/* Footer CTAs */}
         <div className="flex-shrink-0 flex flex-col gap-2 px-5 pb-5 pt-3" style={{ background: '#F2EDE3', borderTop: '1px solid var(--border)', boxShadow: '0 -8px 20px rgba(0,0,0,0.08)' }}>
           <button onClick={() => { onClose(); onReserve(song.id); }}
-            className="w-full py-[12px] rounded-xl text-[10px] tracking-[1.5px] uppercase cursor-pointer"
+            className="w-full py-[12px] rounded-xl text-label tracking-[1.5px] uppercase cursor-pointer"
             style={{ fontFamily: "'DM Mono', monospace", background: 'var(--sky)', color: 'var(--black)', border: 'none' }}>
             Reserve · 72-Hour Hold
           </button>
           <button onClick={() => { onClose(); onBuy(song.id); }}
-            className="w-full py-[12px] rounded-xl text-[10px] tracking-[1.5px] uppercase cursor-pointer"
+            className="w-full py-[12px] rounded-xl text-label tracking-[1.5px] uppercase cursor-pointer"
             style={{ fontFamily: "'DM Mono', monospace", background: 'var(--coral)', color: 'white', border: 'none' }}>
             Buy Now — $85,000
           </button>
           <button onClick={onClose}
-            className="w-full py-[10px] text-[10px] tracking-[1px] uppercase cursor-pointer bg-transparent border-none"
+            className="w-full py-[10px] text-label tracking-[1px] uppercase cursor-pointer bg-transparent border-none"
             style={{ fontFamily: "'DM Mono', monospace", color: 'var(--muted)' }}>
             Close
           </button>

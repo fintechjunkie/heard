@@ -61,9 +61,9 @@ export default function MemberProfile({ member, songs, open, onClose, onOpenDeta
               {member.initials}
             </div>
           )}
-          <div className="text-[10px] tracking-[1px] uppercase mb-1" style={{ fontFamily: "'DM Mono', monospace", color: member.color }}>{member.role}</div>
+          <div className="text-label tracking-[1px] uppercase mb-1" style={{ fontFamily: "'DM Mono', monospace", color: member.color }}>{member.role}</div>
           <div className="text-[40px] tracking-[2px] leading-none mb-2" style={{ fontFamily: "'Bebas Neue', sans-serif", color: '#FFFFFF' }}>{member.name}</div>
-          <div className="text-[11px] mb-4" style={{ color: 'rgba(255,255,255,0.55)', lineHeight: 1.5 }}>{member.bio}</div>
+          <div className="text-body mb-4" style={{ color: 'rgba(255,255,255,0.55)', lineHeight: 1.5 }}>{member.bio}</div>
           <div className="flex justify-center gap-8">
             {[
               { val: member.streams, label: 'Streams', color: member.color },
@@ -72,7 +72,7 @@ export default function MemberProfile({ member, songs, open, onClose, onOpenDeta
             ].map(s => (
               <div key={s.label} className="text-center">
                 <div className="text-[22px] tracking-[1px]" style={{ fontFamily: "'Bebas Neue', sans-serif", color: s.color }}>{s.val}</div>
-                <div className="text-[7px] tracking-[1.5px] uppercase" style={{ fontFamily: "'DM Mono', monospace", color: 'rgba(255,255,255,0.5)' }}>{s.label}</div>
+                <div className="text-micro tracking-[1.5px] uppercase" style={{ fontFamily: "'DM Mono', monospace", color: 'rgba(255,255,255,0.5)' }}>{s.label}</div>
               </div>
             ))}
           </div>
@@ -83,12 +83,12 @@ export default function MemberProfile({ member, songs, open, onClose, onOpenDeta
         <div className="p-5">
           {/* Awards */}
           <div className="mb-6">
-            <div className="text-[8px] tracking-[2px] uppercase mb-3" style={{ fontFamily: "'DM Mono', monospace", color: '#5a5650', fontWeight: 500 }}>Awards</div>
+            <div className="text-caption tracking-[2px] uppercase mb-3" style={{ fontFamily: "'DM Mono', monospace", color: '#5a5650', fontWeight: 500 }}>Awards</div>
             <div className="flex flex-wrap gap-2">
               {member.awards.map(a => (
                 <div key={a} className="flex items-center gap-[5px] px-[10px] py-[6px] rounded-lg" style={{ background: 'var(--th-white)', border: '1px solid var(--border)' }}>
                   <span className="text-[12px]">🏆</span>
-                  <span className="text-[10px]" style={{ fontFamily: "'DM Mono', monospace" }}>{a}</span>
+                  <span className="text-label" style={{ fontFamily: "'DM Mono', monospace" }}>{a}</span>
                 </div>
               ))}
             </div>
@@ -96,15 +96,15 @@ export default function MemberProfile({ member, songs, open, onClose, onOpenDeta
 
           {/* Notable Hits */}
           <div className="mb-6">
-            <div className="text-[8px] tracking-[2px] uppercase mb-3" style={{ fontFamily: "'DM Mono', monospace", color: '#5a5650', fontWeight: 500 }}>Notable Hits</div>
+            <div className="text-caption tracking-[2px] uppercase mb-3" style={{ fontFamily: "'DM Mono', monospace", color: '#5a5650', fontWeight: 500 }}>Notable Hits</div>
             {member.hits.map((h, i) => (
               <div key={i} className="flex items-center gap-3 mb-3">
-                <span className="text-[11px] w-[16px] text-center" style={{ fontFamily: "'DM Mono', monospace", color: 'var(--muted-l)' }}>{i + 1}</span>
+                <span className="text-body w-[16px] text-center" style={{ fontFamily: "'DM Mono', monospace", color: 'var(--muted-l)' }}>{i + 1}</span>
                 <div className="flex-1 min-w-0">
                   <div className="text-[12px] font-medium truncate">{h.t}</div>
-                  <div className="text-[10px]" style={{ color: '#6a6660' }}>{h.a}</div>
+                  <div className="text-label" style={{ color: '#6a6660' }}>{h.a}</div>
                 </div>
-                <span className="text-[11px] flex-shrink-0" style={{ fontFamily: "'DM Mono', monospace", color: 'var(--amber)' }}>{h.s}</span>
+                <span className="text-body flex-shrink-0" style={{ fontFamily: "'DM Mono', monospace", color: 'var(--amber)' }}>{h.s}</span>
                 <div className="w-[60px] h-[4px] rounded-full overflow-hidden flex-shrink-0" style={{ background: 'var(--border)' }}>
                   <div className="h-full rounded-full" style={{ width: `${(parseFloat(h.s) / maxStreams * 100).toFixed(0)}%`, background: 'var(--amber)' }} />
                 </div>
@@ -114,7 +114,7 @@ export default function MemberProfile({ member, songs, open, onClose, onOpenDeta
 
           {/* In The Bank */}
           <div className="mb-6">
-            <div className="text-[8px] tracking-[2px] uppercase mb-3" style={{ fontFamily: "'DM Mono', monospace", color: '#5a5650', fontWeight: 500 }}>In The Bank</div>
+            <div className="text-caption tracking-[2px] uppercase mb-3" style={{ fontFamily: "'DM Mono', monospace", color: '#5a5650', fontWeight: 500 }}>In The Bank</div>
             {memberSongs.length === 0 ? (
               <p className="text-[13px]" style={{ color: 'var(--muted)', fontWeight: 300 }}>No songs currently in the bank.</p>
             ) : (
@@ -122,10 +122,10 @@ export default function MemberProfile({ member, songs, open, onClose, onOpenDeta
                 <div key={s.id} className="rounded-xl p-3 mb-2 cursor-pointer" style={{ background: 'var(--th-white)', border: '1px solid var(--border)' }}
                   onClick={() => { onClose(); setTimeout(() => onOpenDetail(s.id), 100); }}>
                   <div className="text-[16px] tracking-[1px] mb-[2px]" style={{ fontFamily: "'Bebas Neue', sans-serif" }}>{s.title}</div>
-                  <div className="text-[9px] mb-2" style={{ fontFamily: "'DM Mono', monospace", color: '#6a6660' }}>{s.genre} · {s.bpm} BPM · {s.key}</div>
+                  <div className="text-caption mb-2" style={{ fontFamily: "'DM Mono', monospace", color: '#6a6660' }}>{s.genre} · {s.bpm} BPM · {s.key}</div>
                   <div className="flex items-center justify-between">
                     <span className="text-[14px] font-medium" style={{ fontFamily: "'Bebas Neue', sans-serif" }}>$85K</span>
-                    <button className="px-3 py-1 rounded-md text-[8px] tracking-[1px] uppercase cursor-pointer border-none"
+                    <button className="px-3 py-1 rounded-md text-caption tracking-[1px] uppercase cursor-pointer border-none"
                       style={{ fontFamily: "'DM Mono', monospace", background: 'var(--black)', color: '#FFFFFF' }}>
                       Details
                     </button>

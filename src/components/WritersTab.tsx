@@ -15,7 +15,7 @@ export default function WritersTab({ onOpenProfile }: WritersTabProps) {
       <div className="text-[38px] tracking-[2px] leading-[0.95] mb-2" style={{ fontFamily: "'Bebas Neue', sans-serif" }}>
         The Collective
       </div>
-      <div className="text-[11px] mb-5" style={{ color: '#6a6660' }}>
+      <div className="text-body mb-5" style={{ color: '#6a6660' }}>
         {MEMBERS.length} members · Award-winning songwriters & producers
       </div>
 
@@ -29,7 +29,7 @@ export default function WritersTab({ onOpenProfile }: WritersTabProps) {
               style={{ background: 'var(--th-white)' }}
               onClick={() => onOpenProfile(member.id)}
             >
-              <div className="w-[36px] h-[36px] rounded-full flex items-center justify-center text-[11px] font-medium flex-shrink-0"
+              <div className="w-[36px] h-[36px] rounded-full flex items-center justify-center text-body font-medium flex-shrink-0"
                 style={{
                   fontFamily: "'DM Mono', monospace",
                   background: `${member.color}22`,
@@ -40,12 +40,12 @@ export default function WritersTab({ onOpenProfile }: WritersTabProps) {
               </div>
               <div className="flex-1 min-w-0">
                 <div className="text-[13px] font-medium">{member.name}</div>
-                <div className="text-[10px]" style={{ fontFamily: "'DM Mono', monospace", color: '#6a6660' }}>
+                <div className="text-label" style={{ fontFamily: "'DM Mono', monospace", color: '#6a6660' }}>
                   {member.role} · {member.streams} streams
                 </div>
               </div>
               {inBank > 0 && (
-                <span className="px-[8px] py-[3px] rounded-full text-[7px] tracking-[1px] uppercase"
+                <span className="px-[8px] py-[3px] rounded-full text-micro tracking-[1px] uppercase"
                   style={{
                     fontFamily: "'DM Mono', monospace",
                     background: 'var(--acid)',

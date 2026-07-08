@@ -74,14 +74,14 @@ export default function TopNav({ onArtistMode, teamName, onSwitchTeam, onOpenDea
           </div>
           {teamName && (
             <button onClick={onSwitchTeam}
-              className="text-[8px] tracking-[1px] uppercase px-2 py-[3px] rounded cursor-pointer border-none"
+              className="text-caption tracking-[1px] uppercase px-2 py-[3px] rounded cursor-pointer border-none"
               style={{ fontFamily: "'DM Mono', monospace", background: 'var(--b3)', color: 'rgba(255,255,255,0.5)', border: '1px solid var(--b4)' }}>
               {teamName}
             </button>
           )}
         </div>
         <div className="flex items-center gap-[10px]">
-          <span className="text-[8px] tracking-[1.5px] uppercase" style={{
+          <span className="text-caption tracking-[1.5px] uppercase" style={{
             fontFamily: "'DM Mono', monospace",
             color: 'var(--acid)',
             border: '1px solid var(--acid)',
@@ -97,9 +97,9 @@ export default function TopNav({ onArtistMode, teamName, onSwitchTeam, onOpenDea
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a4 4 0 0 0-8 0v2"/>
               </svg>
-              <span className="text-[8px] tracking-[1px] uppercase" style={{ fontFamily: "'DM Mono', monospace" }}>Deals</span>
+              <span className="text-caption tracking-[1px] uppercase" style={{ fontFamily: "'DM Mono', monospace" }}>Deals</span>
               {activeDealRoomCount > 0 && (
-                <span className="absolute -top-[3px] -right-[3px] w-[16px] h-[16px] rounded-full flex items-center justify-center text-[8px] font-bold"
+                <span className="absolute -top-[3px] -right-[3px] w-[16px] h-[16px] rounded-full flex items-center justify-center text-caption font-bold"
                   style={{ background: 'var(--sky)', color: 'var(--black)', fontFamily: "'DM Mono', monospace" }}>
                   {activeDealRoomCount}
                 </span>
@@ -116,7 +116,7 @@ export default function TopNav({ onArtistMode, teamName, onSwitchTeam, onOpenDea
           <div className="relative" ref={profileRef}>
             <button
               onClick={() => setShowProfile(!showProfile)}
-              className="w-[34px] h-[34px] rounded-full flex items-center justify-center text-[10px] font-semibold cursor-pointer border-none"
+              className="w-[34px] h-[34px] rounded-full flex items-center justify-center text-label font-semibold cursor-pointer border-none"
               style={{ background: 'var(--acid)', color: 'var(--black)', fontFamily: "'DM Mono', monospace" }}
             >
               {initials}
@@ -136,7 +136,7 @@ export default function TopNav({ onArtistMode, teamName, onSwitchTeam, onOpenDea
                       <div className="text-[13px] font-medium truncate" style={{ color: '#FFFFFF', fontFamily: "'DM Sans', sans-serif" }}>
                         {profile?.full_name || 'Loading...'}
                       </div>
-                      <div className="text-[10px] truncate" style={{ color: 'rgba(255,255,255,0.4)', fontFamily: "'DM Mono', monospace" }}>
+                      <div className="text-label truncate" style={{ color: 'rgba(255,255,255,0.4)', fontFamily: "'DM Mono', monospace" }}>
                         {profile?.email}
                       </div>
                     </div>
@@ -146,20 +146,20 @@ export default function TopNav({ onArtistMode, teamName, onSwitchTeam, onOpenDea
                 {/* Profile details */}
                 <div className="p-4 space-y-2 border-b" style={{ borderColor: 'var(--b4)' }}>
                   <div className="flex justify-between">
-                    <span className="text-[9px] uppercase tracking-[1px]" style={{ color: 'rgba(255,255,255,0.35)', fontFamily: "'DM Mono', monospace" }}>Role</span>
-                    <span className="text-[11px]" style={{ color: '#FFFFFF', fontFamily: "'DM Sans', sans-serif" }}>
+                    <span className="text-caption uppercase tracking-[1px]" style={{ color: 'rgba(255,255,255,0.35)', fontFamily: "'DM Mono', monospace" }}>Role</span>
+                    <span className="text-body" style={{ color: '#FFFFFF', fontFamily: "'DM Sans', sans-serif" }}>
                       {profile?.role === 'manager' ? 'Artist Manager' : profile?.role === 'ar' ? 'A&R' : profile?.role === 'artist' ? 'Artist' : profile?.role || '—'}
                     </span>
                   </div>
                   {profile?.company && (
                     <div className="flex justify-between">
-                      <span className="text-[9px] uppercase tracking-[1px]" style={{ color: 'rgba(255,255,255,0.35)', fontFamily: "'DM Mono', monospace" }}>Company</span>
-                      <span className="text-[11px]" style={{ color: '#FFFFFF', fontFamily: "'DM Sans', sans-serif" }}>{profile.company}</span>
+                      <span className="text-caption uppercase tracking-[1px]" style={{ color: 'rgba(255,255,255,0.35)', fontFamily: "'DM Mono', monospace" }}>Company</span>
+                      <span className="text-body" style={{ color: '#FFFFFF', fontFamily: "'DM Sans', sans-serif" }}>{profile.company}</span>
                     </div>
                   )}
                   <div className="flex justify-between">
-                    <span className="text-[9px] uppercase tracking-[1px]" style={{ color: 'rgba(255,255,255,0.35)', fontFamily: "'DM Mono', monospace" }}>Tier</span>
-                    <span className="text-[9px] px-2 py-[2px] rounded-full" style={{ background: 'rgba(200,255,69,0.15)', color: 'var(--acid)', fontFamily: "'DM Mono', monospace" }}>
+                    <span className="text-caption uppercase tracking-[1px]" style={{ color: 'rgba(255,255,255,0.35)', fontFamily: "'DM Mono', monospace" }}>Tier</span>
+                    <span className="text-caption px-2 py-[2px] rounded-full" style={{ background: 'rgba(200,255,69,0.15)', color: 'var(--acid)', fontFamily: "'DM Mono', monospace" }}>
                       {profile?.tier === 'tier1' ? 'Tier 1' : profile?.tier === 'tier2' ? 'Tier 2' : profile?.tier || '—'}
                     </span>
                   </div>
@@ -168,7 +168,7 @@ export default function TopNav({ onArtistMode, teamName, onSwitchTeam, onOpenDea
                 {/* Logout */}
                 <button
                   onClick={handleLogout}
-                  className="w-full text-left px-4 py-3 text-[10px] tracking-[1px] uppercase cursor-pointer border-none"
+                  className="w-full text-left px-4 py-3 text-label tracking-[1px] uppercase cursor-pointer border-none"
                   style={{ background: 'transparent', color: 'var(--coral)', fontFamily: "'DM Mono', monospace" }}
                 >
                   Sign Out
@@ -230,7 +230,7 @@ function GenreChips() {
           }`}
           style={{
             fontFamily: "'DM Mono', monospace",
-            fontSize: 9,
+            fontSize: 13,
             letterSpacing: 1.5,
             textTransform: 'uppercase',
             border: activeGenre === g.key

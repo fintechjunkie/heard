@@ -22,11 +22,11 @@ export default function ReserveSheet({ song, open, onClose, onConfirm, teamReser
       <div className="p-5">
         {/* Header */}
         <div className="text-center mb-4">
-          <div className="text-[8px] tracking-[2px] uppercase mb-1" style={{ fontFamily: "'DM Mono', monospace", color: 'var(--muted)' }}>
+          <div className="text-caption tracking-[2px] uppercase mb-1" style={{ fontFamily: "'DM Mono', monospace", color: 'var(--muted)' }}>
             Reserve Song
           </div>
           <div className="text-[28px] tracking-[2px]" style={{ fontFamily: "'Bebas Neue', sans-serif" }}>{song.title}</div>
-          <div className="text-[11px]" style={{ color: '#6a6660' }}>{song.writers.join(' · ')}</div>
+          <div className="text-body" style={{ color: '#6a6660' }}>{song.writers.join(' · ')}</div>
         </div>
 
         {/* Timer box */}
@@ -35,11 +35,11 @@ export default function ReserveSheet({ song, open, onClose, onConfirm, teamReser
             style={{ fontFamily: "'Bebas Neue', sans-serif", color: 'var(--acid)' }}>
             72:00:00
           </div>
-          <div className="text-[8px] tracking-[2px] uppercase"
+          <div className="text-caption tracking-[2px] uppercase"
             style={{ fontFamily: "'DM Mono', monospace", color: 'rgba(255,255,255,0.5)' }}>
             Hold Duration
           </div>
-          <div className="text-[10px] mt-2" style={{ color: 'rgba(255,255,255,0.4)' }}>
+          <div className="text-label mt-2" style={{ color: 'rgba(255,255,255,0.4)' }}>
             Song goes off-market immediately
           </div>
         </div>
@@ -53,7 +53,7 @@ export default function ReserveSheet({ song, open, onClose, onConfirm, teamReser
             ['Price', '$85,000'],
           ].map(([label, value], i) => (
             <div key={i} className="px-3 py-[10px]" style={{ background: 'var(--th-white)' }}>
-              <div className="text-[7px] tracking-[1.5px] uppercase mb-[2px]" style={{ fontFamily: "'DM Mono', monospace", color: '#6a6660' }}>{label}</div>
+              <div className="text-micro tracking-[1.5px] uppercase mb-[2px]" style={{ fontFamily: "'DM Mono', monospace", color: '#6a6660' }}>{label}</div>
               <div className="text-[13px] font-medium" style={{ color: i === 3 ? 'var(--sky)' : 'var(--black)' }}>{value}</div>
             </div>
           ))}
@@ -61,7 +61,7 @@ export default function ReserveSheet({ song, open, onClose, onConfirm, teamReser
 
         {/* Reserve cap indicator */}
         <div className="flex items-center justify-center gap-2 mb-3">
-          <span className="text-[8px] tracking-[1px] uppercase" style={{ fontFamily: "'DM Mono', monospace", color: atLimit ? 'var(--coral)' : '#6a6660' }}>
+          <span className="text-caption tracking-[1px] uppercase" style={{ fontFamily: "'DM Mono', monospace", color: atLimit ? 'var(--coral)' : '#6a6660' }}>
             Reserves: {teamReservedCount} / {maxReserves}
           </span>
           <div className="flex gap-[3px]">
@@ -74,7 +74,7 @@ export default function ReserveSheet({ song, open, onClose, onConfirm, teamReser
         </div>
 
         {/* Disclaimer */}
-        <p className="text-[10px] text-center mb-5" style={{ color: 'var(--muted)', lineHeight: 1.5 }}>
+        <p className="text-label text-center mb-5" style={{ color: 'var(--muted)', lineHeight: 1.5 }}>
           {atLimit
             ? `Your team has reached the ${maxReserves}-reserve limit. Release a hold before reserving another song.`
             : 'Reserving does not obligate purchase. Song auto-relists after 72 hours if not purchased.'}
@@ -84,12 +84,12 @@ export default function ReserveSheet({ song, open, onClose, onConfirm, teamReser
         <button
           onClick={() => !atLimit && onConfirm(song.id)}
           disabled={atLimit}
-          className="w-full py-[14px] rounded-xl text-[10px] tracking-[1.5px] uppercase cursor-pointer border-none"
+          className="w-full py-[14px] rounded-xl text-label tracking-[1.5px] uppercase cursor-pointer border-none"
           style={{ fontFamily: "'DM Mono', monospace", background: atLimit ? '#ccc' : 'var(--sky)', color: atLimit ? '#999' : 'var(--black)', opacity: atLimit ? 0.6 : 1 }}>
           {atLimit ? 'Reserve Limit Reached' : 'Confirm Reserve'}
         </button>
         <button onClick={onClose}
-          className="w-full py-[10px] mt-2 text-[10px] tracking-[1px] uppercase cursor-pointer bg-transparent border-none"
+          className="w-full py-[10px] mt-2 text-label tracking-[1px] uppercase cursor-pointer bg-transparent border-none"
           style={{ fontFamily: "'DM Mono', monospace", color: 'var(--muted)' }}>
           Cancel
         </button>

@@ -38,13 +38,13 @@ export default function RightsPassportSheet({ song, open, onClose }: RightsPassp
       <div>
         {/* Header */}
         <div className="px-5 pt-5 pb-4" style={{ background: '#1a3a2a' }}>
-          <div className="text-[8px] tracking-[2px] uppercase mb-1" style={{ fontFamily: "'DM Mono', monospace", color: '#4ade80' }}>
+          <div className="text-caption tracking-[2px] uppercase mb-1" style={{ fontFamily: "'DM Mono', monospace", color: '#4ade80' }}>
             ✓ Rights Verified
           </div>
           <div className="text-[24px] tracking-[2px] leading-none mb-1" style={{ fontFamily: "'Bebas Neue', sans-serif", color: 'white' }}>
             {song.title}
           </div>
-          <div className="text-[10px]" style={{ color: 'rgba(255,255,255,0.6)' }}>
+          <div className="text-label" style={{ color: 'rgba(255,255,255,0.6)' }}>
             All certifications cleared prior to listing.
           </div>
         </div>
@@ -53,13 +53,13 @@ export default function RightsPassportSheet({ song, open, onClose }: RightsPassp
         <div className="px-5 py-4">
           {CERTIFICATIONS.map((cert, i) => (
             <div key={i} className="flex items-start gap-3 py-3" style={{ borderBottom: i < CERTIFICATIONS.length - 1 ? '1px solid var(--border)' : 'none' }}>
-              <div className="w-[24px] h-[24px] rounded-full flex items-center justify-center text-[10px] flex-shrink-0 mt-[2px]"
+              <div className="w-[24px] h-[24px] rounded-full flex items-center justify-center text-label flex-shrink-0 mt-[2px]"
                 style={{ background: 'rgba(42,122,42,0.1)', color: '#2a7a2a', border: '1px solid rgba(42,122,42,0.2)' }}>
                 ✓
               </div>
               <div>
                 <div className="text-[12px] font-medium mb-[2px]">{cert.name}</div>
-                <div className="text-[10px]" style={{ color: '#6a6660' }}>{cert.sub}</div>
+                <div className="text-label" style={{ color: '#6a6660' }}>{cert.sub}</div>
               </div>
             </div>
           ))}
@@ -68,12 +68,12 @@ export default function RightsPassportSheet({ song, open, onClose }: RightsPassp
         {/* Footer */}
         <div className="px-5 pb-5">
           <button onClick={handleCopy}
-            className="w-full py-[14px] rounded-xl text-[10px] tracking-[1.5px] uppercase cursor-pointer border-none mb-2"
+            className="w-full py-[14px] rounded-xl text-label tracking-[1.5px] uppercase cursor-pointer border-none mb-2"
             style={{ fontFamily: "'DM Mono', monospace", background: '#1a3a2a', color: '#4ade80' }}>
             ⎘ Copy for Your Attorney
           </button>
           <button onClick={onClose}
-            className="w-full py-[10px] text-[10px] tracking-[1px] uppercase cursor-pointer bg-transparent border-none"
+            className="w-full py-[10px] text-label tracking-[1px] uppercase cursor-pointer bg-transparent border-none"
             style={{ fontFamily: "'DM Mono', monospace", color: 'var(--muted)' }}>
             Close
           </button>

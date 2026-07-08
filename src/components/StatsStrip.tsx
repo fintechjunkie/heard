@@ -33,7 +33,7 @@ export default function StatsStrip() {
             }}>
             {c.val}
           </div>
-          <div className="text-[7px] tracking-[1.5px] uppercase mt-[2px]"
+          <div className="text-micro tracking-[1.5px] uppercase mt-[2px]"
             style={{
               fontFamily: "'DM Mono', monospace",
               fontWeight: 500,

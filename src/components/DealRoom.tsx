@@ -287,9 +287,9 @@ export default function DealRoom({ song, open, onClose, onBack, onReserve, onBuy
 
       {/* Song header */}
       <div className="px-5 py-4" style={{ background: 'var(--black)' }}>
-        <div className="text-[8px] tracking-[2px] uppercase mb-1" style={{ fontFamily: "'DM Mono', monospace", color: 'rgba(255,255,255,0.45)' }}>Evaluating</div>
+        <div className="text-caption tracking-[2px] uppercase mb-1" style={{ fontFamily: "'DM Mono', monospace", color: 'rgba(255,255,255,0.45)' }}>Evaluating</div>
         <div className="text-[32px] tracking-[2px] leading-none mb-1" style={{ fontFamily: "'Bebas Neue', sans-serif", color: '#FFFFFF' }}>{song.title}</div>
-        <div className="text-[11px] mb-3" style={{ color: 'rgba(255,255,255,0.6)' }}>{song.writers.join(' · ')}</div>
+        <div className="text-body mb-3" style={{ color: 'rgba(255,255,255,0.6)' }}>{song.writers.join(' · ')}</div>
         {isHeld && <HoldCountdown reservedUntil={song.reserved_until} />}
       </div>
 
@@ -300,11 +300,11 @@ export default function DealRoom({ song, open, onClose, onBack, onReserve, onBuy
         /* No deal room yet */
         <div className="flex-1 py-12 text-center px-8">
           <div className="text-[32px] mb-3" style={{ opacity: 0.3 }}>🤝</div>
-          <p className="text-[11px] leading-relaxed mb-4" style={{ fontFamily: "'DM Mono', monospace", color: 'var(--muted)' }}>
+          <p className="text-body leading-relaxed mb-4" style={{ fontFamily: "'DM Mono', monospace", color: 'var(--muted)' }}>
             No deal room exists for this song yet. Start one to collaborate with your team.
           </p>
           <button onClick={startDealRoom}
-            className="px-6 py-3 rounded-xl text-[10px] tracking-[1.5px] uppercase cursor-pointer border-none"
+            className="px-6 py-3 rounded-xl text-label tracking-[1.5px] uppercase cursor-pointer border-none"
             style={{ fontFamily: "'DM Mono', monospace", background: 'var(--sky)', color: 'var(--black)' }}>
             Start Deal Room
           </button>
@@ -313,7 +313,7 @@ export default function DealRoom({ song, open, onClose, onBack, onReserve, onBuy
         <>
           {/* Team Reactions — pinned, not scrollable */}
           <div className="flex-shrink-0 mx-5 mt-4">
-              <div className="text-[8px] tracking-[2px] uppercase mb-2" style={{ fontFamily: "'DM Mono', monospace", color: '#5a5650' }}>
+              <div className="text-caption tracking-[2px] uppercase mb-2" style={{ fontFamily: "'DM Mono', monospace", color: '#5a5650' }}>
                 Team Reactions · {totalReactions} vote{totalReactions !== 1 ? 's' : ''}
               </div>
               <div className="grid grid-cols-5 gap-[6px]">
@@ -335,7 +335,7 @@ export default function DealRoom({ song, open, onClose, onBack, onReserve, onBuy
                     >
                       <span className="text-[18px] block">{r.emoji}</span>
                       <span className="text-[12px] font-bold block mt-[1px]">{count > 0 ? count : ''}</span>
-                      <span className="text-[6px] tracking-[0.5px] uppercase block mt-[1px]">{r.label}</span>
+                      <span className="text-micro tracking-[0.5px] uppercase block mt-[1px]">{r.label}</span>
                     </button>
                   );
                 })}
@@ -348,8 +348,8 @@ export default function DealRoom({ song, open, onClose, onBack, onReserve, onBuy
                     return (
                       <div key={r.id} className="flex items-center gap-[4px] px-[8px] py-[4px] rounded-full"
                         style={{ background: rxDef ? rxDef.bg : '#f5f5f5', border: `1px solid ${rxDef ? rxDef.border : 'var(--border)'}` }}>
-                        <span className="text-[10px]">{rxDef?.emoji}</span>
-                        <span className="text-[8px] font-medium" style={{ color: rxDef?.color || '#6a6660' }}>
+                        <span className="text-label">{rxDef?.emoji}</span>
+                        <span className="text-caption font-medium" style={{ color: rxDef?.color || '#6a6660' }}>
                           {r.full_name.split(' ')[0]}
                         </span>
                       </div>
@@ -362,7 +362,7 @@ export default function DealRoom({ song, open, onClose, onBack, onReserve, onBuy
           {/* Comments — this section scrolls */}
           <div ref={scrollContainerRef} className="flex-1 overflow-y-auto scrollbar-hide">
             <div className="mx-5 mt-3 pb-4">
-              <div className="text-[8px] tracking-[2px] uppercase mb-2" style={{ fontFamily: "'DM Mono', monospace", color: '#5a5650' }}>
+              <div className="text-caption tracking-[2px] uppercase mb-2" style={{ fontFamily: "'DM Mono', monospace", color: '#5a5650' }}>
                 Discussion ({comments.length})
               </div>
               <div className="space-y-2">
@@ -373,21 +373,21 @@ export default function DealRoom({ song, open, onClose, onBack, onReserve, onBuy
                       border: c.is_admin_response ? '1px solid rgba(200,255,69,0.3)' : '1px solid var(--border)',
                     }}>
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="text-[9px] font-medium" style={{ color: c.is_admin_response ? 'var(--acid)' : 'var(--black)' }}>
+                      <span className="text-caption font-medium" style={{ color: c.is_admin_response ? 'var(--acid)' : 'var(--black)' }}>
                         {c.is_admin_response ? '★ Heard Admin' : c.full_name}
                       </span>
-                      <span className="text-[7px]" style={{ color: '#999' }}>
+                      <span className="text-micro" style={{ color: '#999' }}>
                         {new Date(c.created_at).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
                       </span>
                       {c.is_admin_question && !c.is_admin_response && (
-                        <span className="text-[7px] px-1 py-[1px] rounded" style={{ background: 'rgba(200,255,69,0.15)', color: 'var(--acid)' }}>To Admin</span>
+                        <span className="text-micro px-1 py-[1px] rounded" style={{ background: 'rgba(200,255,69,0.15)', color: 'var(--acid)' }}>To Admin</span>
                       )}
                     </div>
-                    <div className="text-[11px] leading-relaxed" style={{ color: '#333' }}>{c.content}</div>
+                    <div className="text-body leading-relaxed" style={{ color: '#333' }}>{c.content}</div>
                   </div>
                 ))}
                 {comments.length === 0 && (
-                  <div className="text-[11px] text-center py-4" style={{ color: '#999' }}>No comments yet. Start the conversation.</div>
+                  <div className="text-body text-center py-4" style={{ color: '#999' }}>No comments yet. Start the conversation.</div>
                 )}
                 <div ref={commentsEndRef} />
               </div>
@@ -409,14 +409,14 @@ export default function DealRoom({ song, open, onClose, onBack, onReserve, onBuy
               style={{ background: '#FAFAF7', border: '1px solid var(--border)', fontFamily: "'DM Sans', sans-serif", fontSize: 16, minHeight: 36, color: 'var(--black)' }}
             />
             <button onClick={submitComment}
-              className="px-3 py-2 rounded-lg text-[9px] tracking-[1px] uppercase cursor-pointer border-none"
+              className="px-3 py-2 rounded-lg text-caption tracking-[1px] uppercase cursor-pointer border-none"
               style={{ fontFamily: "'DM Mono', monospace", background: 'var(--black)', color: '#FFFFFF' }}>
               Send
             </button>
           </div>
           <label className="flex items-center gap-2 cursor-pointer">
             <input type="checkbox" checked={isAdminQuestion} onChange={e => setIsAdminQuestion(e.target.checked)} />
-            <span className="text-[9px]" style={{ fontFamily: "'DM Mono', monospace", color: '#6a6660' }}>Send to Heard admin for response</span>
+            <span className="text-caption" style={{ fontFamily: "'DM Mono', monospace", color: '#6a6660' }}>Send to Heard admin for response</span>
           </label>
         </div>
       )}
@@ -426,7 +426,7 @@ export default function DealRoom({ song, open, onClose, onBack, onReserve, onBuy
         <div className="flex-shrink-0 flex flex-col gap-2 px-5 pb-5 pt-2" style={{ background: '#F2EDE3' }}>
           <button
             onClick={() => { onClose(); setTimeout(() => onReserve(song.id), 100); }}
-            className="w-full py-[12px] rounded-xl text-[10px] tracking-[1.5px] uppercase cursor-pointer border-none"
+            className="w-full py-[12px] rounded-xl text-label tracking-[1.5px] uppercase cursor-pointer border-none"
             style={{ fontFamily: "'DM Mono', monospace", background: 'var(--sky)', color: 'var(--black)', opacity: isHeld ? 0.5 : 1 }}
             disabled={isHeld}
           >
@@ -434,30 +434,30 @@ export default function DealRoom({ song, open, onClose, onBack, onReserve, onBuy
           </button>
           <button
             onClick={() => { onClose(); setTimeout(() => onBuy(song.id), 100); }}
-            className="w-full py-[12px] rounded-xl text-[10px] tracking-[1.5px] uppercase cursor-pointer border-none"
+            className="w-full py-[12px] rounded-xl text-label tracking-[1.5px] uppercase cursor-pointer border-none"
             style={{ fontFamily: "'DM Mono', monospace", background: 'var(--coral)', color: 'white' }}>
             Buy Now — $85,000
           </button>
           {!showDeactivateConfirm ? (
             <button
               onClick={() => setShowDeactivateConfirm(true)}
-              className="w-full py-[8px] text-[8px] tracking-[1px] uppercase cursor-pointer bg-transparent border-none"
+              className="w-full py-[8px] text-caption tracking-[1px] uppercase cursor-pointer bg-transparent border-none"
               style={{ fontFamily: "'DM Mono', monospace", color: 'var(--muted)' }}>
               Close Deal Room
             </button>
           ) : (
             <div className="rounded-xl p-3 mt-1" style={{ background: 'rgba(255,104,72,0.06)', border: '1px solid rgba(255,104,72,0.2)' }}>
-              <p className="text-[10px] text-center mb-2" style={{ color: '#FF6848' }}>
+              <p className="text-label text-center mb-2" style={{ color: '#FF6848' }}>
                 Are you sure? This will close the deal room for your team.
               </p>
               <div className="flex gap-2">
                 <button onClick={() => setShowDeactivateConfirm(false)}
-                  className="flex-1 py-[8px] rounded-lg text-[9px] tracking-[1px] uppercase cursor-pointer"
+                  className="flex-1 py-[8px] rounded-lg text-caption tracking-[1px] uppercase cursor-pointer"
                   style={{ fontFamily: "'DM Mono', monospace", background: '#FAFAF7', border: '1px solid var(--border)', color: '#6a6660' }}>
                   Cancel
                 </button>
                 <button onClick={deactivateDealRoom}
-                  className="flex-1 py-[8px] rounded-lg text-[9px] tracking-[1px] uppercase cursor-pointer border-none"
+                  className="flex-1 py-[8px] rounded-lg text-caption tracking-[1px] uppercase cursor-pointer border-none"
                   style={{ fontFamily: "'DM Mono', monospace", background: '#FF6848', color: 'white' }}>
                   Yes, Close It
                 </button>

@@ -102,7 +102,7 @@ export default function DealRoomsList({ open, onClose, onOpenDealRoom, teamId, s
         <div className="text-[32px] tracking-[2px] leading-none" style={{ fontFamily: "'Bebas Neue', sans-serif", color: '#FFFFFF' }}>
           Active Deals
         </div>
-        <div className="text-[11px] mt-1" style={{ color: 'rgba(255,255,255,0.5)' }}>
+        <div className="text-body mt-1" style={{ color: 'rgba(255,255,255,0.5)' }}>
           {dealRooms.length} open deal room{dealRooms.length !== 1 ? 's' : ''}
         </div>
       </div>
@@ -114,7 +114,7 @@ export default function DealRoomsList({ open, onClose, onOpenDealRoom, teamId, s
         ) : dealRooms.length === 0 ? (
           <div className="py-12 text-center">
             <div className="text-[32px] mb-3" style={{ opacity: 0.3 }}>🤝</div>
-            <p className="text-[11px] leading-relaxed" style={{ fontFamily: "'DM Mono', monospace", color: 'var(--muted)' }}>
+            <p className="text-body leading-relaxed" style={{ fontFamily: "'DM Mono', monospace", color: 'var(--muted)' }}>
               No active deal rooms yet. Open a song and start one to collaborate with your team.
             </p>
           </div>
@@ -135,12 +135,12 @@ export default function DealRoomsList({ open, onClose, onOpenDealRoom, teamId, s
                         style={{ fontFamily: "'Bebas Neue', sans-serif", color: 'var(--black)' }}>
                         {dr.song_title}
                       </div>
-                      <div className="text-[10px] mt-[3px]" style={{ color: '#6a6660' }}>
+                      <div className="text-label mt-[3px]" style={{ color: '#6a6660' }}>
                         {dr.song_writers.join(' · ')}
                       </div>
                     </div>
                     {song && (
-                      <span className={`px-2 py-1 rounded-full text-[7px] tracking-[1px] uppercase ${
+                      <span className={`px-2 py-1 rounded-full text-micro tracking-[1px] uppercase ${
                         song.status === 'reserved' ? 'bg-blue-50 text-blue-700' :
                         song.status === 'purchased' ? 'bg-purple-50 text-purple-700' :
                         'bg-green-50 text-green-700'
@@ -149,7 +149,7 @@ export default function DealRoomsList({ open, onClose, onOpenDealRoom, teamId, s
                       </span>
                     )}
                   </div>
-                  <div className="flex items-center gap-4 text-[9px]" style={{ fontFamily: "'DM Mono', monospace", color: '#6a6660' }}>
+                  <div className="flex items-center gap-4 text-caption" style={{ fontFamily: "'DM Mono', monospace", color: '#6a6660' }}>
                     <span>{dr.reaction_count} vote{dr.reaction_count !== 1 ? 's' : ''}</span>
                     <span>{dr.comment_count} comment{dr.comment_count !== 1 ? 's' : ''}</span>
                     <span className="ml-auto" style={{ color: 'var(--sky)' }}>Open →</span>

@@ -162,7 +162,7 @@ export default function Home() {
                 <div className="text-[38px] tracking-[2px] leading-[0.95]" style={{ fontFamily: "'Bebas Neue', sans-serif" }}>
                   {tabTitle}
                 </div>
-                <div className="text-[11px] mt-[3px]" style={{ color: '#6a6660' }}>
+                <div className="text-body mt-[3px]" style={{ color: '#6a6660' }}>
                   Tier 1 · {filteredSongs.filter(s => s.status === 'available').length} available
                 </div>
               </div>
@@ -172,12 +172,12 @@ export default function Home() {
 
             {/* Sort row */}
             <div className="flex items-center justify-between px-5 pb-[10px]">
-              <div className="text-[11px]" style={{ color: '#5a5650' }}>{filteredSongs.length} songs</div>
+              <div className="text-body" style={{ color: '#5a5650' }}>{filteredSongs.length} songs</div>
               <button onClick={() => setSortOpen(true)}
                 className="flex items-center gap-[5px] px-[11px] py-[6px] rounded-md cursor-pointer"
                 style={{
                   fontFamily: "'DM Mono', monospace",
-                  fontSize: 9,
+                  fontSize: 13,
                   letterSpacing: 1.5,
                   textTransform: 'uppercase',
                   color: 'var(--muted)',
@@ -193,7 +193,7 @@ export default function Home() {
               {filteredSongs.length === 0 ? (
                 <div className="py-12 text-center" style={{ background: 'var(--th-white)' }}>
                   <p className="text-[24px] tracking-[2px]" style={{ fontFamily: "'Bebas Neue', sans-serif", color: 'var(--muted-l)' }}>No Songs</p>
-                  <p className="text-[11px] mt-1" style={{ color: 'var(--muted)' }}>
+                  <p className="text-body mt-1" style={{ color: 'var(--muted)' }}>
                     {activeTab === 'reserved' ? 'Reserve a song to hold it for 72 hours.' :
                      activeTab === 'purchased' ? 'Purchased songs will appear here.' :
                      'No songs match your filters.'}

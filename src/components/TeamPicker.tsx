@@ -52,7 +52,7 @@ export default function TeamPicker({ onSelect }: TeamPickerProps) {
             style={{ fontFamily: "'Bebas Neue', sans-serif", color: '#FFFFFF' }}>
             HEARD
           </div>
-          <p className="text-[10px] tracking-[2px] uppercase"
+          <p className="text-label tracking-[2px] uppercase"
             style={{ fontFamily: "'DM Mono', monospace", color: 'rgba(255,255,255,0.4)' }}>
             Select Your Team
           </p>
@@ -73,11 +73,11 @@ export default function TeamPicker({ onSelect }: TeamPickerProps) {
                 {team.name}
               </div>
               {team.description && (
-                <div className="text-[10px]" style={{ color: 'rgba(255,255,255,0.4)', fontFamily: "'DM Mono', monospace" }}>
+                <div className="text-label" style={{ color: 'rgba(255,255,255,0.4)', fontFamily: "'DM Mono', monospace" }}>
                   {team.description}
                 </div>
               )}
-              <div className="text-[9px] mt-1 uppercase tracking-[1px]" style={{ color: 'var(--violet)', fontFamily: "'DM Mono', monospace" }}>
+              <div className="text-caption mt-1 uppercase tracking-[1px]" style={{ color: 'var(--violet)', fontFamily: "'DM Mono', monospace" }}>
                 {team.role_in_team}
               </div>
             </button>

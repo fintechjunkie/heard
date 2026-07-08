@@ -129,12 +129,12 @@ export default function ArtistMode({ open, onClose, onOpenProfile, onOpenDetail,
           <span className="text-[18px] tracking-[3px]" style={{ fontFamily: "'Bebas Neue', sans-serif", color: '#FFFFFF' }}>Pocket Songs</span>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-[8px] tracking-[1px]" style={{ fontFamily: "'DM Mono', monospace", color: effectiveColor }}>
+          <span className="text-caption tracking-[1px]" style={{ fontFamily: "'DM Mono', monospace", color: effectiveColor }}>
             {queuedSongs.length} song{queuedSongs.length !== 1 ? 's' : ''}
           </span>
           {!inline && (
             <button onClick={onClose}
-              className="px-[10px] py-[5px] rounded-full text-[8px] tracking-[1.5px] uppercase cursor-pointer"
+              className="px-[10px] py-[5px] rounded-full text-caption tracking-[1.5px] uppercase cursor-pointer"
               style={{
                 fontFamily: "'DM Mono', monospace",
                 background: 'rgba(255,255,255,0.08)',
@@ -153,7 +153,7 @@ export default function ArtistMode({ open, onClose, onOpenProfile, onOpenDetail,
           <button
             key={theme.key}
             onClick={() => setActiveTheme(theme.key)}
-            className="flex-shrink-0 whitespace-nowrap px-[12px] py-[6px] rounded-full text-[8px] tracking-[1px] uppercase cursor-pointer transition-all duration-200"
+            className="flex-shrink-0 whitespace-nowrap px-[12px] py-[6px] rounded-full text-caption tracking-[1px] uppercase cursor-pointer transition-all duration-200"
             style={{
               fontFamily: "'DM Mono', monospace",
               border: activeTheme === theme.key
@@ -182,7 +182,7 @@ export default function ArtistMode({ open, onClose, onOpenProfile, onOpenDetail,
             <button
               key={s.id}
               onClick={() => { setCurrentIndex(i); }}
-              className="flex-shrink-0 whitespace-nowrap px-[10px] py-[5px] rounded-full text-[7px] tracking-[0.5px] uppercase cursor-pointer transition-all duration-150"
+              className="flex-shrink-0 whitespace-nowrap px-[10px] py-[5px] rounded-full text-micro tracking-[0.5px] uppercase cursor-pointer transition-all duration-150"
               style={{
                 fontFamily: "'DM Mono', monospace",
                 border: i === currentIndex ? `1px solid ${effectiveColor}` : '1px solid rgba(255,255,255,0.1)',
@@ -202,7 +202,7 @@ export default function ArtistMode({ open, onClose, onOpenProfile, onOpenDetail,
           <div className="text-center py-16">
             <div className="text-[48px] mb-4" style={{ opacity: 0.3 }}>🎵</div>
             <p className="text-[28px] tracking-[2px] mb-2" style={{ fontFamily: "'Bebas Neue', sans-serif", color: 'rgba(255,255,255,0.2)' }}>No Songs Selected</p>
-            <p className="text-[11px] leading-relaxed max-w-[240px] mx-auto" style={{ fontFamily: "'DM Mono', monospace", color: 'rgba(255,255,255,0.25)' }}>
+            <p className="text-body leading-relaxed max-w-[240px] mx-auto" style={{ fontFamily: "'DM Mono', monospace", color: 'rgba(255,255,255,0.25)' }}>
               Tap the <span style={{ color: 'var(--violet)' }}>♫ Artist</span> button on songs in the bank to add them to your queue.
             </p>
           </div>
@@ -224,7 +224,7 @@ export default function ArtistMode({ open, onClose, onOpenProfile, onOpenDetail,
                 )}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between mb-1">
-                    <div className="text-[8px] tracking-[1.5px] uppercase"
+                    <div className="text-caption tracking-[1.5px] uppercase"
                       style={{ fontFamily: "'DM Mono', monospace", color: 'rgba(255,255,255,0.5)' }}>
                       {song.genre} · {song.bpm} bpm · {song.key}
                     </div>
@@ -240,7 +240,7 @@ export default function ArtistMode({ open, onClose, onOpenProfile, onOpenDetail,
                         <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.6)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                           <circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>
                         </svg>
-                        <span className="text-[7px] tracking-[1px] uppercase" style={{ fontFamily: "'DM Mono', monospace", color: 'rgba(255,255,255,0.5)' }}>Info</span>
+                        <span className="text-micro tracking-[1px] uppercase" style={{ fontFamily: "'DM Mono', monospace", color: 'rgba(255,255,255,0.5)' }}>Info</span>
                       </button>
                     )}
                   </div>
@@ -263,7 +263,7 @@ export default function ArtistMode({ open, onClose, onOpenProfile, onOpenDetail,
                                 setTimeout(() => onOpenProfile(member.id), 300);
                               }
                             }}
-                            className="bg-transparent border-none cursor-pointer underline text-[11px]"
+                            className="bg-transparent border-none cursor-pointer underline text-body"
                             style={{ color: 'rgba(255,255,255,0.72)', textDecorationColor: 'rgba(255,255,255,0.3)' }}
                           >
                             {writer}
@@ -315,7 +315,7 @@ export default function ArtistMode({ open, onClose, onOpenProfile, onOpenDetail,
                 >
                   <div className="flex flex-col items-center">
                     <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', lineHeight: 1 }}>↺</span>
-                    <span style={{ fontSize: 6, fontFamily: "'DM Mono', monospace", color: 'rgba(255,255,255,0.4)', lineHeight: 1 }}>10</span>
+                    <span style={{ fontSize: 12, fontFamily: "'DM Mono', monospace", color: 'rgba(255,255,255,0.4)', lineHeight: 1 }}>10</span>
                   </div>
                 </button>
 
@@ -342,7 +342,7 @@ export default function ArtistMode({ open, onClose, onOpenProfile, onOpenDetail,
                 >
                   <div className="flex flex-col items-center">
                     <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', lineHeight: 1 }}>↻</span>
-                    <span style={{ fontSize: 6, fontFamily: "'DM Mono', monospace", color: 'rgba(255,255,255,0.4)', lineHeight: 1 }}>10</span>
+                    <span style={{ fontSize: 12, fontFamily: "'DM Mono', monospace", color: 'rgba(255,255,255,0.4)', lineHeight: 1 }}>10</span>
                   </div>
                 </button>
               </div>
@@ -350,7 +350,7 @@ export default function ArtistMode({ open, onClose, onOpenProfile, onOpenDetail,
               {/* Progress bar */}
               <div className="mb-4">
                 <div className="flex items-center justify-between mb-1">
-                  <span className="text-[7px]" style={{ fontFamily: "'DM Mono', monospace", color: 'rgba(255,255,255,0.3)' }}>
+                  <span className="text-micro" style={{ fontFamily: "'DM Mono', monospace", color: 'rgba(255,255,255,0.3)' }}>
                     {currentIndex + 1} / {queuedSongs.length}
                   </span>
                 </div>
@@ -376,7 +376,7 @@ export default function ArtistMode({ open, onClose, onOpenProfile, onOpenDetail,
                         boxShadow: isSelected ? `0 0 12px ${effectiveColor}44, inset 0 0 12px ${effectiveColor}22` : 'none',
                       }}>
                       <span className={`block ${isSelected ? 'text-[20px]' : 'text-[16px]'}`}>{r.emoji}</span>
-                      <span className={`tracking-[0.5px] uppercase block mt-[3px] ${isSelected ? 'text-[7px] font-medium' : 'text-[6px]'}`}
+                      <span className={`tracking-[0.5px] uppercase block mt-[3px] ${isSelected ? 'text-micro font-medium' : 'text-micro'}`}
                         style={{ color: isSelected ? 'white' : 'rgba(255,255,255,0.35)' }}>
                         {r.label}
                       </span>
@@ -389,7 +389,7 @@ export default function ArtistMode({ open, onClose, onOpenProfile, onOpenDetail,
                 <div className="flex items-center gap-[6px] mt-3 px-[10px] py-[8px] rounded-lg"
                   style={{ background: `${effectiveColor}0a`, border: `1px solid ${effectiveColor}22` }}>
                   <span className="text-[14px]">{rxData.emoji}</span>
-                  <span className="text-[10px]" style={{ color: 'rgba(255,255,255,0.6)' }}>
+                  <span className="text-label" style={{ color: 'rgba(255,255,255,0.6)' }}>
                     You said: <strong style={{ color: '#fff' }}>{rxData.label}</strong> · shared with your team
                   </span>
                 </div>

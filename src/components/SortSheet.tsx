@@ -35,7 +35,7 @@ export default function SortSheet({ open, onClose }: SortSheetProps) {
                 background: sortMode === opt.key ? 'var(--black)' : 'var(--th-white)',
                 color: sortMode === opt.key ? 'var(--acid)' : 'var(--black)',
                 fontFamily: "'DM Mono', monospace",
-                fontSize: 11,
+                fontSize: 15,
                 letterSpacing: 0.5,
               }}
             >

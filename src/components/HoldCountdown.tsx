@@ -40,7 +40,7 @@ export default function HoldCountdown({ reservedUntil, compact }: HoldCountdownP
     return (
       <div className="flex items-center gap-2 px-3 py-2 rounded-lg"
         style={{ background: 'rgba(90,180,255,0.1)', border: '1px solid rgba(90,180,255,0.25)' }}>
-        <span className="text-[8px] tracking-[1.5px] uppercase" style={{ fontFamily: "'DM Mono', monospace", color: 'var(--sky)' }}>
+        <span className="text-caption tracking-[1.5px] uppercase" style={{ fontFamily: "'DM Mono', monospace", color: 'var(--sky)' }}>
           Hold expires in
         </span>
         <span className="text-[14px] tracking-[2px] font-bold" style={{ fontFamily: "'Bebas Neue', sans-serif", color: 'var(--sky)' }}>
@@ -54,14 +54,14 @@ export default function HoldCountdown({ reservedUntil, compact }: HoldCountdownP
     <div className="rounded-xl px-4 py-3" style={{ background: 'var(--b2)', border: '1px solid var(--b3)' }}>
       <div className="flex items-center justify-between">
         <div>
-          <div className="text-[8px] tracking-[2px] uppercase mb-[3px]" style={{ fontFamily: "'DM Mono', monospace", color: 'rgba(255,255,255,0.5)' }}>
+          <div className="text-caption tracking-[2px] uppercase mb-[3px]" style={{ fontFamily: "'DM Mono', monospace", color: 'rgba(255,255,255,0.5)' }}>
             Hold Expires In
           </div>
           <div className="text-[32px] tracking-[2px] leading-none" style={{ fontFamily: "'Bebas Neue', sans-serif", color: 'var(--acid)' }}>
             {timeLeft}
           </div>
         </div>
-        <div className="text-[10px] text-right max-w-[110px]" style={{ color: 'rgba(255,255,255,0.55)', lineHeight: 1.5 }}>
+        <div className="text-label text-right max-w-[110px]" style={{ color: 'rgba(255,255,255,0.55)', lineHeight: 1.5 }}>
           Song is off-market. 72 hours to complete.
         </div>
       </div>

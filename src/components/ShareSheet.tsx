@@ -36,7 +36,7 @@ export default function ShareSheet({ song, open, onClose }: ShareSheetProps) {
   return (
     <BottomSheet open={open} onClose={onClose}>
       <div className="p-5">
-        <div className="text-[8px] tracking-[2px] uppercase mb-1" style={{ fontFamily: "'DM Mono', monospace", color: 'var(--muted)' }}>
+        <div className="text-caption tracking-[2px] uppercase mb-1" style={{ fontFamily: "'DM Mono', monospace", color: 'var(--muted)' }}>
           {song ? `Sharing: ${song.title}` : 'Sharing the full Song Bank'}
         </div>
         <div className="text-[22px] tracking-[2px] mb-4" style={{ fontFamily: "'Bebas Neue', sans-serif" }}>
@@ -55,7 +55,7 @@ export default function ShareSheet({ song, open, onClose }: ShareSheetProps) {
             onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
           />
           <button onClick={handleAdd}
-            className="px-3 py-[10px] rounded-lg text-[9px] tracking-[1px] uppercase cursor-pointer border-none"
+            className="px-3 py-[10px] rounded-lg text-caption tracking-[1px] uppercase cursor-pointer border-none"
             style={{ fontFamily: "'DM Mono', monospace", background: 'var(--black)', color: '#FFFFFF' }}>
             + Add
           </button>
@@ -65,13 +65,13 @@ export default function ShareSheet({ song, open, onClose }: ShareSheetProps) {
         <div className="flex flex-col gap-2 mb-4 max-h-[200px] overflow-y-auto scrollbar-hide">
           {recipients.map((r, i) => (
             <div key={i} className="flex items-center gap-3 py-2 px-3 rounded-lg" style={{ background: 'var(--th-white)', border: '1px solid var(--border)' }}>
-              <div className="w-[28px] h-[28px] rounded-full flex items-center justify-center text-[9px] font-medium flex-shrink-0"
+              <div className="w-[28px] h-[28px] rounded-full flex items-center justify-center text-caption font-medium flex-shrink-0"
                 style={{ fontFamily: "'DM Mono', monospace", background: `${r.color}22`, color: r.color }}>
                 {r.initials}
               </div>
               <div className="flex-1 min-w-0">
                 <div className="text-[12px] font-medium truncate">{r.name}</div>
-                <div className="text-[9px]" style={{ fontFamily: "'DM Mono', monospace", color: '#6a6660' }}>{r.role}</div>
+                <div className="text-caption" style={{ fontFamily: "'DM Mono', monospace", color: '#6a6660' }}>{r.role}</div>
               </div>
               <button onClick={() => setRecipients(recipients.filter((_, j) => j !== i))}
                 className="text-[12px] cursor-pointer bg-transparent border-none" style={{ color: 'var(--muted)' }}>✕</button>
@@ -88,7 +88,7 @@ export default function ShareSheet({ song, open, onClose }: ShareSheetProps) {
         />
 
         <button onClick={handleSend}
-          className="w-full py-[14px] rounded-xl text-[10px] tracking-[1.5px] uppercase cursor-pointer border-none"
+          className="w-full py-[14px] rounded-xl text-label tracking-[1.5px] uppercase cursor-pointer border-none"
           style={{ fontFamily: "'DM Mono', monospace", background: 'var(--sky)', color: 'var(--black)' }}>
           Send to Team
         </button>

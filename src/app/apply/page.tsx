@@ -66,12 +66,12 @@ export default function ApplyPage() {
             style={{ fontFamily: "'Bebas Neue', sans-serif", color: 'var(--acid)' }}>
             Application Received
           </div>
-          <p className="text-[11px] leading-relaxed mb-6"
+          <p className="text-body leading-relaxed mb-6"
             style={{ fontFamily: "'DM Mono', monospace", color: 'rgba(255,255,255,0.5)' }}>
             Thank you, {form.fullName}. Your application is under review.
             You&apos;ll receive access once approved by our team.
           </p>
-          <a href="/login" className="text-[10px] tracking-[1px] uppercase"
+          <a href="/login" className="text-label tracking-[1px] uppercase"
             style={{ color: 'var(--violet)', fontFamily: "'DM Mono', monospace", textDecoration: 'none' }}>
             ← Back to Login
           </a>
@@ -89,7 +89,7 @@ export default function ApplyPage() {
             style={{ fontFamily: "'Bebas Neue', sans-serif", color: '#ffffff', textShadow: '0 0 20px rgba(200,255,69,0.3)' }}>
             HEARD
           </div>
-          <p className="text-[10px] tracking-[2px] uppercase"
+          <p className="text-label tracking-[2px] uppercase"
             style={{ fontFamily: "'DM Mono', monospace", color: 'rgba(255,255,255,0.4)' }}>
             Apply for Access
           </p>
@@ -155,7 +155,7 @@ export default function ApplyPage() {
           />
 
           {error && (
-            <div className="text-[11px] px-3 py-2 rounded-lg"
+            <div className="text-body px-3 py-2 rounded-lg"
               style={{ background: 'rgba(255,104,72,0.1)', border: '1px solid rgba(255,104,72,0.3)', color: 'var(--coral)' }}>
               {error}
             </div>
@@ -164,7 +164,7 @@ export default function ApplyPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 rounded-lg text-[11px] tracking-[2px] uppercase cursor-pointer border-none mt-2"
+            className="w-full py-3 rounded-lg text-body tracking-[2px] uppercase cursor-pointer border-none mt-2"
             style={{ fontFamily: "'DM Mono', monospace", background: 'var(--violet)', color: '#fff', opacity: loading ? 0.6 : 1 }}
           >
             {loading ? 'Submitting...' : 'Submit Application'}
@@ -172,7 +172,7 @@ export default function ApplyPage() {
         </form>
 
         <div className="text-center mt-5">
-          <a href="/login" className="text-[10px] tracking-[1px] uppercase"
+          <a href="/login" className="text-label tracking-[1px] uppercase"
             style={{ color: 'rgba(255,255,255,0.35)', fontFamily: "'DM Mono', monospace", textDecoration: 'none' }}>
             ← Already have access? Sign in
           </a>

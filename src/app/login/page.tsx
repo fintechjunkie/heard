@@ -69,7 +69,7 @@ export default function LoginPage() {
             HEARD
           </div>
           <div className="w-[6px] h-[6px] rounded-full mx-auto mb-3 animate-blink" style={{ background: 'var(--acid)' }} />
-          <p className="text-[10px] tracking-[2px] uppercase"
+          <p className="text-label tracking-[2px] uppercase"
             style={{ fontFamily: "'DM Mono', monospace", color: 'rgba(255,255,255,0.4)' }}>
             Private Song Marketplace
           </p>
@@ -107,7 +107,7 @@ export default function LoginPage() {
           />
 
           {error && (
-            <div className="text-[11px] px-3 py-2 rounded-lg"
+            <div className="text-body px-3 py-2 rounded-lg"
               style={{ background: 'rgba(255,104,72,0.1)', border: '1px solid rgba(255,104,72,0.3)', color: 'var(--coral)' }}>
               {error}
             </div>
@@ -116,7 +116,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 rounded-lg text-[11px] tracking-[2px] uppercase cursor-pointer border-none mt-2"
+            className="w-full py-3 rounded-lg text-body tracking-[2px] uppercase cursor-pointer border-none mt-2"
             style={{
               fontFamily: "'DM Mono', monospace",
               background: 'var(--acid)',
@@ -130,10 +130,10 @@ export default function LoginPage() {
 
         {/* Apply link */}
         <div className="text-center mt-6">
-          <p className="text-[10px]" style={{ color: 'rgba(255,255,255,0.3)', fontFamily: "'DM Mono', monospace" }}>
+          <p className="text-label" style={{ color: 'rgba(255,255,255,0.3)', fontFamily: "'DM Mono', monospace" }}>
             Don&apos;t have access?
           </p>
-          <a href="/apply" className="text-[10px] tracking-[1px] uppercase mt-1 inline-block"
+          <a href="/apply" className="text-label tracking-[1px] uppercase mt-1 inline-block"
             style={{ color: 'var(--violet)', fontFamily: "'DM Mono', monospace", textDecoration: 'none' }}>
             Apply for an invitation
           </a>

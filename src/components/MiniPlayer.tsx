@@ -63,7 +63,7 @@ export default function MiniPlayer({ onOpenDetail, onReserve, onBuy }: MiniPlaye
             style={{ fontFamily: "'Bebas Neue', sans-serif", color: '#FFFFFF' }}>
             {activeSong.title}
           </div>
-          <div className="truncate text-[8px] tracking-[0.5px]"
+          <div className="truncate text-caption tracking-[0.5px]"
             style={{ fontFamily: "'DM Mono', monospace", color: 'rgba(255,255,255,0.4)' }}>
             {activeSong.writers.join(' · ')}
           </div>
@@ -72,7 +72,7 @@ export default function MiniPlayer({ onOpenDetail, onReserve, onBuy }: MiniPlaye
         {/* Info button */}
         <button
           onClick={(e) => { e.stopPropagation(); onOpenDetail(activeSong.id); }}
-          className="text-[8px] tracking-[1px] uppercase px-[8px] py-[4px] rounded cursor-pointer border-none"
+          className="text-caption tracking-[1px] uppercase px-[8px] py-[4px] rounded cursor-pointer border-none"
           style={{ fontFamily: "'DM Mono', monospace", background: 'var(--b3)', color: 'rgba(255,255,255,0.5)', border: '1px solid var(--b4)' }}
         >
           Info
