@@ -10,6 +10,13 @@ export default function PhoneFrame({ children }: { children: ReactNode }) {
   // Don't wrap admin pages in the phone frame
   const isAdmin = pathname?.startsWith('/admin');
 
+  // Only the phone shell should lock body scrolling; admin is a normal page.
+  useEffect(() => {
+    if (isAdmin) return;
+    document.body.classList.add('phone-mode');
+    return () => document.body.classList.remove('phone-mode');
+  }, [isAdmin]);
+
   useEffect(() => {
     const el = scaleRef.current;
     if (!el || isAdmin) return;

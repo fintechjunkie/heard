@@ -118,6 +118,10 @@ body {
 @media (min-width: 768px) {
   body {
     background: #f8f8f8;
+  }
+  /* Pinning the viewport is only correct for the phone shell. Applying it to
+     `body` outright also froze /admin, which is a normal scrolling page. */
+  body.phone-mode {
     overflow: hidden;
   }
   .phone-stage {

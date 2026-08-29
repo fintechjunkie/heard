@@ -360,7 +360,7 @@ export default function AdminPage() {
   return (
     <div className="min-h-screen flex" style={{ background: '#f5f5f5' }}>
       {/* Sidebar */}
-      <div className="w-56 bg-white border-r border-gray-200 p-4 flex-shrink-0">
+      <div className="w-56 bg-white border-r border-gray-200 p-4 flex-shrink-0 sticky top-0 self-start h-screen">
         <div className="text-lg font-bold mb-1">Heard</div>
         <div className="text-xs text-gray-400 mb-6">Admin Panel</div>
         {TABS.map(tab => (
@@ -375,7 +375,7 @@ export default function AdminPage() {
       </div>
 
       {/* Main */}
-      <div className="flex-1 p-8 overflow-y-auto">
+      <div className="flex-1 p-8 min-w-0">
         {activeTab === 'dashboard' && (
           <>
             <h2 className="text-2xl font-bold mb-6">Dashboard</h2>
