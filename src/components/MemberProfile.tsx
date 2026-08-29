@@ -2,6 +2,23 @@
 
 import { Member, Song } from '@/data/types';
 import { FEATURES } from '@/lib/features';
+import Waveform from './Waveform';
+
+/**
+ * A small deterministic art tile per song, built from the writer's colour.
+ * The hatch angle and depth come from the song id, so every track gets a
+ * recognisably different tile while the palette stays the writer's own.
+ */
+function songTileStyle(songId: number, color: string): React.CSSProperties {
+  const angle = 100 + ((songId * 47) % 160);
+  const depth = 6 + ((songId * 13) % 6);
+  return {
+    background: `
+      repeating-linear-gradient(${angle}deg, rgba(255,255,255,0.17) 0 2px, rgba(255,255,255,0) 2px ${depth}px),
+      linear-gradient(135deg, ${color} 0%, ${color}cc 45%, #141414 140%)
+    `,
+  };
+}
 
 interface MemberProfileProps {
   member: Member | null;
@@ -145,46 +162,75 @@ export default function MemberProfile({ member, songs, open, onClose, onOpenDeta
             ) : (
               memberSongs.map((s, i) => (
                 <div key={s.id}
-                  className="rounded-xl p-3 mb-2 cursor-pointer border-l-[3px] overflow-hidden"
+                  className="rounded-xl mb-2 overflow-hidden"
                   style={{
-                    // Tinted toward the writer's own colour and staggered, so a
-                    // long list reads as separate songs rather than one slab.
-                    background: i % 2 === 0
-                      ? `linear-gradient(90deg, ${member.color}14, ${member.color}00 60%), var(--th-white)`
-                      : `linear-gradient(90deg, ${member.color}14, ${member.color}00 60%), #F6F2E8`,
+                    background: i % 2 === 0 ? 'var(--th-white)' : '#F6F2E8',
                     border: '1px solid var(--border)',
-                    borderLeftColor: member.color,
-                  }}
-                  onClick={() => { onClose(); setTimeout(() => onOpenDetail(s.id), 100); }}>
-                  <div className="flex items-baseline gap-2 mb-[2px]">
-                    <span className="text-micro flex-shrink-0" style={{ fontFamily: "'DM Mono', monospace", color: 'var(--muted-l)' }}>
-                      {String(i + 1).padStart(2, '0')}
-                    </span>
-                    <span className="text-[16px] tracking-[1px] truncate" style={{ fontFamily: "'Bebas Neue', sans-serif" }}>{s.title}</span>
+                    borderLeft: `3px solid ${member.color}`,
+                  }}>
+                  <div className="flex items-stretch gap-3 p-3">
+                    {/* Art tile — the colour and per-song variation live here,
+                        so the card itself stays calm and readable. */}
+                    <div
+                      onClick={() => { onClose(); setTimeout(() => onOpenDetail(s.id), 100); }}
+                      className="w-[56px] h-[56px] rounded-lg flex-shrink-0 relative overflow-hidden cursor-pointer"
+                      style={songTileStyle(s.id, member.color)}
+                    >
+                      <span
+                        className="absolute bottom-[3px] right-[5px] text-micro"
+                        style={{ fontFamily: "'DM Mono', monospace", color: 'rgba(255,255,255,0.85)' }}
+                      >
+                        {String(i + 1).padStart(2, '0')}
+                      </span>
+                    </div>
+
+                    <div className="flex-1 min-w-0 flex flex-col justify-center">
+                      <div
+                        onClick={() => { onClose(); setTimeout(() => onOpenDetail(s.id), 100); }}
+                        className="text-[19px] tracking-[1px] leading-none truncate cursor-pointer"
+                        style={{ fontFamily: "'Bebas Neue', sans-serif" }}
+                      >
+                        {s.title}
+                      </div>
+                      <div className="flex items-center gap-[5px] flex-wrap mt-[5px]">
+                        <span className="px-[7px] py-[2px] rounded-full text-micro tracking-[1px] uppercase"
+                          style={{
+                            fontFamily: "'DM Mono', monospace",
+                            background: `${member.color}1f`,
+                            color: member.color,
+                            border: `1px solid ${member.color}44`,
+                          }}>
+                          {s.genre}
+                        </span>
+                        <span className="text-caption" style={{ fontFamily: "'DM Mono', monospace", color: '#6a6660' }}>
+                          {s.bpm} BPM · {s.key}
+                        </span>
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-[5px] flex-wrap mb-2">
-                    <span className="px-[7px] py-[2px] rounded-full text-micro tracking-[1px] uppercase"
-                      style={{
-                        fontFamily: "'DM Mono', monospace",
-                        background: `${member.color}1f`,
-                        color: member.color,
-                        border: `1px solid ${member.color}44`,
-                      }}>
-                      {s.genre}
-                    </span>
-                    <span className="text-caption" style={{ fontFamily: "'DM Mono', monospace", color: '#6a6660' }}>
-                      {s.bpm} BPM · {s.key}
-                    </span>
+
+                  {/* Playable waveform in the writer's colour */}
+                  <div className="px-3 pb-[10px]">
+                    <Waveform
+                      song={s}
+                      barCount={38}
+                      height={26}
+                      fillColor={member.color}
+                      baseColor="rgba(140,135,120,0.28)"
+                    />
                   </div>
-                  <div className="flex items-center justify-between">
-                    {FEATURES.pricing
-                      ? <span className="text-[14px] font-medium" style={{ fontFamily: "'Bebas Neue', sans-serif" }}>$85K</span>
-                      : <span />}
-                    <button className="px-3 py-1 rounded-md text-caption tracking-[1px] uppercase cursor-pointer border-none"
-                      style={{ fontFamily: "'DM Mono', monospace", background: 'var(--black)', color: '#FFFFFF' }}>
-                      Details
-                    </button>
-                  </div>
+
+                  {FEATURES.pricing && (
+                    <div className="px-3 pb-3 flex items-center justify-between">
+                      <span className="text-[14px] font-medium" style={{ fontFamily: "'Bebas Neue', sans-serif" }}>$85K</span>
+                      <button
+                        onClick={() => { onClose(); setTimeout(() => onOpenDetail(s.id), 100); }}
+                        className="px-3 py-1 rounded-md text-caption tracking-[1px] uppercase cursor-pointer border-none"
+                        style={{ fontFamily: "'DM Mono', monospace", background: 'var(--black)', color: '#FFFFFF' }}>
+                        Details
+                      </button>
+                    </div>
+                  )}
                 </div>
               ))
             )}
