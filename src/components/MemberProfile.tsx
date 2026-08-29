@@ -47,8 +47,8 @@ export default function MemberProfile({ member, songs, open, onClose, onOpenDeta
     >
       {/* Sticky nav */}
       <div className="flex-shrink-0 flex items-center gap-3 px-4 py-3 sticky top-0 z-10" style={{ background: 'var(--cream)', borderBottom: '1px solid var(--border)' }}>
-        <button onClick={onClose} className="text-[18px] cursor-pointer bg-transparent border-none" style={{ color: 'var(--black)' }}>←</button>
-        <span className="text-[14px] font-medium" style={{ fontFamily: "'DM Mono', monospace" }}>{member.name}</span>
+        <button onClick={onClose} className="text-[18px] cursor-pointer bg-transparent border-none flex-shrink-0" style={{ color: 'var(--black)' }}>←</button>
+        <span className="text-[14px] font-medium truncate min-w-0" style={{ fontFamily: "'DM Mono', monospace" }}>{member.name}</span>
       </div>
 
       <div className="flex-1 overflow-y-auto scrollbar-hide">
@@ -101,8 +101,21 @@ export default function MemberProfile({ member, songs, open, onClose, onOpenDeta
               {member.initials}
             </div>
           ))}
-          <div className="text-label tracking-[1px] uppercase mb-1" style={{ fontFamily: "'DM Mono', monospace", color: member.color }}>{member.role}</div>
-          <div className="text-[40px] tracking-[2px] leading-none mb-2" style={{ fontFamily: "'Bebas Neue', sans-serif", color: '#FFFFFF' }}>{member.name}</div>
+          <div className="text-label tracking-[1px] uppercase mb-[6px]" style={{ fontFamily: "'DM Mono', monospace", color: member.color }}>{member.role}</div>
+          <div
+            className="tracking-[2px] mb-2 px-2"
+            style={{
+              fontFamily: "'Bebas Neue', sans-serif",
+              color: '#FFFFFF',
+              // Bebas at a fixed 40px overflowed longer names on a 393px
+              // screen. Step down past ~14 characters and allow a second line.
+              fontSize: member.name.length > 18 ? 28 : member.name.length > 14 ? 34 : 40,
+              lineHeight: 1.05,
+              overflowWrap: 'break-word',
+            }}
+          >
+            {member.name}
+          </div>
           <div className="text-body mb-4" style={{ color: 'rgba(255,255,255,0.55)', lineHeight: 1.5 }}>{member.bio}</div>
           {/* The whole counter row goes with the credentials — In Bank was the
               only one left and the space is better spent on the photo. */}

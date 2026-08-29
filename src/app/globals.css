@@ -28,6 +28,11 @@
 :root {
   --cream: #F2EDE3;
   --white: #FAFAF7;
+  /* Alias for --white. 30-odd components use `var(--th-white)` inline, which
+     resolved to nothing — the @theme block below defines --color-th-white, a
+     Tailwind token usable as a class, not a custom property. Every one of
+     those backgrounds was silently transparent. */
+  --th-white: #FAFAF7;
   --black: #0A0A0A;
   --b2: #141414;
   --b3: #1E1E1E;

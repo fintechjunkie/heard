@@ -258,24 +258,40 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       );
     }
 
-    // Sort
+    // Sort. Comparisons fall back to title so equal keys keep a stable,
+    // predictable order rather than whatever the source array happened to be.
+    const byTitle = (a: Song, b: Song) => a.title.localeCompare(b.title);
+
     switch (sortMode) {
       case 'closing':
         filtered.sort((a, b) => a.tier1_days_remaining - b.tier1_days_remaining);
         break;
+      case 'title-az':
+        filtered.sort(byTitle);
+        break;
+      case 'genre':
+        filtered.sort((a, b) => (a.genre || '').localeCompare(b.genre || '') || byTitle(a, b));
+        break;
+      case 'pocket':
+        filtered.sort((a, b) => {
+          const aq = artistQueue.includes(a.id) ? 0 : 1;
+          const bq = artistQueue.includes(b.id) ? 0 : 1;
+          return aq - bq || byTitle(a, b);
+        });
+        break;
       case 'bpm-low':
-        filtered.sort((a, b) => a.bpm - b.bpm);
+        filtered.sort((a, b) => a.bpm - b.bpm || byTitle(a, b));
         break;
       case 'bpm-high':
-        filtered.sort((a, b) => b.bpm - a.bpm);
+        filtered.sort((a, b) => b.bpm - a.bpm || byTitle(a, b));
         break;
       case 'writer-az':
-        filtered.sort((a, b) => a.writers[0].localeCompare(b.writers[0]));
+        filtered.sort((a, b) => (a.writers[0] || '').localeCompare(b.writers[0] || '') || byTitle(a, b));
         break;
     }
 
     return filtered;
-  }, [songs, activeTab, savedSongIds, activeGenre, searchQuery, sortMode]);
+  }, [songs, activeTab, savedSongIds, activeGenre, searchQuery, sortMode, artistQueue]);
 
   const getStats = useCallback(() => {
     return {
