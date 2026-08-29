@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useStore } from '@/lib/store';
+import { usePlayer } from '@/lib/player';
 import { FEATURES } from '@/lib/features';
 import TopNav from '@/components/TopNav';
 import BottomTabBar from '@/components/BottomTabBar';
@@ -23,6 +24,7 @@ import TeamPicker from '@/components/TeamPicker';
 
 export default function Home() {
   const store = useStore();
+  const { activeSong } = usePlayer();
   const { songs, members, activeTab, getFilteredSongs, reserveSong, purchaseSong, showToast, noInterestIds } = store;
 
   // Splash screen
@@ -249,6 +251,7 @@ export default function Home() {
                     <SongCard
                       song={song}
                       index={i}
+                      highlighted={!activeSong && i === 0}
                       onOpenDetail={setDetailSongId}
                       onOpenDealRoom={setDealRoomSongId}
                       onOpenRightsPassport={setRightsSongId}

@@ -9,6 +9,8 @@ import Waveform from './Waveform';
 interface SongCardProps {
   song: Song;
   index: number;
+  /** Give the list a visual anchor when no track is playing yet. */
+  highlighted?: boolean;
   onOpenDetail: (songId: number) => void;
   onOpenDealRoom: (songId: number) => void;
   onOpenRightsPassport: (songId: number) => void;
@@ -31,7 +33,7 @@ const REACTION_MAP: Record<string, { emoji: string; label: string }> = {
 };
 
 export default function SongCard({
-  song, index, onOpenDetail, onOpenDealRoom,
+  song, index, highlighted = false, onOpenDetail, onOpenDealRoom,
   onOpenRightsPassport, onOpenProfile, onReserve,
 }: SongCardProps) {
   const { savedSongIds, toggleSave, artistQueue, toggleArtistQueue, showToast, artistReactions, releaseReserve, noInterestIds, toggleNoInterest } = useStore();
@@ -57,8 +59,19 @@ export default function SongCard({
         isPlayingSong ? 'border-l-[3px]' : 'border-l-[3px] border-l-transparent'
       }`}
       style={{
-        background: isPlayingSong ? 'var(--black)' : 'var(--th-white)',
-        borderLeftColor: isPlayingSong ? 'var(--acid)' : 'transparent',
+        // A playing card goes fully dark. A highlighted-but-not-playing card
+        // gets the same accent rail with a soft wash instead, so it anchors the
+        // list without pretending to be the active track.
+        background: isPlayingSong
+          ? 'var(--black)'
+          : highlighted
+            ? 'linear-gradient(90deg, rgba(200,255,69,0.16), rgba(200,255,69,0) 55%), var(--th-white)'
+            : 'var(--th-white)',
+        borderLeftColor: isPlayingSong
+          ? 'var(--acid)'
+          : highlighted
+            ? 'var(--acid)'
+            : 'transparent',
         padding: '16px 16px 13px',
       }}
       onClick={() => {

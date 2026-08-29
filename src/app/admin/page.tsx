@@ -45,6 +45,7 @@ export default function AdminPage() {
   const [songs, setSongs] = useState<Song[]>([]);
   const [members, setMembers] = useState<Member[]>([]);
   const [editingSong, setEditingSong] = useState<Song | null>(null);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const [editingMember, setEditingMember] = useState<Member | null>(null);
   const [mounted, setMounted] = useState(false);
   const [users, setUsers] = useState<UserProfile[]>([]);
@@ -309,25 +310,27 @@ export default function AdminPage() {
     expiring: songs.filter(s => s.tier1_days_remaining <= 14 && s.status === 'available').length,
   };
 
-  const updateSong = async (updated: Song) => {
-    await fetch('/api/songs', {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(updated),
-    });
-    loadSongs();
-    setEditingSong(null);
+  // Every write here used to ignore its response, so a rejected save looked
+  // identical to a successful one. Surface the failure instead.
+  const submitSong = async (song: Song, method: 'POST' | 'PUT') => {
+    setSaveError(null);
+    try {
+      const res = await fetch('/api/songs', {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(song),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || `Save failed (${res.status})`);
+      loadSongs();
+      setEditingSong(null);
+    } catch (err) {
+      setSaveError(err instanceof Error ? err.message : 'Save failed');
+    }
   };
 
-  const addSong = async (newSong: Song) => {
-    await fetch('/api/songs', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(newSong),
-    });
-    loadSongs();
-    setEditingSong(null);
-  };
+  const updateSong = (updated: Song) => submitSong(updated, 'PUT');
+  const addSong = (newSong: Song) => submitSong(newSong, 'POST');
 
   const deleteSong = async (id: number) => {
     if (!confirm('Delete this song?')) return;
@@ -454,7 +457,7 @@ export default function AdminPage() {
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-bold">Songs ({songs.length})</h2>
               <button onClick={() => setEditingSong({
-                id: 0, title: '', writers: [], writer_ids: [], genre: 'Pop', bpm: 120, key: 'C Major',
+                id: 0, title: '', writers: ['Jody Lynn', 'Esjay Jones'], writer_ids: [1, 2], genre: 'K-Pop', bpm: 120, key: 'C Major',
                 mood: [], tier1_days_remaining: 180, days_in_bank: 0, audio_url: '', audio_duration_seconds: 60,
                 color: '#FFB830', gradient: '', status: 'available', reserved_by: null, reserved_until: null,
                 purchased_by: null, purchased_at: null, credit_type: 'fixed', is_new: true, season_id: 1,
@@ -464,6 +467,13 @@ export default function AdminPage() {
                 + Add Song
               </button>
             </div>
+            {saveError && (
+              <div className="mb-4 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-sm text-red-700 flex items-start justify-between gap-3">
+                <span>Could not save: {saveError}</span>
+                <button onClick={() => setSaveError(null)}
+                  className="text-red-400 cursor-pointer bg-transparent border-none flex-shrink-0">✕</button>
+              </div>
+            )}
             <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
               <table className="w-full text-sm">
                 <thead>

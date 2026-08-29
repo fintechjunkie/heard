@@ -1,6 +1,52 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
+/**
+ * Columns that actually exist on the songs table.
+ *
+ * The client-side Song type carries extra camelCase fields (artistFlagged,
+ * artistFlagTime, artistReaction) that are derived, not stored. Passing a whole
+ * Song object to Supabase made it reject the write with "Could not find the
+ * 'artistFlagTime' column" — which the admin UI swallowed, so edits silently
+ * did nothing. Filter here so no caller can reintroduce that.
+ */
+const SONG_COLUMNS = [
+  'title',
+  'writers',
+  'writer_ids',
+  'genre',
+  'bpm',
+  'key',
+  'mood',
+  'tier1_days_remaining',
+  'days_in_bank',
+  'audio_url',
+  'audio_duration_seconds',
+  'color',
+  'gradient',
+  'status',
+  'reserved_by',
+  'reserved_until',
+  'purchased_by',
+  'purchased_at',
+  'credit_type',
+  'is_new',
+  'season_id',
+  'artist_flagged',
+  'artist_flag_time',
+  'artist_reaction',
+  'legal_doc_url',
+  'deleted_at',
+] as const;
+
+function pickSongColumns(body: Record<string, unknown>): Record<string, unknown> {
+  const out: Record<string, unknown> = {};
+  for (const col of SONG_COLUMNS) {
+    if (col in body) out[col] = body[col];
+  }
+  return out;
+}
+
 function getClient() {
   return createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -79,11 +125,17 @@ export async function POST(request: NextRequest) {
 // PUT — update a song
 export async function PUT(request: NextRequest) {
   const body = await request.json();
-  const { id, ...updates } = body;
+  const { id } = body;
 
   if (!id) {
     return NextResponse.json({ error: 'Missing song id' }, { status: 400 });
   }
+
+  const updates = pickSongColumns(body);
+  if (Object.keys(updates).length === 0) {
+    return NextResponse.json({ error: 'No updatable fields provided' }, { status: 400 });
+  }
+  updates.updated_at = new Date().toISOString();
 
   const supabase = getClient();
   const { data, error } = await supabase
@@ -91,10 +143,15 @@ export async function PUT(request: NextRequest) {
     .update(updates)
     .eq('id', id)
     .select()
-    .single();
+    .maybeSingle();
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+  // maybeSingle rather than single: a missing row is a 404, not a 500 with
+  // PostgREST's "cannot coerce the result to a single JSON object".
+  if (!data) {
+    return NextResponse.json({ error: `No song with id ${id}` }, { status: 404 });
   }
   return NextResponse.json(data);
 }
