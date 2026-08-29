@@ -289,7 +289,7 @@ export default function Home() {
                           onReserve={setReserveSongId}
                         />
                       ) : (
-                        <DismissedSongRow song={song} onExpand={toggleExpandedDismissed} />
+                        <DismissedSongRow song={song} index={i} onExpand={toggleExpandedDismissed} />
                       )}
                     </div>
                   ))}

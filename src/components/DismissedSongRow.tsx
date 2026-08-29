@@ -5,6 +5,7 @@ import { useStore } from '@/lib/store';
 
 interface DismissedSongRowProps {
   song: Song;
+  index: number;
   onExpand: (songId: number) => void;
 }
 
@@ -13,14 +14,14 @@ interface DismissedSongRowProps {
  * card, so a long bank stays scannable without losing the song. Tapping opens
  * the full card, where the same button puts it back.
  */
-export default function DismissedSongRow({ song, onExpand }: DismissedSongRowProps) {
+export default function DismissedSongRow({ song, index, onExpand }: DismissedSongRowProps) {
   const { toggleNoInterest, showToast } = useStore();
 
   return (
     <div
       onClick={() => onExpand(song.id)}
       className="flex items-center gap-3 px-4 py-[10px] cursor-pointer"
-      style={{ background: 'var(--th-white)' }}
+      style={{ background: index % 2 === 0 ? 'var(--th-white)' : '#F6F2E8' }}
     >
       <div className="flex-1 min-w-0">
         <div

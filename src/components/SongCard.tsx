@@ -18,6 +18,12 @@ interface SongCardProps {
   onReserve: (songId: number) => void;
 }
 
+// Alternating row tints. Every card sharing one background made a long list
+// read as an undifferentiated block; a half-step toward the page cream is
+// enough to separate rows without looking striped.
+const ROW_BG = 'var(--th-white)';
+const ROW_BG_ALT = '#F6F2E8';
+
 // Each row action carries its own accent so the three read as distinct
 // choices at a glance rather than three identical grey buttons.
 const ACTION_VIOLET = '#B57BFF';
@@ -40,6 +46,7 @@ export default function SongCard({
   const { activeSong, isPlaying, toggle, playSong, previewMode, currentTime } = usePlayer();
   const isSaved = savedSongIds.includes(song.id);
   const isNoInterest = noInterestIds.includes(song.id);
+  const rowBg = index % 2 === 0 ? ROW_BG : ROW_BG_ALT;
   const isQueued = artistQueue.includes(song.id);
   const isActive = activeSong?.id === song.id && isPlaying;
   const isPlayingSong = activeSong?.id === song.id;
@@ -65,8 +72,8 @@ export default function SongCard({
         background: isPlayingSong
           ? 'var(--black)'
           : highlighted
-            ? 'linear-gradient(90deg, rgba(200,255,69,0.16), rgba(200,255,69,0) 55%), var(--th-white)'
-            : 'var(--th-white)',
+            ? `linear-gradient(90deg, rgba(200,255,69,0.16), rgba(200,255,69,0) 55%), ${rowBg}`
+            : rowBg,
         borderLeftColor: isPlayingSong
           ? 'var(--acid)'
           : highlighted
