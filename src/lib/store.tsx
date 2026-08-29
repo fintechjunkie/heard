@@ -13,6 +13,10 @@ interface StoreState {
   /** Songs the user has waved off. They stay in the bank, collapsed and
    *  pushed below the live list, and can be restored at any time. */
   noInterestIds: number[];
+  /** Pocket Songs player appearance. Persisted so a chosen look survives
+   *  leaving the tab, which unmounts the player. */
+  pocketTheme: string;
+  pocketVizMode: string;
   activeTab: string;
   searchQuery: string;
   searchOpen: boolean;
@@ -29,6 +33,8 @@ interface StoreActions {
   setMembers: (members: Member[]) => void;
   toggleSave: (songId: number) => void;
   toggleNoInterest: (songId: number) => void;
+  setPocketTheme: (theme: string) => void;
+  setPocketVizMode: (mode: string) => void;
   reserveSong: (songId: number) => void;
   purchaseSong: (songId: number) => void;
   releaseReserve: (songId: number) => void;
@@ -75,6 +81,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [members, setMembersState] = useState<Member[]>(SEED_MEMBERS);
   const [savedSongIds, setSavedSongIds] = useState<number[]>(() => loadFromStorage('saved', []));
   const [noInterestIds, setNoInterestIds] = useState<number[]>(() => loadFromStorage('noInterest', []));
+  const [pocketTheme, setPocketTheme] = useState<string>(() => loadFromStorage('pocketTheme', 'default'));
+  const [pocketVizMode, setPocketVizMode] = useState<string>(() => loadFromStorage('pocketVizMode', 'waveform'));
   const [activeTab, setActiveTab] = useState('bank');
   const [searchQuery, setSearchQuery] = useState('');
   const [searchOpen, setSearchOpen] = useState(false);
@@ -125,6 +133,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   useEffect(() => { saveToStorage('artistReactions', artistReactions); }, [artistReactions]);
   useEffect(() => { saveToStorage('artistQueue', artistQueue); }, [artistQueue]);
   useEffect(() => { saveToStorage('noInterest', noInterestIds); }, [noInterestIds]);
+  useEffect(() => { saveToStorage('pocketTheme', pocketTheme); }, [pocketTheme]);
+  useEffect(() => { saveToStorage('pocketVizMode', pocketVizMode); }, [pocketVizMode]);
 
   const setSongs = useCallback((newSongs: Song[]) => {
     setSongsState(newSongs);
@@ -303,10 +313,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   return (
     <StoreContext.Provider value={{
-      songs, members, savedSongIds, artistQueue, noInterestIds, activeTab, searchQuery, searchOpen,
+      songs, members, savedSongIds, artistQueue, noInterestIds, pocketTheme, pocketVizMode,
+      activeTab, searchQuery, searchOpen,
       activeGenre, sortMode, toastMessage, artistReactions,
       dealRoomReaction, dealRoomNote,
       setSongs, setMembers, toggleSave, toggleNoInterest, toggleArtistQueue, clearArtistQueue,
+      setPocketTheme, setPocketVizMode,
       reserveSong, purchaseSong, releaseReserve,
       setActiveTab, setSearchQuery, setSearchOpen, setActiveGenre,
       setSortMode, showToast, setArtistReaction, setDealRoomReaction,

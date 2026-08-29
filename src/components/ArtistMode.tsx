@@ -34,11 +34,16 @@ interface ArtistModeProps {
 }
 
 export default function ArtistMode({ open, onClose, onOpenProfile, onOpenDetail, inline }: ArtistModeProps) {
-  const { songs, members, artistQueue, artistReactions, setArtistReaction, showToast } = useStore();
+  const { songs, members, artistQueue, artistReactions, setArtistReaction, showToast,
+    pocketTheme, setPocketTheme, pocketVizMode, setPocketVizMode } = useStore();
   const { activeSong, isPlaying, progress, currentTime, duration, seek, toggle, playSong, skipForward, skipBack, setPreviewMode } = usePlayer();
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [vizMode, setVizMode] = useState<VizMode>('waveform');
-  const [activeTheme, setActiveTheme] = useState('default');
+  // Appearance lives in the store, not local state: leaving the tab unmounts
+  // this component, which was discarding the chosen theme and visualizer.
+  const vizMode = pocketVizMode as VizMode;
+  const setVizMode = (mode: VizMode) => setPocketVizMode(mode);
+  const activeTheme = pocketTheme;
+  const setActiveTheme = setPocketTheme;
 
   // Disable preview mode when in Pocket Songs, re-enable when leaving
   useEffect(() => {
