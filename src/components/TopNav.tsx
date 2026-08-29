@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useStore } from '@/lib/store';
 import { createClient } from '@/lib/supabase/client';
+import { SHARED_PASSWORD, DEMO_SESSION_COOKIE } from '@/lib/features';
 
 interface TopNavProps {
   onArtistMode: () => void;
@@ -29,6 +30,16 @@ export default function TopNav({ onArtistMode, teamName, onSwitchTeam, onOpenDea
   useEffect(() => {
     const supabase = createClient();
     async function loadProfile() {
+      // Shared-password mode has no Supabase user; show the email typed at the
+      // door so the avatar isn't a permanent '??'.
+      if (SHARED_PASSWORD) {
+        let email = '';
+        try { email = localStorage.getItem('theheard_demoEmail') || ''; } catch {}
+        const name = email ? email.split('@')[0].replace(/[._-]+/g, ' ') : 'Guest';
+        setProfile({ full_name: name, email, role: 'manager', tier: 'tier1', company: '' });
+        return;
+      }
+
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         const { data } = await supabase
@@ -54,6 +65,13 @@ export default function TopNav({ onArtistMode, teamName, onSwitchTeam, onOpenDea
   }, [showProfile]);
 
   const handleLogout = async () => {
+    if (SHARED_PASSWORD) {
+      // Clear the demo cookie, or middleware sends us straight back in.
+      document.cookie = `${DEMO_SESSION_COOKIE}=; path=/; max-age=0; samesite=lax`;
+      try { localStorage.removeItem('theheard_demoEmail'); } catch {}
+      window.location.href = '/login';
+      return;
+    }
     const supabase = createClient();
     await supabase.auth.signOut();
     window.location.href = '/login';

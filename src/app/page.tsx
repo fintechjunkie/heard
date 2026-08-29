@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useStore } from '@/lib/store';
+import { FEATURES } from '@/lib/features';
 import { MEMBERS } from '@/data/members';
 import TopNav from '@/components/TopNav';
 import BottomTabBar from '@/components/BottomTabBar';
@@ -48,7 +49,7 @@ export default function Home() {
       return stored ? JSON.parse(stored) : null;
     } catch { return null; }
   });
-  const [showTeamPicker, setShowTeamPicker] = useState(!activeTeam);
+  const [showTeamPicker, setShowTeamPicker] = useState(FEATURES.teams && !activeTeam);
 
   const handleTeamSelect = useCallback((teamId: number, teamName: string) => {
     const team = { id: teamId, name: teamName };
@@ -64,7 +65,7 @@ export default function Home() {
     const curr = store.artistReactions;
     prevReactionsRef.current = curr;
 
-    if (!activeTeam) return;
+    if (!FEATURES.dealRooms || !activeTeam) return;
 
     // Find which song IDs changed
     const allIds = new Set([...Object.keys(prev), ...Object.keys(curr)]);
@@ -145,8 +146,15 @@ export default function Home() {
 
   return (
     <div className="flex flex-col h-full overflow-hidden" style={{ background: 'var(--cream)' }}>
-      {showTeamPicker && <TeamPicker onSelect={handleTeamSelect} />}
-      {activeTab !== 'pocket' && <TopNav onArtistMode={() => {}} teamName={activeTeam?.name} onSwitchTeam={() => setShowTeamPicker(true)} onOpenDealRooms={() => setShowDealRoomsList(true)} />}
+      {FEATURES.teams && showTeamPicker && <TeamPicker onSelect={handleTeamSelect} />}
+      {activeTab !== 'pocket' && (
+        <TopNav
+          onArtistMode={() => {}}
+          teamName={FEATURES.teams ? activeTeam?.name : undefined}
+          onSwitchTeam={FEATURES.teams ? () => setShowTeamPicker(true) : undefined}
+          onOpenDealRooms={FEATURES.dealRooms ? () => setShowDealRoomsList(true) : undefined}
+        />
+      )}
 
       {/* Main content */}
       <div className="flex-1 overflow-y-auto scrollbar-hide" style={{ paddingBottom: activeTab === 'pocket' ? 60 : 140 }}>
@@ -156,37 +164,60 @@ export default function Home() {
           <WritersTab onOpenProfile={setProfileMemberId} />
         ) : (
           <>
-            {/* Page header */}
-            <div className="flex items-end justify-between px-5 pt-[18px] pb-2">
+            {/* Page header — without the tier/price framing there is room for
+                a larger title and the sort control on the same row. */}
+            <div className="flex items-end justify-between px-5 pt-[18px] pb-3">
               <div>
-                <div className="text-[38px] tracking-[2px] leading-[0.95]" style={{ fontFamily: "'Bebas Neue', sans-serif" }}>
+                <div
+                  className="tracking-[2px] leading-[0.95]"
+                  style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: FEATURES.pricing ? 38 : 46 }}
+                >
                   {tabTitle}
                 </div>
                 <div className="text-body mt-[3px]" style={{ color: '#6a6660' }}>
-                  Tier 1 · {filteredSongs.filter(s => s.status === 'available').length} available
+                  {FEATURES.pricing
+                    ? `Tier 1 · ${filteredSongs.filter(s => s.status === 'available').length} available`
+                    : `${filteredSongs.length} song${filteredSongs.length !== 1 ? 's' : ''}`}
                 </div>
               </div>
+              {!FEATURES.pricing && (
+                <button onClick={() => setSortOpen(true)}
+                  className="flex items-center gap-[5px] px-[11px] py-[7px] rounded-md cursor-pointer flex-shrink-0"
+                  style={{
+                    fontFamily: "'DM Mono', monospace",
+                    fontSize: 13,
+                    letterSpacing: 1.5,
+                    textTransform: 'uppercase',
+                    color: 'var(--muted)',
+                    background: 'var(--th-white)',
+                    border: '1px solid var(--border)',
+                  }}>
+                  ⇅ Sort
+                </button>
+              )}
             </div>
 
-            {activeTab === 'bank' && <StatsStrip />}
+            {FEATURES.pricing && activeTab === 'bank' && <StatsStrip />}
 
             {/* Sort row */}
-            <div className="flex items-center justify-between px-5 pb-[10px]">
-              <div className="text-body" style={{ color: '#5a5650' }}>{filteredSongs.length} songs</div>
-              <button onClick={() => setSortOpen(true)}
-                className="flex items-center gap-[5px] px-[11px] py-[6px] rounded-md cursor-pointer"
-                style={{
-                  fontFamily: "'DM Mono', monospace",
-                  fontSize: 13,
-                  letterSpacing: 1.5,
-                  textTransform: 'uppercase',
-                  color: 'var(--muted)',
-                  background: 'var(--th-white)',
-                  border: '1px solid var(--border)',
-                }}>
-                ⇅ Sort
-              </button>
-            </div>
+            {FEATURES.pricing && (
+              <div className="flex items-center justify-between px-5 pb-[10px]">
+                <div className="text-body" style={{ color: '#5a5650' }}>{filteredSongs.length} songs</div>
+                <button onClick={() => setSortOpen(true)}
+                  className="flex items-center gap-[5px] px-[11px] py-[6px] rounded-md cursor-pointer"
+                  style={{
+                    fontFamily: "'DM Mono', monospace",
+                    fontSize: 13,
+                    letterSpacing: 1.5,
+                    textTransform: 'uppercase',
+                    color: 'var(--muted)',
+                    background: 'var(--th-white)',
+                    border: '1px solid var(--border)',
+                  }}>
+                  ⇅ Sort
+                </button>
+              </div>
+            )}
 
             {/* Song list */}
             <div className="mx-5 rounded-[14px] overflow-hidden" style={{ border: '1px solid var(--border)', background: 'var(--border)' }}>
@@ -241,25 +272,27 @@ export default function Home() {
         onBuy={setBuySongId}
         onOpenProfile={(mid) => { setDetailSongId(null); setDetailOpenedFromPocket(false); setTimeout(() => setProfileMemberId(mid), 100); }}
       />
-      <ReserveSheet
+      {FEATURES.commerce && <ReserveSheet
         song={findSong(reserveSongId)}
         open={reserveSongId !== null}
         onClose={() => setReserveSongId(null)}
         onConfirm={handleReserveConfirm}
         teamReservedCount={teamReservedCount}
         maxReserves={MAX_RESERVES_PER_TEAM}
-      />
-      <BuyFlowSheet
+      />}
+      {FEATURES.commerce && <BuyFlowSheet
         song={findSong(buySongId)}
         open={buySongId !== null}
         onClose={() => setBuySongId(null)}
         onComplete={handlePurchaseComplete}
-      />
-      <RightsPassportSheet
-        song={findSong(rightsSongId)}
-        open={rightsSongId !== null}
-        onClose={() => setRightsSongId(null)}
-      />
+      />}
+      {FEATURES.commerce && (
+        <RightsPassportSheet
+          song={findSong(rightsSongId)}
+          open={rightsSongId !== null}
+          onClose={() => setRightsSongId(null)}
+        />
+      )}
       <SortSheet open={sortOpen} onClose={() => setSortOpen(false)} />
 
       {/* Full-screen panels */}
@@ -270,7 +303,9 @@ export default function Home() {
         onClose={() => setProfileMemberId(null)}
         onOpenDetail={setDetailSongId}
       />
-      <DealRoom
+      {FEATURES.dealRooms && (
+        <>
+          <DealRoom
         song={findSong(dealRoomSongId)}
         open={dealRoomSongId !== null}
         onClose={() => setDealRoomSongId(null)}
@@ -279,14 +314,16 @@ export default function Home() {
         onBuy={setBuySongId}
         teamId={activeTeam?.id}
         pocketReaction={dealRoomSongId ? store.artistReactions[dealRoomSongId] || null : null}
-      />
-      <DealRoomsList
-        open={showDealRoomsList}
-        onClose={() => setShowDealRoomsList(false)}
-        onOpenDealRoom={setDealRoomSongId}
-        teamId={activeTeam?.id}
-        songs={songs}
-      />
+          />
+          <DealRoomsList
+            open={showDealRoomsList}
+            onClose={() => setShowDealRoomsList(false)}
+            onOpenDealRoom={setDealRoomSongId}
+            teamId={activeTeam?.id}
+            songs={songs}
+          />
+        </>
+      )}
     </div>
   );
 }

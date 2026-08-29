@@ -3,6 +3,7 @@
 import { Song } from '@/data/types';
 import { MEMBERS } from '@/data/members';
 import { usePlayer } from '@/lib/player';
+import { FEATURES } from '@/lib/features';
 import BottomSheet from './BottomSheet';
 import Waveform from './Waveform';
 import SongArt from './SongArt';
@@ -73,7 +74,7 @@ export default function SongDetailSheet({
           <SongArt songId={song.id} bpm={song.bpm} songKey={song.key} color={song.color} mood={song.mood} height={140} />
 
           {/* Hold countdown if reserved */}
-          {song.status === 'reserved' && song.reserved_until && (
+          {FEATURES.commerce && song.status === 'reserved' && song.reserved_until && (
             <div className="px-5 pt-3">
               <HoldCountdown reservedUntil={song.reserved_until} compact />
             </div>
@@ -140,7 +141,9 @@ export default function SongDetailSheet({
                 ['BPM', song.bpm.toString()],
                 ['Key', song.key],
                 ['Mood', song.mood.join(' · ')],
-                ['Available', song.status === 'purchased' ? 'Purchased' : 'Yes'],
+                ...(FEATURES.commerce
+                  ? [['Available', song.status === 'purchased' ? 'Purchased' : 'Yes']]
+                  : []),
                 ...(song.days_in_bank <= 30 && song.status !== 'purchased'
                   ? [['Added', `${song.days_in_bank} days ago · Brand New`]]
                   : []),
@@ -157,7 +160,7 @@ export default function SongDetailSheet({
           </div>
 
           {/* What You Receive */}
-          <div className="px-5 pb-4">
+          {FEATURES.commerce && <div className="px-5 pb-4">
             <div className="text-caption tracking-[2px] uppercase mb-2" style={{ fontFamily: "'DM Mono', monospace", color: '#5a5650' }}>
               What You Receive
             </div>
@@ -176,7 +179,7 @@ export default function SongDetailSheet({
                 </div>
               ))}
             </div>
-          </div>
+          </div>}
 
           {/* Legal Document */}
           {song.legal_doc_url && (
@@ -202,21 +205,25 @@ export default function SongDetailSheet({
           )}
 
           {/* Spacer for CTAs */}
-          <div className="h-[180px]" />
+          <div style={{ height: FEATURES.commerce ? 180 : 40 }} />
         </div>
 
         {/* Footer CTAs */}
         <div className="flex-shrink-0 flex flex-col gap-2 px-5 pb-5 pt-3" style={{ background: '#F2EDE3', borderTop: '1px solid var(--border)', boxShadow: '0 -8px 20px rgba(0,0,0,0.08)' }}>
-          <button onClick={() => { onClose(); onReserve(song.id); }}
-            className="w-full py-[12px] rounded-xl text-label tracking-[1.5px] uppercase cursor-pointer"
-            style={{ fontFamily: "'DM Mono', monospace", background: 'var(--sky)', color: 'var(--black)', border: 'none' }}>
-            Reserve · 72-Hour Hold
-          </button>
-          <button onClick={() => { onClose(); onBuy(song.id); }}
-            className="w-full py-[12px] rounded-xl text-label tracking-[1.5px] uppercase cursor-pointer"
-            style={{ fontFamily: "'DM Mono', monospace", background: 'var(--coral)', color: 'white', border: 'none' }}>
-            Buy Now — $85,000
-          </button>
+          {FEATURES.commerce && (
+            <>
+              <button onClick={() => { onClose(); onReserve(song.id); }}
+                className="w-full py-[12px] rounded-xl text-label tracking-[1.5px] uppercase cursor-pointer"
+                style={{ fontFamily: "'DM Mono', monospace", background: 'var(--sky)', color: 'var(--black)', border: 'none' }}>
+                Reserve · 72-Hour Hold
+              </button>
+              <button onClick={() => { onClose(); onBuy(song.id); }}
+                className="w-full py-[12px] rounded-xl text-label tracking-[1.5px] uppercase cursor-pointer"
+                style={{ fontFamily: "'DM Mono', monospace", background: 'var(--coral)', color: 'white', border: 'none' }}>
+                Buy Now — $85,000
+              </button>
+            </>
+          )}
           <button onClick={onClose}
             className="w-full py-[10px] text-label tracking-[1px] uppercase cursor-pointer bg-transparent border-none"
             style={{ fontFamily: "'DM Mono', monospace", color: 'var(--muted)' }}>

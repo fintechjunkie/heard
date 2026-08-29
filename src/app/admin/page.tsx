@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Song, Member, Team, TeamMember } from '@/data/types';
 import { SONGS as SEED_SONGS } from '@/data/songs';
 import { MEMBERS as SEED_MEMBERS } from '@/data/members';
+import { upload } from '@vercel/blob/client';
 interface UserProfile {
   id: string;
   email: string;
@@ -47,6 +48,9 @@ export default function AdminPage() {
   const [usersLoading, setUsersLoading] = useState(false);
   const [editingUser, setEditingUser] = useState<UserProfile | null>(null);
   const [editUserForm, setEditUserForm] = useState({ full_name: '', role: '', company: '', bio: '', tier: '' });
+  const [newPassword, setNewPassword] = useState('');
+  const [passwordStatus, setPasswordStatus] = useState<{ ok: boolean; message: string } | null>(null);
+  const [savingPassword, setSavingPassword] = useState(false);
   const [teams, setTeams] = useState<Team[]>([]);
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const [selectedTeamId, setSelectedTeamId] = useState<number | null>(null);
@@ -128,6 +132,27 @@ export default function AdminPage() {
     if (!editingUser) return;
     await updateUser(editingUser.id, editUserForm);
     setEditingUser(null);
+  };
+
+  const saveNewPassword = async () => {
+    if (!editingUser) return;
+    setSavingPassword(true);
+    setPasswordStatus(null);
+    try {
+      const res = await fetch('/api/admin/users', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: editingUser.id, password: newPassword }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'Could not set password');
+      setNewPassword('');
+      setPasswordStatus({ ok: true, message: `Password updated for ${editingUser.email}.` });
+    } catch (err) {
+      setPasswordStatus({ ok: false, message: err instanceof Error ? err.message : 'Could not set password' });
+    } finally {
+      setSavingPassword(false);
+    }
   };
 
   // Teams management
@@ -588,7 +613,7 @@ export default function AdminPage() {
                         }`}>{u.status}</span>
                       </td>
                       <td className="px-4 py-3 flex gap-2">
-                        <button onClick={() => setEditingUser(u)} className="text-blue-600 text-xs cursor-pointer bg-transparent border-none">Edit</button>
+                        <button onClick={() => { setNewPassword(''); setPasswordStatus(null); setEditingUser(u); }} className="text-blue-600 text-xs cursor-pointer bg-transparent border-none">Edit</button>
                         {u.status === 'rejected' && (
                           <button onClick={() => approveUser(u.id)} className="text-green-600 text-xs cursor-pointer bg-transparent border-none">Approve</button>
                         )}
@@ -651,6 +676,42 @@ export default function AdminPage() {
                       <label className="block text-xs text-gray-500 mb-1">Bio</label>
                       <textarea value={editUserForm.bio} onChange={e => setEditUserForm({ ...editUserForm, bio: e.target.value })}
                         rows={3} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none resize-none" />
+                    </div>
+
+                    {/* Password — set only. The stored value is a one-way hash,
+                        so there is nothing to display here. */}
+                    <div className="pt-3 border-t border-gray-100">
+                      <label className="block text-xs text-gray-500 mb-1">Password</label>
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={newPassword}
+                          onChange={e => { setNewPassword(e.target.value); setPasswordStatus(null); }}
+                          placeholder="Type a new password…"
+                          className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none" />
+                        <button
+                          type="button"
+                          onClick={saveNewPassword}
+                          disabled={savingPassword || newPassword.length < 8}
+                          className="px-3 py-2 rounded-lg text-sm border-none whitespace-nowrap"
+                          style={{
+                            background: savingPassword || newPassword.length < 8 ? '#E5E7EB' : '#2563EB',
+                            color: savingPassword || newPassword.length < 8 ? '#9CA3AF' : '#FFFFFF',
+                            cursor: savingPassword || newPassword.length < 8 ? 'not-allowed' : 'pointer',
+                          }}>
+                          {savingPassword ? 'Setting…' : 'Set'}
+                        </button>
+                      </div>
+                      <div className="text-xs text-gray-400 mt-1">
+                        Existing passwords can&apos;t be displayed — Supabase only stores a
+                        one-way hash. You can replace one here (8 characters minimum), then
+                        pass the new password to the user yourself.
+                      </div>
+                      {passwordStatus && (
+                        <div className={`text-xs mt-1 ${passwordStatus.ok ? 'text-green-600' : 'text-red-500'}`}>
+                          {passwordStatus.message}
+                        </div>
+                      )}
                     </div>
                   </div>
                   <div className="flex gap-2 mt-5">
@@ -927,6 +988,28 @@ function SongForm({ song, members, onSave, onCancel }: { song: Song; members: Me
     }
   };
 
+  // Documents go straight from the browser to Blob for the same reason images
+  // do — see the comment in /api/upload/client-token.
+  const handleLegalUpload = async (file: File) => {
+    setLegalUploading(true);
+    setLegalUploadError(null);
+    try {
+      if (file.size > 10 * 1024 * 1024) {
+        throw new Error(`That file is ${(file.size / 1024 / 1024).toFixed(1)}MB — the limit is 10MB.`);
+      }
+      const blob = await upload(`documents/${file.name}`, file, {
+        access: 'public',
+        handleUploadUrl: '/api/upload/client-token',
+        contentType: file.type,
+      });
+      setForm(prev => ({ ...prev, legal_doc_url: blob.url }));
+    } catch (err) {
+      setLegalUploadError(err instanceof Error ? err.message : 'Upload failed');
+    } finally {
+      setLegalUploading(false);
+    }
+  };
+
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
@@ -1105,21 +1188,7 @@ function SongForm({ song, members, onSave, onCancel }: { song: Song; members: Me
                 e.preventDefault();
                 e.stopPropagation();
                 const file = e.dataTransfer.files[0];
-                if (!file) return;
-                setLegalUploading(true);
-                setLegalUploadError(null);
-                try {
-                  const formData = new FormData();
-                  formData.append('file', file);
-                  const res = await fetch('/api/upload/image', { method: 'POST', body: formData });
-                  if (!res.ok) { const err = await res.json(); throw new Error(err.error || 'Upload failed'); }
-                  const data = await res.json();
-                  setForm(prev => ({ ...prev, legal_doc_url: data.url }));
-                } catch (err) {
-                  setLegalUploadError(err instanceof Error ? err.message : 'Upload failed');
-                } finally {
-                  setLegalUploading(false);
-                }
+                if (file) handleLegalUpload(file);
               }}
             >
               {legalUploading ? (
@@ -1133,23 +1202,9 @@ function SongForm({ song, members, onSave, onCancel }: { song: Song; members: Me
                     type="file"
                     accept=".pdf,.doc,.docx"
                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                    onChange={async (e) => {
+                    onChange={(e) => {
                       const file = e.target.files?.[0];
-                      if (!file) return;
-                      setLegalUploading(true);
-                      setLegalUploadError(null);
-                      try {
-                        const formData = new FormData();
-                        formData.append('file', file);
-                        const res = await fetch('/api/upload/image', { method: 'POST', body: formData });
-                        if (!res.ok) { const err = await res.json(); throw new Error(err.error || 'Upload failed'); }
-                        const data = await res.json();
-                        setForm(prev => ({ ...prev, legal_doc_url: data.url }));
-                      } catch (err) {
-                        setLegalUploadError(err instanceof Error ? err.message : 'Upload failed');
-                      } finally {
-                        setLegalUploading(false);
-                      }
+                      if (file) handleLegalUpload(file);
                     }}
                   />
                 </>
@@ -1182,12 +1237,17 @@ function ImageUploadField({ label, value, onChange }: { label: string; value: st
     setUploading(true);
     setError(null);
     try {
-      const formData = new FormData();
-      formData.append('file', file);
-      const res = await fetch('/api/upload/image', { method: 'POST', body: formData });
-      if (!res.ok) { const err = await res.json(); throw new Error(err.error || 'Upload failed'); }
-      const data = await res.json();
-      onChange(data.url);
+      if (file.size > 10 * 1024 * 1024) {
+        throw new Error(`That image is ${(file.size / 1024 / 1024).toFixed(1)}MB — the limit is 10MB.`);
+      }
+      // Upload straight from the browser to Vercel Blob. Routing the bytes
+      // through our own API would cap the file at the serverless body limit.
+      const blob = await upload(file.name, file, {
+        access: 'public',
+        handleUploadUrl: '/api/upload/client-token',
+        contentType: file.type,
+      });
+      onChange(blob.url);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Upload failed');
     } finally {

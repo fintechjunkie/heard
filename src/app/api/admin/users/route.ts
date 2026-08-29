@@ -46,3 +46,31 @@ export async function PATCH(request: NextRequest) {
   }
   return NextResponse.json(data);
 }
+
+/**
+ * PUT — set a user's password.
+ *
+ * Note there is deliberately no "read password" counterpart: Supabase stores
+ * only a bcrypt hash of the password, so the original text cannot be retrieved
+ * by this API, by a SQL query, or by anyone. Setting a new one is the only
+ * possible operation.
+ */
+export async function PUT(request: NextRequest) {
+  const body = await request.json();
+  const { userId, password } = body;
+
+  if (!userId || !password) {
+    return NextResponse.json({ error: 'Missing userId or password' }, { status: 400 });
+  }
+  if (typeof password !== 'string' || password.length < 8) {
+    return NextResponse.json({ error: 'Password must be at least 8 characters' }, { status: 400 });
+  }
+
+  const supabase = getAdminClient();
+  const { error } = await supabase.auth.admin.updateUserById(userId, { password });
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+  return NextResponse.json({ success: true });
+}

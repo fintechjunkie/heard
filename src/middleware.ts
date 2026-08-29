@@ -1,7 +1,29 @@
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
+import { SHARED_PASSWORD, DEMO_SESSION_COOKIE } from '@/lib/features';
 
 export async function middleware(request: NextRequest) {
+  // ⚠️ Shared-password mode: there is no Supabase session to refresh, so the
+  // gate is the demo cookie set by the login page. See src/lib/features.ts.
+  if (SHARED_PASSWORD) {
+    const { pathname } = request.nextUrl;
+    const isLoginPage = pathname === '/login';
+    const isOpenPath = isLoginPage || pathname === '/apply' || pathname.startsWith('/api');
+    const hasDemoSession = request.cookies.has(DEMO_SESSION_COOKIE);
+
+    if (!hasDemoSession && !isOpenPath) {
+      const url = request.nextUrl.clone();
+      url.pathname = '/login';
+      return NextResponse.redirect(url);
+    }
+    if (hasDemoSession && isLoginPage) {
+      const url = request.nextUrl.clone();
+      url.pathname = '/';
+      return NextResponse.redirect(url);
+    }
+    return NextResponse.next({ request });
+  }
+
   let supabaseResponse = NextResponse.next({ request });
 
   const supabase = createServerClient(

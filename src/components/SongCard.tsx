@@ -2,6 +2,7 @@
 
 import { Song } from '@/data/types';
 import { useStore } from '@/lib/store';
+import { FEATURES } from '@/lib/features';
 import { usePlayer } from '@/lib/player';
 import Waveform from './Waveform';
 
@@ -67,13 +68,13 @@ export default function SongCard({
       }}
     >
       {/* Status ribbons */}
-      {song.status === 'reserved' && (
+      {FEATURES.commerce && song.status === 'reserved' && (
         <span className="absolute top-0 right-0 text-micro tracking-[2px] uppercase px-2 py-[3px] font-medium"
           style={{ fontFamily: "'DM Mono', monospace", background: 'var(--sky)', color: 'var(--black)' }}>
           Reserved
         </span>
       )}
-      {song.status === 'purchased' && (
+      {FEATURES.commerce && song.status === 'purchased' && (
         <span className="absolute top-0 right-0 text-micro tracking-[2px] uppercase px-2 py-[3px] font-medium"
           style={{ fontFamily: "'DM Mono', monospace", background: 'var(--acid)', color: 'var(--black)' }}>
           Purchased
@@ -121,7 +122,7 @@ export default function SongCard({
             </span>
             <span className="text-micro tracking-[0.8px] uppercase" style={{ fontFamily: "'DM Mono', monospace" }}>Info</span>
           </button>
-          <button onClick={(e) => { e.stopPropagation(); onOpenDealRoom(song.id); }}
+          {FEATURES.dealRooms && <button onClick={(e) => { e.stopPropagation(); onOpenDealRoom(song.id); }}
             title="Deal Room"
             className="flex flex-col items-center gap-[2px] cursor-pointer bg-transparent border-none"
             style={{ color: 'var(--sky)' }}>
@@ -132,7 +133,7 @@ export default function SongCard({
               </svg>
             </span>
             <span className="text-micro tracking-[0.8px] uppercase" style={{ fontFamily: "'DM Mono', monospace" }}>Deals</span>
-          </button>
+          </button>}
         </div>
       </div>
 
@@ -142,15 +143,17 @@ export default function SongCard({
           style={{ fontFamily: "'Bebas Neue', sans-serif", color: isPlayingSong ? '#FFFFFF' : 'var(--black)' }}>
           {song.title}
         </span>
-        <span className="text-[18px] tracking-[1px] flex-shrink-0"
-          style={{
-            fontFamily: "'Bebas Neue', sans-serif",
-            color: song.status === 'purchased'
-              ? 'var(--acid)'
-              : isPlayingSong ? 'var(--th-white)' : 'var(--black)',
-          }}>
-          {song.status === 'purchased' ? '✓ Yours' : '$85K'}
-        </span>
+        {FEATURES.pricing && (
+          <span className="text-[18px] tracking-[1px] flex-shrink-0"
+            style={{
+              fontFamily: "'Bebas Neue', sans-serif",
+              color: song.status === 'purchased'
+                ? 'var(--acid)'
+                : isPlayingSong ? 'var(--th-white)' : 'var(--black)',
+            }}>
+            {song.status === 'purchased' ? '✓ Yours' : '$85K'}
+          </span>
+        )}
       </div>
 
       {/* Row 3: Writers */}
@@ -218,7 +221,7 @@ export default function SongCard({
             {m}
           </span>
         ))}
-        <button
+        {FEATURES.commerce && <button
           onClick={(e) => { e.stopPropagation(); onOpenRightsPassport(song.id); }}
           className="ml-auto px-[8px] py-[2px] rounded-full text-micro tracking-[1px] uppercase cursor-pointer border-none"
           style={{
@@ -228,11 +231,11 @@ export default function SongCard({
             border: '1px solid rgba(42,122,42,0.2)',
           }}>
           ✓ Cleared
-        </button>
+        </button>}
       </div>
 
       {/* Row 6: Window strip */}
-      <div className="flex items-center gap-[6px] text-caption"
+      {FEATURES.commerce && <div className="flex items-center gap-[6px] text-caption"
         style={{ color: isPlayingSong ? 'rgba(255,255,255,0.4)' : '#6a6660' }}>
         {song.status === 'purchased' ? (
           <span style={{ color: '#2a7a2a' }}>Rights Transferred · Closed</span>
@@ -245,7 +248,7 @@ export default function SongCard({
             </span>
           </>
         )}
-      </div>
+      </div>}
 
       {/* Row 7: Artist flag (conditional) */}
       {(song.artistFlagged || reactionData) && (
@@ -264,7 +267,7 @@ export default function SongCard({
       )}
 
       {/* Release Reserve button */}
-      {song.status === 'reserved' && (
+      {FEATURES.commerce && song.status === 'reserved' && (
         <button
           onClick={(e) => {
             e.stopPropagation();

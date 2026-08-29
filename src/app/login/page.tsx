@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
+import { SHARED_PASSWORD, DEMO_SESSION_COOKIE } from '@/lib/features';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -15,6 +16,22 @@ export default function LoginPage() {
     e.preventDefault();
     setError(null);
     setLoading(true);
+
+    // ⚠️ Shared-password mode — any email, one common password.
+    // See SHARED_PASSWORD in src/lib/features.ts.
+    if (SHARED_PASSWORD) {
+      if (password !== SHARED_PASSWORD) {
+        setError('Invalid email or password.');
+        setLoading(false);
+        return;
+      }
+      const thirtyDays = 60 * 60 * 24 * 30;
+      document.cookie = `${DEMO_SESSION_COOKIE}=1; path=/; max-age=${thirtyDays}; samesite=lax`;
+      // No real profile exists, so remember the email for the top-nav avatar.
+      try { localStorage.setItem('theheard_demoEmail', email); } catch {}
+      window.location.href = '/';
+      return;
+    }
 
     const { error } = await supabase.auth.signInWithPassword({
       email,
