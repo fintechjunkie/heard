@@ -52,6 +52,12 @@ export default function AdminPage() {
   const [usersLoading, setUsersLoading] = useState(false);
   const [editingUser, setEditingUser] = useState<UserProfile | null>(null);
   const [editUserForm, setEditUserForm] = useState({ full_name: '', role: '', company: '', bio: '', tier: '' });
+  const [showAddUser, setShowAddUser] = useState(false);
+  const [newUserForm, setNewUserForm] = useState({
+    email: '', full_name: '', password: '', role: 'manager', tier: 'tier1', company: '',
+  });
+  const [addUserError, setAddUserError] = useState<string | null>(null);
+  const [addingUser, setAddingUser] = useState(false);
   const [newPassword, setNewPassword] = useState('');
   const [passwordStatus, setPasswordStatus] = useState<{ ok: boolean; message: string } | null>(null);
   const [savingPassword, setSavingPassword] = useState(false);
@@ -136,6 +142,34 @@ export default function AdminPage() {
     if (!editingUser) return;
     await updateUser(editingUser.id, editUserForm);
     setEditingUser(null);
+  };
+
+  const createUser = async () => {
+    setAddingUser(true);
+    setAddUserError(null);
+    try {
+      const res = await fetch('/api/admin/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: newUserForm.email.trim(),
+          password: newUserForm.password,
+          fullName: newUserForm.full_name.trim(),
+          role: newUserForm.role,
+          tier: newUserForm.tier,
+          company: newUserForm.company,
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || `Could not create user (${res.status})`);
+      setShowAddUser(false);
+      setNewUserForm({ email: '', full_name: '', password: '', role: 'manager', tier: 'tier1', company: '' });
+      loadUsers();
+    } catch (err) {
+      setAddUserError(err instanceof Error ? err.message : 'Could not create user');
+    } finally {
+      setAddingUser(false);
+    }
   };
 
   const saveNewPassword = async () => {
@@ -555,10 +589,16 @@ export default function AdminPage() {
           <>
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-bold">Users ({users.length})</h2>
-              <button onClick={loadUsers}
-                className="px-3 py-1 text-xs text-gray-500 border border-gray-200 rounded-lg cursor-pointer bg-white">
-                {usersLoading ? 'Loading...' : 'Refresh'}
-              </button>
+              <div className="flex gap-2">
+                <button onClick={loadUsers}
+                  className="px-3 py-1 text-xs text-gray-500 border border-gray-200 rounded-lg cursor-pointer bg-white">
+                  {usersLoading ? 'Loading...' : 'Refresh'}
+                </button>
+                <button onClick={() => { setAddUserError(null); setShowAddUser(true); }}
+                  className="px-4 py-2 bg-black text-white rounded-lg text-sm cursor-pointer border-none">
+                  + Add User
+                </button>
+              </div>
             </div>
 
             {/* Pending applications */}
@@ -642,6 +682,96 @@ export default function AdminPage() {
                 </tbody>
               </table>
             </div>
+
+            {/* Add User Modal */}
+            {showAddUser && (
+              <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                <div className="bg-white rounded-xl p-6 w-full max-w-md mx-4">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-bold">Add User</h3>
+                    <button onClick={() => setShowAddUser(false)}
+                      className="text-gray-400 text-xl cursor-pointer bg-transparent border-none">✕</button>
+                  </div>
+                  <p className="text-xs text-gray-500 mb-4">
+                    Creates an approved account straight away — no application or approval step.
+                  </p>
+                  <div className="space-y-3">
+                    <div>
+                      <label className="block text-xs text-gray-500 mb-1">Full Name</label>
+                      <input value={newUserForm.full_name}
+                        onChange={e => setNewUserForm({ ...newUserForm, full_name: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none" />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-500 mb-1">Email</label>
+                      <input type="email" value={newUserForm.email}
+                        onChange={e => setNewUserForm({ ...newUserForm, email: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none" />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-500 mb-1">Password</label>
+                      <input type="text" value={newUserForm.password}
+                        onChange={e => setNewUserForm({ ...newUserForm, password: e.target.value })}
+                        placeholder="At least 8 characters"
+                        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none" />
+                      <div className="text-xs text-gray-400 mt-1">
+                        Shown in plain text so you can pass it on — it cannot be read back later.
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-500 mb-1">Role</label>
+                      <select value={newUserForm.role}
+                        onChange={e => setNewUserForm({ ...newUserForm, role: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none bg-white text-gray-800">
+                        <option value="manager">Artist Manager</option>
+                        <option value="ar">A&R Representative</option>
+                        <option value="artist">Artist</option>
+                        <option value="label_admin">Label Admin</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-500 mb-1">Company</label>
+                      <input value={newUserForm.company}
+                        onChange={e => setNewUserForm({ ...newUserForm, company: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none" />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-500 mb-1">Tier</label>
+                      <select value={newUserForm.tier}
+                        onChange={e => setNewUserForm({ ...newUserForm, tier: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none bg-white text-gray-800">
+                        <option value="tier1">Tier 1</option>
+                        <option value="tier2">Tier 2</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {addUserError && (
+                    <div className="mt-3 px-3 py-2 rounded-lg bg-red-50 border border-red-200 text-xs text-red-700">
+                      {addUserError}
+                    </div>
+                  )}
+
+                  <div className="flex gap-2 mt-5">
+                    <button onClick={() => setShowAddUser(false)}
+                      className="flex-1 px-4 py-2 border border-gray-200 rounded-lg text-sm cursor-pointer bg-white text-gray-600">
+                      Cancel
+                    </button>
+                    <button
+                      onClick={createUser}
+                      disabled={addingUser || !newUserForm.email || !newUserForm.full_name || newUserForm.password.length < 8}
+                      className="flex-1 px-4 py-2 rounded-lg text-sm border-none"
+                      style={{
+                        background: addingUser || !newUserForm.email || !newUserForm.full_name || newUserForm.password.length < 8 ? '#E5E7EB' : '#2563EB',
+                        color: addingUser || !newUserForm.email || !newUserForm.full_name || newUserForm.password.length < 8 ? '#9CA3AF' : '#FFFFFF',
+                        cursor: addingUser || !newUserForm.email || !newUserForm.full_name || newUserForm.password.length < 8 ? 'not-allowed' : 'pointer',
+                      }}>
+                      {addingUser ? 'Creating…' : 'Create User'}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Edit User Modal */}
             {editingUser && (
