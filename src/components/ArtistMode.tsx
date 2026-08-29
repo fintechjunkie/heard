@@ -58,6 +58,18 @@ export default function ArtistMode({ open, onClose, onOpenProfile, onOpenDetail,
     }
   }, [queuedSongs.length, currentIndex]);
 
+  // Open on whatever is playing. This is React's "adjust state when a value
+  // changes" pattern — done during render rather than in an effect, so it
+  // resolves before paint and does not cause a cascading re-render. It fires
+  // only when the playing track actually changes, so browsing the picker to a
+  // different song is never fought.
+  const [syncedSongId, setSyncedSongId] = useState<number | null>(null);
+  if (activeSong && activeSong.id !== syncedSongId) {
+    setSyncedSongId(activeSong.id);
+    const idx = queuedSongs.findIndex(s => s.id === activeSong.id);
+    if (idx >= 0 && idx !== currentIndex) setCurrentIndex(idx);
+  }
+
   const song = queuedSongs[currentIndex] || null;
   const themeColor = MOOD_THEMES.find(t => t.key === activeTheme)?.color || '';
 

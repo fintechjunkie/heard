@@ -143,11 +143,39 @@ export default function MemberProfile({ member, songs, open, onClose, onOpenDeta
             {memberSongs.length === 0 ? (
               <p className="text-[13px]" style={{ color: 'var(--muted)', fontWeight: 300 }}>No songs currently in the bank.</p>
             ) : (
-              memberSongs.map(s => (
-                <div key={s.id} className="rounded-xl p-3 mb-2 cursor-pointer" style={{ background: 'var(--th-white)', border: '1px solid var(--border)' }}
+              memberSongs.map((s, i) => (
+                <div key={s.id}
+                  className="rounded-xl p-3 mb-2 cursor-pointer border-l-[3px] overflow-hidden"
+                  style={{
+                    // Tinted toward the writer's own colour and staggered, so a
+                    // long list reads as separate songs rather than one slab.
+                    background: i % 2 === 0
+                      ? `linear-gradient(90deg, ${member.color}14, ${member.color}00 60%), var(--th-white)`
+                      : `linear-gradient(90deg, ${member.color}14, ${member.color}00 60%), #F6F2E8`,
+                    border: '1px solid var(--border)',
+                    borderLeftColor: member.color,
+                  }}
                   onClick={() => { onClose(); setTimeout(() => onOpenDetail(s.id), 100); }}>
-                  <div className="text-[16px] tracking-[1px] mb-[2px]" style={{ fontFamily: "'Bebas Neue', sans-serif" }}>{s.title}</div>
-                  <div className="text-caption mb-2" style={{ fontFamily: "'DM Mono', monospace", color: '#6a6660' }}>{s.genre} · {s.bpm} BPM · {s.key}</div>
+                  <div className="flex items-baseline gap-2 mb-[2px]">
+                    <span className="text-micro flex-shrink-0" style={{ fontFamily: "'DM Mono', monospace", color: 'var(--muted-l)' }}>
+                      {String(i + 1).padStart(2, '0')}
+                    </span>
+                    <span className="text-[16px] tracking-[1px] truncate" style={{ fontFamily: "'Bebas Neue', sans-serif" }}>{s.title}</span>
+                  </div>
+                  <div className="flex items-center gap-[5px] flex-wrap mb-2">
+                    <span className="px-[7px] py-[2px] rounded-full text-micro tracking-[1px] uppercase"
+                      style={{
+                        fontFamily: "'DM Mono', monospace",
+                        background: `${member.color}1f`,
+                        color: member.color,
+                        border: `1px solid ${member.color}44`,
+                      }}>
+                      {s.genre}
+                    </span>
+                    <span className="text-caption" style={{ fontFamily: "'DM Mono', monospace", color: '#6a6660' }}>
+                      {s.bpm} BPM · {s.key}
+                    </span>
+                  </div>
                   <div className="flex items-center justify-between">
                     {FEATURES.pricing
                       ? <span className="text-[14px] font-medium" style={{ fontFamily: "'Bebas Neue', sans-serif" }}>$85K</span>
