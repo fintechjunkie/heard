@@ -16,6 +16,12 @@ interface SongCardProps {
   onReserve: (songId: number) => void;
 }
 
+// Each row action carries its own accent so the three read as distinct
+// choices at a glance rather than three identical grey buttons.
+const ACTION_VIOLET = '#B57BFF';
+const ACTION_SKY = '#5AB4FF';
+const ACTION_CORAL = '#FF6848';
+
 const REACTION_MAP: Record<string, { emoji: string; label: string }> = {
   musthave: { emoji: '🔥', label: 'Must Have' },
   hit: { emoji: '⚡', label: 'Definite Hit' },
@@ -28,9 +34,10 @@ export default function SongCard({
   song, index, onOpenDetail, onOpenDealRoom,
   onOpenRightsPassport, onOpenProfile, onReserve,
 }: SongCardProps) {
-  const { savedSongIds, toggleSave, artistQueue, toggleArtistQueue, showToast, artistReactions, releaseReserve } = useStore();
+  const { savedSongIds, toggleSave, artistQueue, toggleArtistQueue, showToast, artistReactions, releaseReserve, noInterestIds, toggleNoInterest } = useStore();
   const { activeSong, isPlaying, toggle, playSong, previewMode, currentTime } = usePlayer();
   const isSaved = savedSongIds.includes(song.id);
+  const isNoInterest = noInterestIds.includes(song.id);
   const isQueued = artistQueue.includes(song.id);
   const isActive = activeSong?.id === song.id && isPlaying;
   const isPlayingSong = activeSong?.id === song.id;
@@ -90,32 +97,46 @@ export default function SongCard({
           }}>
           {String(index + 1).padStart(2, '0')}
         </span>
-        <div className="flex gap-[6px] items-center">
+        <div className="flex gap-[10px] items-center">
           <button onClick={(e) => {
               e.stopPropagation();
               toggleArtistQueue(song.id);
               showToast(isQueued ? `"${song.title}" removed from Pocket Songs.` : `"${song.title}" added to Pocket Songs.`);
             }}
             title="Add to Pocket Songs"
-            className="flex flex-col items-center gap-[2px] cursor-pointer bg-transparent border-none"
-            style={{ color: isQueued ? 'var(--violet)' : isPlayingSong ? 'rgba(255,255,255,0.4)' : 'var(--muted)' }}>
-            <span className="w-[26px] h-[26px] rounded-full flex items-center justify-center"
+            className="flex flex-col items-center gap-[3px] cursor-pointer bg-transparent border-none"
+            style={{ color: ACTION_VIOLET }}>
+            {/* Queued state is a solid fill, not a tint: an outlined icon that
+                merely changes hue reads as decoration, a filled one reads as on. */}
+            <span className="relative w-[28px] h-[28px] rounded-full flex items-center justify-center transition-all duration-150"
               style={{
-                border: isQueued ? '1px solid var(--violet)' : isPlayingSong ? '1px solid var(--b4)' : '1px solid var(--border)',
-                background: isQueued ? 'rgba(181,123,255,0.12)' : 'transparent',
+                border: `1px solid ${isQueued ? ACTION_VIOLET : 'rgba(181,123,255,0.35)'}`,
+                background: isQueued ? ACTION_VIOLET : 'transparent',
+                color: isQueued ? '#FFFFFF' : ACTION_VIOLET,
+                boxShadow: isQueued ? `0 0 0 3px rgba(181,123,255,0.22)` : 'none',
               }}>
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
               </svg>
+              {isQueued && (
+                <span className="absolute -top-[3px] -right-[3px] w-[13px] h-[13px] rounded-full flex items-center justify-center"
+                  style={{ background: ACTION_VIOLET, border: '1.5px solid var(--th-white)' }}>
+                  <svg width="7" height="7" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                </span>
+              )}
             </span>
-            <span className="text-micro tracking-[0.8px] uppercase" style={{ fontFamily: "'DM Mono', monospace" }}>Pocket</span>
+            <span className="text-micro tracking-[0.8px] uppercase" style={{ fontFamily: "'DM Mono', monospace", fontWeight: isQueued ? 600 : 400 }}>
+              {isQueued ? 'In Pocket' : 'Pocket'}
+            </span>
           </button>
           <button onClick={(e) => { e.stopPropagation(); onOpenDetail(song.id); }}
             title="Song Details"
-            className="flex flex-col items-center gap-[2px] cursor-pointer bg-transparent border-none"
-            style={{ color: isPlayingSong ? 'rgba(255,255,255,0.4)' : 'var(--muted)' }}>
-            <span className="w-[26px] h-[26px] rounded-full flex items-center justify-center border"
-              style={{ borderColor: isPlayingSong ? 'var(--b4)' : 'var(--border)' }}>
+            className="flex flex-col items-center gap-[3px] cursor-pointer bg-transparent border-none"
+            style={{ color: ACTION_SKY }}>
+            <span className="w-[28px] h-[28px] rounded-full flex items-center justify-center"
+              style={{ border: '1px solid rgba(90,180,255,0.35)' }}>
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>
               </svg>
@@ -134,6 +155,32 @@ export default function SongCard({
             </span>
             <span className="text-micro tracking-[0.8px] uppercase" style={{ fontFamily: "'DM Mono', monospace" }}>Deals</span>
           </button>}
+          <button onClick={(e) => {
+              e.stopPropagation();
+              toggleNoInterest(song.id);
+              showToast(isNoInterest
+                ? `"${song.title}" back in the bank.`
+                : `"${song.title}" moved to Nope.`);
+            }}
+            title={isNoInterest ? 'Move back into the bank' : 'Collapse and move to the bottom'}
+            className="flex flex-col items-center gap-[3px] cursor-pointer bg-transparent border-none"
+            style={{ color: ACTION_CORAL }}>
+            <span className="w-[28px] h-[28px] rounded-full flex items-center justify-center transition-all duration-150"
+              style={{
+                border: `1px solid ${isNoInterest ? ACTION_CORAL : 'rgba(255,104,72,0.35)'}`,
+                background: isNoInterest ? ACTION_CORAL : 'transparent',
+                color: isNoInterest ? '#FFFFFF' : ACTION_CORAL,
+                boxShadow: isNoInterest ? '0 0 0 3px rgba(255,104,72,0.22)' : 'none',
+              }}>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10"/><line x1="8" y1="12" x2="16" y2="12"/>
+              </svg>
+            </span>
+            <span className="text-micro tracking-[0.8px] uppercase whitespace-nowrap"
+              style={{ fontFamily: "'DM Mono', monospace", fontWeight: isNoInterest ? 600 : 400 }}>
+              {isNoInterest ? 'Undo' : 'Nope'}
+            </span>
+          </button>
         </div>
       </div>
 
@@ -199,7 +246,7 @@ export default function SongCard({
           }}>
           {song.genre}
         </span>
-        {song.days_in_bank <= 30 && song.status !== 'purchased' && (
+        {FEATURES.songRecency && song.days_in_bank <= 30 && song.status !== 'purchased' && (
           <span className="px-[8px] py-[2px] rounded-full text-caption tracking-[1px] uppercase animate-tag-pulse"
             style={{
               fontFamily: "'DM Mono', monospace",
@@ -251,7 +298,7 @@ export default function SongCard({
       </div>}
 
       {/* Row 7: Artist flag (conditional) */}
-      {(song.artistFlagged || reactionData) && (
+      {FEATURES.sharedReactions && (song.artistFlagged || reactionData) && (
         <div className="flex items-center gap-[6px] mt-[6px] px-[8px] py-[5px] rounded-lg"
           style={{
             background: 'rgba(181,123,255,0.06)',

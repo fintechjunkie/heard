@@ -1,6 +1,7 @@
 'use client';
 
 import { Member, Song } from '@/data/types';
+import { FEATURES } from '@/lib/features';
 
 interface MemberProfileProps {
   member: Member | null;
@@ -38,15 +39,37 @@ export default function MemberProfile({ member, songs, open, onClose, onOpenDeta
         <div className="relative text-center" style={{ background: 'var(--black)' }}>
           {/* Banner image */}
           {member.banner_url ? (
-            <div className="w-full h-[140px] overflow-hidden">
-              <img src={member.banner_url} alt="" className="w-full h-full object-cover" style={{ opacity: 0.6 }} />
-              <div className="absolute inset-0 h-[140px]" style={{ background: 'linear-gradient(to bottom, transparent 40%, var(--black) 100%)' }} />
+            /* object-cover crops to fill, which decapitates a portrait-shaped
+               photo. Show the whole image with object-contain instead, and fill
+               the leftover space with a blurred, zoomed copy of itself so the
+               frame still reads as a designed banner rather than letterboxing. */
+            <div className="relative w-full overflow-hidden" style={{ height: 190 }}>
+              <img
+                src={member.banner_url}
+                alt=""
+                aria-hidden="true"
+                className="absolute inset-0 w-full h-full object-cover"
+                style={{ filter: 'blur(22px)', transform: 'scale(1.2)', opacity: 0.45 }}
+              />
+              <img
+                src={member.banner_url}
+                alt=""
+                className="relative w-full h-full object-contain"
+                style={{ opacity: 0.9 }}
+              />
+              <div
+                className="absolute inset-0 pointer-events-none"
+                style={{ background: 'linear-gradient(to bottom, transparent 45%, var(--black) 100%)' }}
+              />
             </div>
           ) : (
             <div className="h-[20px]" />
           )}
-          <div className={member.banner_url ? "px-5 pb-6 -mt-[40px] relative z-10" : "px-5 py-6"}>
-          {member.avatar_url ? (
+          <div className={member.banner_url ? "px-5 pb-6 -mt-[18px] relative z-10" : "px-5 py-6"}>
+          {/* No avatar bubble: the banner already shows the artist, and a second
+              portrait on top of it competed with it. Kept behind the flag so the
+              full build still gets an avatar when there is no banner. */}
+          {FEATURES.memberCredentials && (member.avatar_url ? (
             <img src={member.avatar_url} alt={member.name}
               className="w-[64px] h-[64px] rounded-full object-cover mx-auto mb-3"
               style={{ border: `2px solid ${member.color}55` }} />
@@ -60,11 +83,13 @@ export default function MemberProfile({ member, songs, open, onClose, onOpenDeta
               }}>
               {member.initials}
             </div>
-          )}
+          ))}
           <div className="text-label tracking-[1px] uppercase mb-1" style={{ fontFamily: "'DM Mono', monospace", color: member.color }}>{member.role}</div>
           <div className="text-[40px] tracking-[2px] leading-none mb-2" style={{ fontFamily: "'Bebas Neue', sans-serif", color: '#FFFFFF' }}>{member.name}</div>
           <div className="text-body mb-4" style={{ color: 'rgba(255,255,255,0.55)', lineHeight: 1.5 }}>{member.bio}</div>
-          <div className="flex justify-center gap-8">
+          {/* The whole counter row goes with the credentials — In Bank was the
+              only one left and the space is better spent on the photo. */}
+          {FEATURES.memberCredentials && <div className="flex justify-center gap-8">
             {[
               { val: member.streams, label: 'Streams', color: member.color },
               { val: member.awards.length.toString(), label: 'Awards', color: '#FFFFFF' },
@@ -75,14 +100,14 @@ export default function MemberProfile({ member, songs, open, onClose, onOpenDeta
                 <div className="text-micro tracking-[1.5px] uppercase" style={{ fontFamily: "'DM Mono', monospace", color: 'rgba(255,255,255,0.5)' }}>{s.label}</div>
               </div>
             ))}
-          </div>
+          </div>}
           </div>
         </div>
 
         {/* Body */}
         <div className="p-5">
           {/* Awards */}
-          <div className="mb-6">
+          {FEATURES.memberCredentials && <div className="mb-6">
             <div className="text-caption tracking-[2px] uppercase mb-3" style={{ fontFamily: "'DM Mono', monospace", color: '#5a5650', fontWeight: 500 }}>Awards</div>
             <div className="flex flex-wrap gap-2">
               {member.awards.map(a => (
@@ -92,10 +117,10 @@ export default function MemberProfile({ member, songs, open, onClose, onOpenDeta
                 </div>
               ))}
             </div>
-          </div>
+          </div>}
 
           {/* Notable Hits */}
-          <div className="mb-6">
+          {FEATURES.memberCredentials && <div className="mb-6">
             <div className="text-caption tracking-[2px] uppercase mb-3" style={{ fontFamily: "'DM Mono', monospace", color: '#5a5650', fontWeight: 500 }}>Notable Hits</div>
             {member.hits.map((h, i) => (
               <div key={i} className="flex items-center gap-3 mb-3">
@@ -110,7 +135,7 @@ export default function MemberProfile({ member, songs, open, onClose, onOpenDeta
                 </div>
               </div>
             ))}
-          </div>
+          </div>}
 
           {/* In The Bank */}
           <div className="mb-6">
@@ -124,7 +149,9 @@ export default function MemberProfile({ member, songs, open, onClose, onOpenDeta
                   <div className="text-[16px] tracking-[1px] mb-[2px]" style={{ fontFamily: "'Bebas Neue', sans-serif" }}>{s.title}</div>
                   <div className="text-caption mb-2" style={{ fontFamily: "'DM Mono', monospace", color: '#6a6660' }}>{s.genre} · {s.bpm} BPM · {s.key}</div>
                   <div className="flex items-center justify-between">
-                    <span className="text-[14px] font-medium" style={{ fontFamily: "'Bebas Neue', sans-serif" }}>$85K</span>
+                    {FEATURES.pricing
+                      ? <span className="text-[14px] font-medium" style={{ fontFamily: "'Bebas Neue', sans-serif" }}>$85K</span>
+                      : <span />}
                     <button className="px-3 py-1 rounded-md text-caption tracking-[1px] uppercase cursor-pointer border-none"
                       style={{ fontFamily: "'DM Mono', monospace", background: 'var(--black)', color: '#FFFFFF' }}>
                       Details

@@ -3,11 +3,11 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useStore } from '@/lib/store';
 import { FEATURES } from '@/lib/features';
-import { MEMBERS } from '@/data/members';
 import TopNav from '@/components/TopNav';
 import BottomTabBar from '@/components/BottomTabBar';
 import Toast from '@/components/Toast';
 import SongCard from '@/components/SongCard';
+import DismissedSongRow from '@/components/DismissedSongRow';
 import StatsStrip from '@/components/StatsStrip';
 import WritersTab from '@/components/WritersTab';
 import SongDetailSheet from '@/components/SongDetailSheet';
@@ -23,7 +23,7 @@ import TeamPicker from '@/components/TeamPicker';
 
 export default function Home() {
   const store = useStore();
-  const { songs, activeTab, getFilteredSongs, reserveSong, purchaseSong, showToast } = store;
+  const { songs, members, activeTab, getFilteredSongs, reserveSong, purchaseSong, showToast, noInterestIds } = store;
 
   // Splash screen
   const [showSplash, setShowSplash] = useState(true);
@@ -40,6 +40,15 @@ export default function Home() {
   const [dealRoomSongId, setDealRoomSongId] = useState<number | null>(null);
   const [detailOpenedFromPocket, setDetailOpenedFromPocket] = useState(false);
   const [showDealRoomsList, setShowDealRoomsList] = useState(false);
+
+  // Dismissed songs the user has opened back up. Kept local, not persisted:
+  // reopening the app should show the tidy collapsed list again.
+  const [expandedDismissed, setExpandedDismissed] = useState<number[]>([]);
+  const toggleExpandedDismissed = useCallback((songId: number) => {
+    setExpandedDismissed(prev =>
+      prev.includes(songId) ? prev.filter(id => id !== songId) : [...prev, songId]
+    );
+  }, []);
 
   // Team state
   const [activeTeam, setActiveTeam] = useState<{ id: number; name: string } | null>(() => {
@@ -100,9 +109,12 @@ export default function Home() {
   }, [store.artistReactions, activeTeam]);
 
   const filteredSongs = getFilteredSongs();
+  // "No Interest" songs stay in the bank but sink below everything live.
+  const liveSongs = filteredSongs.filter(s => !noInterestIds.includes(s.id));
+  const dismissedSongs = filteredSongs.filter(s => noInterestIds.includes(s.id));
 
   const findSong = (id: number | null) => id ? songs.find(s => s.id === id) || null : null;
-  const findMember = (id: number | null) => id ? MEMBERS.find(m => m.id === id) || null : null;
+  const findMember = (id: number | null) => id ? members.find(m => m.id === id) || null : null;
 
   const MAX_RESERVES_PER_TEAM = 2;
   const teamReservedCount = songs.filter(s => s.status === 'reserved').length;
@@ -176,8 +188,8 @@ export default function Home() {
                 </div>
                 <div className="text-body mt-[3px]" style={{ color: '#6a6660' }}>
                   {FEATURES.pricing
-                    ? `Tier 1 · ${filteredSongs.filter(s => s.status === 'available').length} available`
-                    : `${filteredSongs.length} song${filteredSongs.length !== 1 ? 's' : ''}`}
+                    ? `Tier 1 · ${liveSongs.filter(s => s.status === 'available').length} available`
+                    : `${liveSongs.length} song${liveSongs.length !== 1 ? 's' : ''}`}
                 </div>
               </div>
               {!FEATURES.pricing && (
@@ -202,7 +214,7 @@ export default function Home() {
             {/* Sort row */}
             {FEATURES.pricing && (
               <div className="flex items-center justify-between px-5 pb-[10px]">
-                <div className="text-body" style={{ color: '#5a5650' }}>{filteredSongs.length} songs</div>
+                <div className="text-body" style={{ color: '#5a5650' }}>{liveSongs.length} songs</div>
                 <button onClick={() => setSortOpen(true)}
                   className="flex items-center gap-[5px] px-[11px] py-[6px] rounded-md cursor-pointer"
                   style={{
@@ -221,18 +233,19 @@ export default function Home() {
 
             {/* Song list */}
             <div className="mx-5 rounded-[14px] overflow-hidden" style={{ border: '1px solid var(--border)', background: 'var(--border)' }}>
-              {filteredSongs.length === 0 ? (
+              {liveSongs.length === 0 ? (
                 <div className="py-12 text-center" style={{ background: 'var(--th-white)' }}>
                   <p className="text-[24px] tracking-[2px]" style={{ fontFamily: "'Bebas Neue', sans-serif", color: 'var(--muted-l)' }}>No Songs</p>
                   <p className="text-body mt-1" style={{ color: 'var(--muted)' }}>
                     {activeTab === 'reserved' ? 'Reserve a song to hold it for 72 hours.' :
                      activeTab === 'purchased' ? 'Purchased songs will appear here.' :
+                     dismissedSongs.length > 0 ? 'Everything here is marked Nope.' :
                      'No songs match your filters.'}
                   </p>
                 </div>
               ) : (
-                filteredSongs.map((song, i) => (
-                  <div key={song.id} style={{ borderBottom: i < filteredSongs.length - 1 ? '1px solid var(--border)' : 'none' }}>
+                liveSongs.map((song, i) => (
+                  <div key={song.id} style={{ borderBottom: i < liveSongs.length - 1 ? '1px solid var(--border)' : 'none' }}>
                     <SongCard
                       song={song}
                       index={i}
@@ -246,6 +259,40 @@ export default function Home() {
                 ))
               )}
             </div>
+
+            {/* Nope — collapsed, below everything live */}
+            {dismissedSongs.length > 0 && (
+              <div className="mt-5">
+                <div className="flex items-center gap-2 px-5 pb-[8px]">
+                  <span className="text-caption tracking-[2px] uppercase" style={{ fontFamily: "'DM Mono', monospace", color: 'var(--muted)' }}>
+                    Nope
+                  </span>
+                  <span className="text-caption" style={{ fontFamily: "'DM Mono', monospace", color: 'var(--muted-l)' }}>
+                    {dismissedSongs.length}
+                  </span>
+                  <div className="flex-1 h-[1px]" style={{ background: 'var(--border)' }} />
+                </div>
+                <div className="mx-5 rounded-[14px] overflow-hidden" style={{ border: '1px solid var(--border)', background: 'var(--border)' }}>
+                  {dismissedSongs.map((song, i) => (
+                    <div key={song.id} style={{ borderBottom: i < dismissedSongs.length - 1 ? '1px solid var(--border)' : 'none' }}>
+                      {expandedDismissed.includes(song.id) ? (
+                        <SongCard
+                          song={song}
+                          index={i}
+                          onOpenDetail={setDetailSongId}
+                          onOpenDealRoom={setDealRoomSongId}
+                          onOpenRightsPassport={setRightsSongId}
+                          onOpenProfile={setProfileMemberId}
+                          onReserve={setReserveSongId}
+                        />
+                      ) : (
+                        <DismissedSongRow song={song} onExpand={toggleExpandedDismissed} />
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </>
         )}
       </div>

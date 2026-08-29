@@ -1,6 +1,5 @@
 'use client';
 
-import { MEMBERS } from '@/data/members';
 import { useStore } from '@/lib/store';
 
 interface WritersTabProps {
@@ -8,7 +7,7 @@ interface WritersTabProps {
 }
 
 export default function WritersTab({ onOpenProfile }: WritersTabProps) {
-  const { songs } = useStore();
+  const { songs, members } = useStore();
 
   return (
     <div className="p-5">
@@ -16,11 +15,11 @@ export default function WritersTab({ onOpenProfile }: WritersTabProps) {
         The Collective
       </div>
       <div className="text-body mb-5" style={{ color: '#6a6660' }}>
-        {MEMBERS.length} members · Award-winning songwriters & producers
+        {members.length} members · Award-winning songwriters & producers
       </div>
 
       <div className="flex flex-col gap-[1px] rounded-xl overflow-hidden" style={{ border: '1px solid var(--border)', background: 'var(--border)' }}>
-        {MEMBERS.map(member => {
+        {members.map(member => {
           const inBank = songs.filter(s => s.writer_ids.includes(member.id) && s.status !== 'purchased').length;
           return (
             <div

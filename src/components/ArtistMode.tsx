@@ -2,9 +2,9 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useStore } from '@/lib/store';
-import { usePlayer } from '@/lib/player';
-import { MEMBERS } from '@/data/members';
+import { usePlayer, formatTime } from '@/lib/player';
 import PlayerVisualizer, { VizMode } from './PlayerVisualizer';
+import { FEATURES } from '@/lib/features';
 
 const REACTIONS = [
   { key: 'musthave', emoji: '🔥', label: 'Must Have' },
@@ -34,8 +34,8 @@ interface ArtistModeProps {
 }
 
 export default function ArtistMode({ open, onClose, onOpenProfile, onOpenDetail, inline }: ArtistModeProps) {
-  const { songs, artistQueue, artistReactions, setArtistReaction, showToast } = useStore();
-  const { activeSong, isPlaying, progress, toggle, playSong, skipForward, skipBack, setPreviewMode } = usePlayer();
+  const { songs, members, artistQueue, artistReactions, setArtistReaction, showToast } = useStore();
+  const { activeSong, isPlaying, progress, currentTime, duration, seek, toggle, playSong, skipForward, skipBack, setPreviewMode } = usePlayer();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [vizMode, setVizMode] = useState<VizMode>('waveform');
   const [activeTheme, setActiveTheme] = useState('default');
@@ -79,10 +79,14 @@ export default function ArtistMode({ open, onClose, onOpenProfile, onOpenDetail,
       setArtistReaction(songId, null);
     } else {
       setArtistReaction(songId, key);
-      const rxData = REACTIONS.find(r => r.key === key);
-      const s = songs.find(x => x.id === songId);
-      if (rxData && s) {
-        showToast(`${rxData.emoji} "${s.title}" — your team sees "${rxData.label}"`);
+      // A private reaction needs no announcement — the button state is the
+      // whole feedback. Only tell the user when someone else will see it.
+      if (FEATURES.sharedReactions) {
+        const rxData = REACTIONS.find(r => r.key === key);
+        const s = songs.find(x => x.id === songId);
+        if (rxData && s) {
+          showToast(`${rxData.emoji} "${s.title}" — your team sees "${rxData.label}"`);
+        }
       }
     }
   };
@@ -94,7 +98,7 @@ export default function ArtistMode({ open, onClose, onOpenProfile, onOpenDetail,
       if (!artistReactions[songId]) {
         setArtistReaction(songId, 'love');
       }
-      showToast(`♥ "${s.title}" flagged — your team will see this.`);
+      if (FEATURES.sharedReactions) showToast(`♥ "${s.title}" flagged — your team will see this.`);
     } else {
       setArtistReaction(songId, null);
       showToast(`Flag removed from "${s.title}".`);
@@ -251,7 +255,7 @@ export default function ArtistMode({ open, onClose, onOpenProfile, onOpenDetail,
                   {/* Clickable writers */}
                   <div className="flex flex-wrap gap-1 mt-1">
                     {song.writers.map((writer, wi) => {
-                      const member = MEMBERS.find(m => m.name === writer);
+                      const member = members.find(m => m.name === writer);
                       return (
                         <span key={wi}>
                           {wi > 0 && <span style={{ color: 'rgba(255,255,255,0.3)' }}> · </span>}
@@ -347,16 +351,31 @@ export default function ArtistMode({ open, onClose, onOpenProfile, onOpenDetail,
                 </button>
               </div>
 
-              {/* Progress bar */}
+              {/* Progress bar + transport clock */}
               <div className="mb-4">
-                <div className="flex items-center justify-between mb-1">
+                <div className="flex items-center justify-between mb-[6px]">
                   <span className="text-micro" style={{ fontFamily: "'DM Mono', monospace", color: 'rgba(255,255,255,0.3)' }}>
                     {currentIndex + 1} / {queuedSongs.length}
                   </span>
+                  <span className="text-micro tabular-nums" style={{ fontFamily: "'DM Mono', monospace", color: 'rgba(255,255,255,0.55)' }}>
+                    <span style={{ color: effectiveColor }}>{formatTime(isSongPlaying ? currentTime : 0)}</span>
+                    <span style={{ color: 'rgba(255,255,255,0.25)' }}> / </span>
+                    {formatTime(isSongPlaying && duration > 0 ? duration : song.audio_duration_seconds)}
+                  </span>
                 </div>
-                <div className="h-[4px] rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.08)' }}>
-                  <div className="h-full rounded-full transition-[width] duration-300"
-                    style={{ width: `${currentProgress}%`, background: effectiveColor, boxShadow: `0 0 6px ${effectiveColor}66` }} />
+                {/* Padded hit area — a 4px bar is too thin to tap accurately */}
+                <div
+                  className="py-[8px] -my-[8px] cursor-pointer"
+                  onClick={(e) => {
+                    if (!isSongPlaying) return;
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    seek(Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100)));
+                  }}
+                >
+                  <div className="h-[4px] rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.08)' }}>
+                    <div className="h-full rounded-full"
+                      style={{ width: `${currentProgress}%`, background: effectiveColor, boxShadow: `0 0 6px ${effectiveColor}66` }} />
+                  </div>
                 </div>
               </div>
 
@@ -367,17 +386,28 @@ export default function ArtistMode({ open, onClose, onOpenProfile, onOpenDetail,
                   return (
                     <button key={r.key}
                       onClick={(e) => { e.stopPropagation(); handleReaction(song.id, r.key); }}
-                      className="py-[10px] rounded-lg text-center cursor-pointer transition-all duration-150"
+                      className="px-[4px] py-[10px] rounded-lg text-center cursor-pointer transition-all duration-150 flex flex-col items-center justify-start"
                       style={{
                         fontFamily: "'DM Mono', monospace",
+                        // Five columns on a 393px screen leaves ~66px per cell,
+                        // so two-word labels wrap. Reserve the room up front and
+                        // keep the text off the border.
+                        minHeight: 74,
                         background: isSelected ? `${effectiveColor}40` : 'rgba(255,255,255,0.04)',
                         border: isSelected ? `2px solid ${effectiveColor}` : '1px solid rgba(255,255,255,0.1)',
                         color: isSelected ? 'white' : 'rgba(255,255,255,0.55)',
                         boxShadow: isSelected ? `0 0 12px ${effectiveColor}44, inset 0 0 12px ${effectiveColor}22` : 'none',
                       }}>
-                      <span className={`block ${isSelected ? 'text-[20px]' : 'text-[16px]'}`}>{r.emoji}</span>
-                      <span className={`tracking-[0.5px] uppercase block mt-[3px] ${isSelected ? 'text-micro font-medium' : 'text-micro'}`}
-                        style={{ color: isSelected ? 'white' : 'rgba(255,255,255,0.35)' }}>
+                      <span className={`block leading-none ${isSelected ? 'text-[20px]' : 'text-[16px]'}`}>{r.emoji}</span>
+                      <span className={`uppercase block mt-[5px] px-[2px] ${isSelected ? 'font-medium' : ''}`}
+                        style={{
+                          color: isSelected ? 'white' : 'rgba(255,255,255,0.45)',
+                          fontSize: 11,
+                          letterSpacing: 0.2,
+                          lineHeight: 1.25,
+                          overflowWrap: 'break-word',
+                          hyphens: 'auto',
+                        }}>
                         {r.label}
                       </span>
                     </button>
@@ -385,7 +415,7 @@ export default function ArtistMode({ open, onClose, onOpenProfile, onOpenDetail,
                 })}
               </div>
 
-              {rxData && (
+              {FEATURES.sharedReactions && rxData && (
                 <div className="flex items-center gap-[6px] mt-3 px-[10px] py-[8px] rounded-lg"
                   style={{ background: `${effectiveColor}0a`, border: `1px solid ${effectiveColor}22` }}>
                   <span className="text-[14px]">{rxData.emoji}</span>

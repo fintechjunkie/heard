@@ -1,13 +1,18 @@
 'use client';
 
 import React, { createContext, useContext, useState, useCallback, useEffect, ReactNode } from 'react';
-import { Song } from '@/data/types';
+import { Song, Member } from '@/data/types';
 import { SONGS as SEED_SONGS } from '@/data/songs';
+import { MEMBERS as SEED_MEMBERS } from '@/data/members';
 
 interface StoreState {
   songs: Song[];
+  members: Member[];
   savedSongIds: number[];
   artistQueue: number[];
+  /** Songs the user has waved off. They stay in the bank, collapsed and
+   *  pushed below the live list, and can be restored at any time. */
+  noInterestIds: number[];
   activeTab: string;
   searchQuery: string;
   searchOpen: boolean;
@@ -21,7 +26,9 @@ interface StoreState {
 
 interface StoreActions {
   setSongs: (songs: Song[]) => void;
+  setMembers: (members: Member[]) => void;
   toggleSave: (songId: number) => void;
+  toggleNoInterest: (songId: number) => void;
   reserveSong: (songId: number) => void;
   purchaseSong: (songId: number) => void;
   releaseReserve: (songId: number) => void;
@@ -63,7 +70,11 @@ function saveToStorage(key: string, value: unknown) {
 
 export function StoreProvider({ children }: { children: ReactNode }) {
   const [songs, setSongsState] = useState<Song[]>(SEED_SONGS);
+  // Seeded from the static file, then replaced by the DB rows — which is where
+  // admin-uploaded avatar_url / banner_url live.
+  const [members, setMembersState] = useState<Member[]>(SEED_MEMBERS);
   const [savedSongIds, setSavedSongIds] = useState<number[]>(() => loadFromStorage('saved', []));
+  const [noInterestIds, setNoInterestIds] = useState<number[]>(() => loadFromStorage('noInterest', []));
   const [activeTab, setActiveTab] = useState('bank');
   const [searchQuery, setSearchQuery] = useState('');
   const [searchOpen, setSearchOpen] = useState(false);
@@ -93,13 +104,34 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     fetchSongs();
   }, []);
 
+  // Load members from API on mount
+  useEffect(() => {
+    async function fetchMembers() {
+      try {
+        const res = await fetch('/api/members');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.length > 0) setMembersState(data);
+        }
+      } catch {
+        // Keep seed data on error
+      }
+    }
+    fetchMembers();
+  }, []);
+
   // Persist local preferences to localStorage
   useEffect(() => { saveToStorage('saved', savedSongIds); }, [savedSongIds]);
   useEffect(() => { saveToStorage('artistReactions', artistReactions); }, [artistReactions]);
   useEffect(() => { saveToStorage('artistQueue', artistQueue); }, [artistQueue]);
+  useEffect(() => { saveToStorage('noInterest', noInterestIds); }, [noInterestIds]);
 
   const setSongs = useCallback((newSongs: Song[]) => {
     setSongsState(newSongs);
+  }, []);
+
+  const setMembers = useCallback((newMembers: Member[]) => {
+    setMembersState(newMembers);
   }, []);
 
   const toggleSave = useCallback((songId: number) => {
@@ -109,6 +141,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         : [...prev, songId];
       return next;
     });
+  }, []);
+
+  const toggleNoInterest = useCallback((songId: number) => {
+    setNoInterestIds(prev =>
+      prev.includes(songId) ? prev.filter(id => id !== songId) : [...prev, songId]
+    );
   }, []);
 
   const reserveSong = useCallback((songId: number) => {
@@ -249,10 +287,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   return (
     <StoreContext.Provider value={{
-      songs, savedSongIds, artistQueue, activeTab, searchQuery, searchOpen,
+      songs, members, savedSongIds, artistQueue, noInterestIds, activeTab, searchQuery, searchOpen,
       activeGenre, sortMode, toastMessage, artistReactions,
       dealRoomReaction, dealRoomNote,
-      setSongs, toggleSave, toggleArtistQueue, clearArtistQueue,
+      setSongs, setMembers, toggleSave, toggleNoInterest, toggleArtistQueue, clearArtistQueue,
       reserveSong, purchaseSong, releaseReserve,
       setActiveTab, setSearchQuery, setSearchOpen, setActiveGenre,
       setSortMode, showToast, setArtistReaction, setDealRoomReaction,

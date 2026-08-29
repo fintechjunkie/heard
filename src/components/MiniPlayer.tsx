@@ -1,18 +1,16 @@
 'use client';
 
-import { usePlayer } from '@/lib/player';
+import { usePlayer, formatTime } from '@/lib/player';
 
 interface MiniPlayerProps {
   onOpenDetail: (songId: number) => void;
-  onReserve: (songId: number) => void;
-  onBuy: (songId: number) => void;
 }
 
 // CSS class names must be written in full for Tailwind to detect them
 const EQ_CLASSES = ['animate-eq-1', 'animate-eq-2', 'animate-eq-3', 'animate-eq-1', 'animate-eq-2'];
 
-export default function MiniPlayer({ onOpenDetail, onReserve, onBuy }: MiniPlayerProps) {
-  const { activeSong, isPlaying, progress, toggle, seek } = usePlayer();
+export default function MiniPlayer({ onOpenDetail }: MiniPlayerProps) {
+  const { activeSong, isPlaying, progress, currentTime, duration, toggle, seek } = usePlayer();
 
   if (!activeSong) return null;
 
@@ -68,6 +66,11 @@ export default function MiniPlayer({ onOpenDetail, onReserve, onBuy }: MiniPlaye
             {activeSong.writers.join(' · ')}
           </div>
         </div>
+
+        <span className="text-caption tabular-nums flex-shrink-0"
+          style={{ fontFamily: "'DM Mono', monospace", color: 'rgba(255,255,255,0.45)' }}>
+          {formatTime(currentTime)} / {formatTime(duration || activeSong.audio_duration_seconds)}
+        </span>
 
         {/* Info button */}
         <button

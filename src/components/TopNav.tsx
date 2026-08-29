@@ -3,7 +3,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { useStore } from '@/lib/store';
 import { createClient } from '@/lib/supabase/client';
-import { SHARED_PASSWORD, DEMO_SESSION_COOKIE } from '@/lib/features';
+import { SHARED_PASSWORD, DEMO_SESSION_COOKIE, FEATURES } from '@/lib/features';
+import { GENRES, GENRE_VALUES } from '@/data/genres';
 
 interface TopNavProps {
   onArtistMode: () => void;
@@ -99,13 +100,15 @@ export default function TopNav({ onArtistMode, teamName, onSwitchTeam, onOpenDea
           )}
         </div>
         <div className="flex items-center gap-[10px]">
-          <span className="text-caption tracking-[1.5px] uppercase" style={{
-            fontFamily: "'DM Mono', monospace",
-            color: 'var(--acid)',
-            border: '1px solid var(--acid)',
-            padding: '3px 8px',
-            borderRadius: 3,
-          }}>{profile?.tier === 'tier2' ? 'T2' : 'T1'}</span>
+          {FEATURES.tiers && (
+            <span className="text-caption tracking-[1.5px] uppercase" style={{
+              fontFamily: "'DM Mono', monospace",
+              color: 'var(--acid)',
+              border: '1px solid var(--acid)',
+              padding: '3px 8px',
+              borderRadius: 3,
+            }}>{profile?.tier === 'tier2' ? 'T2' : 'T1'}</span>
+          )}
           {onOpenDealRooms && (
             <button
               onClick={onOpenDealRooms}
@@ -175,12 +178,12 @@ export default function TopNav({ onArtistMode, teamName, onSwitchTeam, onOpenDea
                       <span className="text-body" style={{ color: '#FFFFFF', fontFamily: "'DM Sans', sans-serif" }}>{profile.company}</span>
                     </div>
                   )}
-                  <div className="flex justify-between">
+                  {FEATURES.tiers && <div className="flex justify-between">
                     <span className="text-caption uppercase tracking-[1px]" style={{ color: 'rgba(255,255,255,0.35)', fontFamily: "'DM Mono', monospace" }}>Tier</span>
                     <span className="text-caption px-2 py-[2px] rounded-full" style={{ background: 'rgba(200,255,69,0.15)', color: 'var(--acid)', fontFamily: "'DM Mono', monospace" }}>
                       {profile?.tier === 'tier1' ? 'Tier 1' : profile?.tier === 'tier2' ? 'Tier 2' : profile?.tier || '—'}
                     </span>
-                  </div>
+                  </div>}
                 </div>
 
                 {/* Logout */}
@@ -225,20 +228,31 @@ export default function TopNav({ onArtistMode, teamName, onSwitchTeam, onOpenDea
 }
 
 function GenreChips() {
-  const { activeGenre, setActiveGenre } = useStore();
+  const { activeGenre, setActiveGenre, songs } = useStore();
+
+  // Only offer genres something is actually filed under, in the canonical
+  // order, so the row never fills with chips that lead to an empty list. Any
+  // genre present on a song but missing from GENRES is appended rather than
+  // dropped — otherwise those songs would be unreachable by filter.
+  const present = new Set(songs.map(s => s.genre).filter(Boolean));
+  const known = GENRES.filter(g => present.has(g.value)).map(g => ({ key: g.value, label: g.label }));
+  const unknown = [...present]
+    .filter(v => !GENRE_VALUES.includes(v))
+    .map(v => ({ key: v, label: v }));
+
   const genres = [
     { key: 'all', label: 'All' },
-    { key: 'new', label: '✦ New' },
-    { key: 'Pop', label: 'Pop' },
-    { key: 'R&B', label: 'R&B' },
-    { key: 'Hip-Hop', label: 'Hip-Hop' },
-    { key: 'Country', label: 'Country' },
-    { key: 'Dance / EDM', label: 'EDM' },
+    ...(FEATURES.songRecency ? [{ key: 'new', label: '✦ New' }] : []),
+    ...known,
+    ...unknown,
   ];
 
+  // The row scrolls horizontally but hides its scrollbar, so a fade on the
+  // right edge is the only cue that there is more to reach.
   return (
-    <div className="flex gap-[6px] overflow-x-auto scrollbar-hide flex-shrink-0 pb-3"
-      style={{ padding: '0 20px 12px', background: 'var(--black)' }}>
+    <div className="relative flex-shrink-0" style={{ background: 'var(--black)' }}>
+      <div className="flex gap-[6px] overflow-x-auto scrollbar-hide pb-3"
+        style={{ padding: '0 20px 12px', background: 'var(--black)' }}>
       {genres.map(g => (
         <button
           key={g.key}
@@ -265,6 +279,11 @@ function GenreChips() {
           {g.label}
         </button>
       ))}
+      </div>
+      {genres.length > 5 && (
+        <div className="absolute right-0 top-0 bottom-0 w-[28px] pointer-events-none"
+          style={{ background: 'linear-gradient(to right, transparent, var(--black))' }} />
+      )}
     </div>
   );
 }

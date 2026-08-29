@@ -5,6 +5,9 @@ import { Song, Member, Team, TeamMember } from '@/data/types';
 import { SONGS as SEED_SONGS } from '@/data/songs';
 import { MEMBERS as SEED_MEMBERS } from '@/data/members';
 import { upload } from '@vercel/blob/client';
+import { downscaleImage, formatBytes } from '@/lib/downscaleImage';
+import { convertToMp3 } from '@/lib/convertAudio';
+import { GENRE_VALUES } from '@/data/genres';
 interface UserProfile {
   id: string;
   email: string;
@@ -932,16 +935,32 @@ function SongForm({ song, members, onSave, onCancel }: { song: Song; members: Me
   const [moodText, setMoodText] = useState(song.mood.join(', '));
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [uploadStage, setUploadStage] = useState<string>('');
+  const [uploadNote, setUploadNote] = useState<string | null>(null);
   const [showManualUrl, setShowManualUrl] = useState(false);
   const [legalUploading, setLegalUploading] = useState(false);
   const [legalUploadError, setLegalUploadError] = useState<string | null>(null);
 
   const update = (field: string, value: unknown) => setForm({ ...form, [field]: value });
 
-  const handleFileUpload = async (file: File) => {
+  const handleFileUpload = async (originalFile: File) => {
     setUploading(true);
     setUploadError(null);
+    setUploadNote(null);
+    setUploadStage('Reading file…');
     try {
+      // Transcode masters to MP3 first: a 50MB WAV becomes ~3MB, which is what
+      // gets stored and what every listener streams.
+      const { file, originalSize, converted, reason } = await convertToMp3(
+        originalFile,
+        fraction => setUploadStage(`Converting to MP3… ${Math.round(fraction * 100)}%`)
+      );
+      if (reason) {
+        // Not fatal — the original still uploads, the user just pays for size.
+        setUploadNote(`Kept original format: ${reason}.`);
+      }
+
+      setUploadStage('Uploading…');
       let url: string;
       const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
 
@@ -974,6 +993,9 @@ function SongForm({ song, members, onSave, onCancel }: { song: Song; members: Me
       }
 
       setForm(prev => ({ ...prev, audio_url: url }));
+      if (converted) {
+        setUploadNote(`Converted to MP3 · ${formatBytes(originalSize)} → ${formatBytes(file.size)}`);
+      }
 
       // Extract duration from audio file
       const audio = new Audio();
@@ -985,6 +1007,7 @@ function SongForm({ song, members, onSave, onCancel }: { song: Song; members: Me
       setUploadError(err instanceof Error ? err.message : 'Upload failed');
     } finally {
       setUploading(false);
+      setUploadStage('');
     }
   };
 
@@ -1027,7 +1050,7 @@ function SongForm({ song, members, onSave, onCancel }: { song: Song; members: Me
             <label className="block text-xs text-gray-500 mb-1">Genre</label>
             <select value={form.genre} onChange={e => update('genre', e.target.value)}
               className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none">
-              {['Pop', 'R&B', 'Hip-Hop', 'Country', 'Dance / EDM'].map(g => <option key={g}>{g}</option>)}
+              {GENRE_VALUES.map(g => <option key={g}>{g}</option>)}
             </select>
           </div>
           <div>
@@ -1126,11 +1149,14 @@ function SongForm({ song, members, onSave, onCancel }: { song: Song; members: Me
               }}
             >
               {uploading ? (
-                <div className="text-sm text-blue-600">Uploading...</div>
+                <div className="text-sm text-blue-600">{uploadStage || 'Uploading…'}</div>
               ) : (
                 <>
                   <div className="text-sm text-gray-500 mb-2">
                     Drag &amp; drop a .wav or .mp3 file here, or click to browse
+                  </div>
+                  <div className="text-xs text-gray-400 mb-2">
+                    WAVs are converted to 192kbps MP3 before upload
                   </div>
                   <input
                     type="file"
@@ -1147,6 +1173,9 @@ function SongForm({ song, members, onSave, onCancel }: { song: Song; members: Me
 
             {uploadError && (
               <div className="text-xs text-red-500 mt-1">{uploadError}</div>
+            )}
+            {uploadNote && !uploadError && (
+              <div className="text-xs text-green-600 mt-1">{uploadNote}</div>
             )}
 
             {/* Manual URL fallback */}
@@ -1232,22 +1261,32 @@ function SongForm({ song, members, onSave, onCancel }: { song: Song; members: Me
 function ImageUploadField({ label, value, onChange }: { label: string; value: string; onChange: (url: string) => void }) {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [savedNote, setSavedNote] = useState<string | null>(null);
 
   const handleUpload = async (file: File) => {
     setUploading(true);
     setError(null);
+    setSavedNote(null);
     try {
-      if (file.size > 10 * 1024 * 1024) {
-        throw new Error(`That image is ${(file.size / 1024 / 1024).toFixed(1)}MB — the limit is 10MB.`);
+      // Shrink before measuring: an 8MB camera JPEG becomes a ~150KB upload,
+      // so the size limit below is about genuinely unusable files, not big photos.
+      const { file: toUpload, originalSize, resized } = await downscaleImage(file);
+
+      if (toUpload.size > 10 * 1024 * 1024) {
+        throw new Error(`That image is ${formatBytes(toUpload.size)} — the limit is 10MB.`);
       }
+
       // Upload straight from the browser to Vercel Blob. Routing the bytes
       // through our own API would cap the file at the serverless body limit.
-      const blob = await upload(file.name, file, {
+      const blob = await upload(toUpload.name, toUpload, {
         access: 'public',
         handleUploadUrl: '/api/upload/client-token',
-        contentType: file.type,
+        contentType: toUpload.type,
       });
       onChange(blob.url);
+      if (resized) {
+        setSavedNote(`Resized ${formatBytes(originalSize)} → ${formatBytes(toUpload.size)}`);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Upload failed');
     } finally {
@@ -1288,6 +1327,7 @@ function ImageUploadField({ label, value, onChange }: { label: string; value: st
         )}
       </div>
       {error && <div className="text-xs text-red-500 mt-1">{error}</div>}
+      {savedNote && !error && <div className="text-xs text-green-600 mt-1">{savedNote}</div>}
     </div>
   );
 }

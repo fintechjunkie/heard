@@ -72,6 +72,28 @@ export const FEATURES: Record<FeatureName, boolean> = {
 
   /** Price and availability counts on cards and in the stats strip. */
   pricing: !SIMPLIFIED,
+
+  /**
+   * Writer credentials on profile pages: the streams and awards counters,
+   * the Awards chips, and the Notable Hits chart.
+   */
+  memberCredentials: !SIMPLIFIED,
+
+  /** Tier badges and Tier 1 / Tier 2 labelling throughout. */
+  tiers: !SIMPLIFIED,
+
+  /**
+   * Whether a reaction is a signal to other people. When off, reacting is a
+   * private bookmark: no "your team sees this" toast, no shared-with-team
+   * caption, and no artist-flag banner on the song card.
+   */
+  sharedReactions: !SIMPLIFIED,
+
+  /**
+   * How recently a song entered the bank: the "✦ New" tag and genre chip,
+   * and the "Added N days ago" detail row.
+   */
+  songRecency: !SIMPLIFIED,
 };
 
 export type FeatureName =
@@ -81,4 +103,8 @@ export type FeatureName =
   | 'dealRooms'
   | 'teams'
   | 'commerce'
-  | 'pricing';
+  | 'pricing'
+  | 'memberCredentials'
+  | 'tiers'
+  | 'sharedReactions'
+  | 'songRecency';

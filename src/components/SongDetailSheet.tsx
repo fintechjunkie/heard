@@ -1,8 +1,8 @@
 'use client';
 
 import { Song } from '@/data/types';
-import { MEMBERS } from '@/data/members';
 import { usePlayer } from '@/lib/player';
+import { useStore } from '@/lib/store';
 import { FEATURES } from '@/lib/features';
 import BottomSheet from './BottomSheet';
 import Waveform from './Waveform';
@@ -22,10 +22,11 @@ export default function SongDetailSheet({
   song, open, onClose, onReserve, onBuy, onOpenProfile,
 }: SongDetailSheetProps) {
   const { activeSong, isPlaying } = usePlayer();
+  const { members } = useStore();
   if (!song) return null;
   const isCurrentlyPlaying = activeSong?.id === song.id && isPlaying;
 
-  const songWriters = song.writer_ids.map(id => MEMBERS.find(m => m.id === id)).filter(Boolean);
+  const songWriters = song.writer_ids.map(id => members.find(m => m.id === id)).filter(Boolean);
 
   return (
     <BottomSheet open={open} onClose={onClose} fullHeight>
@@ -144,7 +145,7 @@ export default function SongDetailSheet({
                 ...(FEATURES.commerce
                   ? [['Available', song.status === 'purchased' ? 'Purchased' : 'Yes']]
                   : []),
-                ...(song.days_in_bank <= 30 && song.status !== 'purchased'
+                ...(FEATURES.songRecency && song.days_in_bank <= 30 && song.status !== 'purchased'
                   ? [['Added', `${song.days_in_bank} days ago · Brand New`]]
                   : []),
               ].map(([label, value], i) => (

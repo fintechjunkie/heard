@@ -29,6 +29,26 @@ interface PlayerActions {
 
 const PlayerContext = createContext<(PlayerState & PlayerActions) | null>(null);
 
+/**
+ * Current playback position in seconds.
+ *
+ * Howler's own seek() returns a value it cached at play() time while its
+ * internal play-lock is held, which on html5 sources can persist for the whole
+ * track — the position only refreshes on pause, which is why the progress bar
+ * appeared to jump forward only when paused. The underlying <audio> element's
+ * currentTime is always live, so prefer it and fall back to seek() if Howler's
+ * internals ever move.
+ */
+function readPosition(howl: Howl): number {
+  const node = (howl as unknown as { _sounds?: { _node?: { currentTime?: number } }[] })
+    ._sounds?.[0]?._node;
+  if (node && typeof node.currentTime === 'number' && !Number.isNaN(node.currentTime)) {
+    return node.currentTime;
+  }
+  const fallback = howl.seek() as number;
+  return typeof fallback === 'number' && !Number.isNaN(fallback) ? fallback : 0;
+}
+
 export function PlayerProvider({ children }: { children: ReactNode }) {
   const [activeSong, setActiveSong] = useState<Song | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -41,6 +61,14 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const activeSongIdRef = useRef<number | null>(null);
   const pendingSeekRef = useRef<number | undefined>(undefined);
   const previewModeRef = useRef(true);
+  /** Whether THIS playback session is preview-limited. Captured when playback
+   *  starts so that later mode changes — e.g. leaving Pocket Songs while a
+   *  track is mid-play — cannot retroactively cut it off. */
+  const previewLockRef = useRef(true);
+  /** Mirrors isPlaying for the rAF loop. Howler's own playing() briefly
+   *  reports false while an html5 element is starting, so polling it to decide
+   *  whether to schedule the next frame kills the loop on the first frame. */
+  const isPlayingRef = useRef(false);
 
   // NOTE: Real Web Audio analysis is intentionally NOT wired up. Splicing
   // Howler's <audio> element into an AnalyserNode (source → analyser →
@@ -68,26 +96,32 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const startProgress = useCallback(() => {
     stopProgress();
     const update = () => {
-      if (howlRef.current) {
-        const playing = howlRef.current.playing();
-        const seekPos = howlRef.current.seek() as number;
-        const dur = howlRef.current.duration();
-        if (dur > 0) {
-          setCurrentTime(seekPos);
-          setDuration(dur);
-          setProgress((seekPos / dur) * 100);
+      if (!howlRef.current || !isPlayingRef.current) {
+        rafRef.current = null;
+        return;
+      }
 
-          // 20-second preview limit on main page
-          if (previewModeRef.current && seekPos >= 20) {
-            howlRef.current.pause();
-            setIsPlaying(false);
-            return; // Stop the animation loop
-          }
-        }
-        if (playing) {
-          rafRef.current = requestAnimationFrame(update);
+      const seekPos = readPosition(howlRef.current);
+      const dur = howlRef.current.duration();
+      if (dur > 0) {
+        setCurrentTime(seekPos);
+        setDuration(dur);
+        setProgress((seekPos / dur) * 100);
+
+        // 20-second preview limit, decided when this track started playing.
+        if (previewLockRef.current && seekPos >= 20) {
+          howlRef.current.pause();
+          isPlayingRef.current = false;
+          setIsPlaying(false);
+          rafRef.current = null;
+          return;
         }
       }
+
+      // Keep polling until onpause/onend/onstop clears isPlayingRef. Asking
+      // Howler whether it is playing would end the loop during the html5
+      // start-up lock, freezing the progress bar for the whole track.
+      rafRef.current = requestAnimationFrame(update);
     };
     rafRef.current = requestAnimationFrame(update);
   }, [stopProgress]);
@@ -103,6 +137,9 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
 
     // Store the pending seek for after load
     pendingSeekRef.current = seekPercent;
+
+    // Lock in whether this track is preview-limited for its whole session.
+    previewLockRef.current = previewModeRef.current;
 
     // Extract format hint from file extension
     const ext = song.audio_url.split('.').pop()?.toLowerCase();
@@ -125,14 +162,22 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
         pendingSeekRef.current = undefined;
       },
       onplay: () => {
+        isPlayingRef.current = true;
         setIsPlaying(true);
         startProgress();
       },
       onpause: () => {
+        isPlayingRef.current = false;
+        setIsPlaying(false);
+        stopProgress();
+      },
+      onstop: () => {
+        isPlayingRef.current = false;
         setIsPlaying(false);
         stopProgress();
       },
       onend: () => {
+        isPlayingRef.current = false;
         setIsPlaying(false);
         setProgress(0);
         setCurrentTime(0);
@@ -156,6 +201,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     if (howlRef.current) {
       howlRef.current.pause();
     }
+    isPlayingRef.current = false;
     setIsPlaying(false);
     stopProgress();
   }, [stopProgress]);
@@ -181,7 +227,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       if (dur > 0) {
         let seekTime = (percent / 100) * dur;
         // Cap at 20s in preview mode
-        if (previewModeRef.current && seekTime > 20) {
+        if (previewLockRef.current && seekTime > 20) {
           seekTime = 20;
           percent = (20 / dur) * 100;
         }
@@ -196,7 +242,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const skipForward = useCallback((seconds = 10) => {
     if (howlRef.current) {
       const dur = howlRef.current.duration();
-      const cur = howlRef.current.seek() as number;
+      const cur = readPosition(howlRef.current);
       if (dur > 0) {
         const newTime = Math.min(dur, cur + seconds);
         howlRef.current.seek(newTime);
@@ -209,7 +255,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const skipBack = useCallback((seconds = 10) => {
     if (howlRef.current) {
       const dur = howlRef.current.duration();
-      const cur = howlRef.current.seek() as number;
+      const cur = readPosition(howlRef.current);
       if (dur > 0) {
         const newTime = Math.max(0, cur - seconds);
         howlRef.current.seek(newTime);
@@ -239,6 +285,15 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       {children}
     </PlayerContext.Provider>
   );
+}
+
+/** Seconds → "3:07". Falsy or non-finite input renders as "0:00". */
+export function formatTime(seconds: number): string {
+  if (!Number.isFinite(seconds) || seconds < 0) return '0:00';
+  const total = Math.floor(seconds);
+  const mins = Math.floor(total / 60);
+  const secs = total % 60;
+  return `${mins}:${secs.toString().padStart(2, '0')}`;
 }
 
 export function usePlayer() {
