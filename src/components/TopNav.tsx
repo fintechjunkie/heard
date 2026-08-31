@@ -31,17 +31,18 @@ export default function TopNav({ onArtistMode, teamName, onSwitchTeam, onOpenDea
   useEffect(() => {
     const supabase = createClient();
     async function loadProfile() {
-      // Shared-password mode has no Supabase user; show the email typed at the
-      // door so the avatar isn't a permanent '??'.
-      if (SHARED_PASSWORD) {
+      const { data: { user } } = await supabase.auth.getUser();
+
+      // Someone who signed in with the shared password has no Supabase user.
+      // Fall back to the email they typed rather than a permanent '??' — but
+      // only after checking, so a real sign-in still shows the real profile.
+      if (!user && SHARED_PASSWORD) {
         let email = '';
-        try { email = localStorage.getItem('theheard_demoEmail') || ''; } catch {}
+        try { email = localStorage.getItem('theheard_demoEmail') || ''; } catch { /* ignore */ }
         const name = email ? email.split('@')[0].replace(/[._-]+/g, ' ') : 'Guest';
         setProfile({ full_name: name, email, role: 'manager', tier: 'tier1', company: '' });
         return;
       }
-
-      const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         const { data } = await supabase
           .from('profiles')
@@ -69,10 +70,9 @@ export default function TopNav({ onArtistMode, teamName, onSwitchTeam, onOpenDea
     if (SHARED_PASSWORD) {
       // Clear the demo cookie, or middleware sends us straight back in.
       document.cookie = `${DEMO_SESSION_COOKIE}=; path=/; max-age=0; samesite=lax`;
-      try { localStorage.removeItem('theheard_demoEmail'); } catch {}
-      window.location.href = '/login';
-      return;
+      try { localStorage.removeItem('theheard_demoEmail'); } catch { /* ignore */ }
     }
+    // Sign out of Supabase too: a real session may exist alongside the cookie.
     const supabase = createClient();
     await supabase.auth.signOut();
     window.location.href = '/login';

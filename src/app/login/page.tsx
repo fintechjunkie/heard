@@ -4,6 +4,18 @@ import { useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { SHARED_PASSWORD, DEMO_SESSION_COOKIE } from '@/lib/features';
 
+/**
+ * Marks this browser as through the door and remembers the email, which is the
+ * only identity the top nav and play tracking have while the demo gate is on.
+ */
+function grantDemoSession(email: string) {
+  if (SHARED_PASSWORD) {
+    const thirtyDays = 60 * 60 * 24 * 30;
+    document.cookie = `${DEMO_SESSION_COOKIE}=1; path=/; max-age=${thirtyDays}; samesite=lax`;
+  }
+  try { localStorage.setItem('theheard_demoEmail', email); } catch { /* ignore */ }
+}
+
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -17,18 +29,15 @@ export default function LoginPage() {
     setError(null);
     setLoading(true);
 
-    // ⚠️ Shared-password mode — any email, one common password.
-    // See SHARED_PASSWORD in src/lib/features.ts.
-    if (SHARED_PASSWORD) {
-      if (password !== SHARED_PASSWORD) {
-        setError('Invalid email or password.');
-        setLoading(false);
-        return;
-      }
-      const thirtyDays = 60 * 60 * 24 * 30;
-      document.cookie = `${DEMO_SESSION_COOKIE}=1; path=/; max-age=${thirtyDays}; samesite=lax`;
-      // No real profile exists, so remember the email for the top-nav avatar.
-      try { localStorage.setItem('theheard_demoEmail', email); } catch {}
+    // ⚠️ Shared-password mode — the common password gets anyone in, with any
+    // email. See SHARED_PASSWORD in src/lib/features.ts.
+    //
+    // It is only a shortcut, never a replacement: if the password typed is not
+    // the shared one, fall through to a real Supabase sign-in. The first
+    // version returned early here, so a person with a genuine approved account
+    // could never sign in with their own password.
+    if (SHARED_PASSWORD && password === SHARED_PASSWORD) {
+      grantDemoSession(email);
       window.location.href = '/';
       return;
     }
@@ -68,6 +77,9 @@ export default function LoginPage() {
           return;
         }
       }
+      // While the demo gate is on, middleware checks the cookie rather than a
+      // Supabase session, so a real sign-in has to set it too.
+      grantDemoSession(email);
       window.location.href = '/';
     }
   };
