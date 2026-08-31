@@ -44,6 +44,9 @@ function recordPlay(songId: number) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ songId, userEmail }),
+    // Survive the page being backgrounded or navigated immediately after a
+    // tap, which mobile browsers otherwise treat as a cancelled request.
+    keepalive: true,
   }).catch(() => { /* tracking is best-effort */ });
 }
 
@@ -87,6 +90,8 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
    *  reports false while an html5 element is starting, so polling it to decide
    *  whether to schedule the next frame kills the loop on the first frame. */
   const isPlayingRef = useRef(false);
+  /** Whether the current track has already been counted as a play. */
+  const playRecordedRef = useRef(false);
 
   // NOTE: Real Web Audio analysis is intentionally NOT wired up. Splicing
   // Howler's <audio> element into an AnalyserNode (source → analyser →
@@ -183,6 +188,14 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
         isPlayingRef.current = true;
         setIsPlaying(true);
         startProgress();
+        // Count the play here rather than when the track was requested: on
+        // mobile, playback can be deferred or refused after playSong runs, so
+        // recording earlier logged plays that never happened. The flag is
+        // reset per track, so resuming after a pause is still not recounted.
+        if (!playRecordedRef.current) {
+          playRecordedRef.current = true;
+          recordPlay(song.id);
+        }
       },
       onpause: () => {
         isPlayingRef.current = false;
@@ -208,7 +221,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
 
     howlRef.current = howl;
     activeSongIdRef.current = song.id;
-    recordPlay(song.id);
+    playRecordedRef.current = false;
     setActiveSong(song);
     setProgress(seekPercent || 0);
     setCurrentTime(0);
