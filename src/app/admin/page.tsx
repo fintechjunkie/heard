@@ -53,6 +53,8 @@ export default function AdminPage() {
   const [editingUser, setEditingUser] = useState<UserProfile | null>(null);
   const [editUserForm, setEditUserForm] = useState({ full_name: '', role: '', company: '', bio: '', tier: '' });
   const [memberError, setMemberError] = useState<string | null>(null);
+  const [playCounts, setPlayCounts] = useState<Record<string, { plays: number; songs: number }>>({});
+  const [playsAvailable, setPlaysAvailable] = useState(true);
   const [showAddUser, setShowAddUser] = useState(false);
   const [newUserForm, setNewUserForm] = useState({
     email: '', full_name: '', password: '', role: 'manager', tier: 'tier1', company: '',
@@ -172,6 +174,20 @@ export default function AdminPage() {
       setAddingUser(false);
     }
   };
+
+  const loadPlayCounts = useCallback(async () => {
+    try {
+      const res = await fetch('/api/plays');
+      if (!res.ok) { setPlaysAvailable(false); return; }
+      const data = await res.json();
+      setPlaysAvailable(data.available !== false);
+      setPlayCounts(data.byEmail || {});
+    } catch {
+      setPlaysAvailable(false);
+    }
+  }, []);
+
+  useEffect(() => { loadPlayCounts(); }, [loadPlayCounts]);
 
   const saveNewPassword = async () => {
     if (!editingUser) return;
@@ -637,7 +653,7 @@ export default function AdminPage() {
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-bold">Users ({users.length})</h2>
               <div className="flex gap-2">
-                <button onClick={loadUsers}
+                <button onClick={() => { loadUsers(); loadPlayCounts(); }}
                   className="px-3 py-1 text-xs text-gray-500 border border-gray-200 rounded-lg cursor-pointer bg-white">
                   {usersLoading ? 'Loading...' : 'Refresh'}
                 </button>
@@ -647,6 +663,13 @@ export default function AdminPage() {
                 </button>
               </div>
             </div>
+
+            {!playsAvailable && (
+              <div className="mb-4 px-4 py-3 rounded-lg bg-amber-50 border border-amber-200 text-sm text-amber-800">
+                Listening counts are unavailable — run <code className="font-mono text-xs">scripts/setup-song-plays.sql</code> in
+                the Supabase SQL editor to create the <code className="font-mono text-xs">song_plays</code> table.
+              </div>
+            )}
 
             {/* Pending applications */}
             {users.filter(u => u.status === 'pending').length > 0 && (
@@ -686,7 +709,7 @@ export default function AdminPage() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-gray-100">
-                    {['Name', 'Email', 'Role', 'Tier', 'Status', 'Actions'].map(h => (
+                    {['Name', 'Email', 'Role', 'Tier', 'Listened', 'Status', 'Actions'].map(h => (
                       <th key={h} className="text-left px-4 py-3 text-xs text-gray-500 font-medium">{h}</th>
                     ))}
                   </tr>
@@ -703,6 +726,18 @@ export default function AdminPage() {
                           <option value="tier1">Tier 1</option>
                           <option value="tier2">Tier 2</option>
                         </select>
+                      </td>
+                      <td className="px-4 py-3">
+                        {(() => {
+                          const c = playCounts[(u.email || '').toLowerCase()];
+                          if (!c) return <span className="text-gray-300">—</span>;
+                          return (
+                            <span className="text-gray-700">
+                              {c.songs} song{c.songs === 1 ? '' : 's'}
+                              <span className="text-gray-400"> · {c.plays} play{c.plays === 1 ? '' : 's'}</span>
+                            </span>
+                          );
+                        })()}
                       </td>
                       <td className="px-4 py-3">
                         <span className={`px-2 py-1 rounded-full text-xs ${
@@ -724,7 +759,7 @@ export default function AdminPage() {
                     </tr>
                   ))}
                   {users.filter(u => u.status !== 'pending').length === 0 && (
-                    <tr><td colSpan={6} className="px-4 py-8 text-center text-gray-400 text-sm">No approved users yet</td></tr>
+                    <tr><td colSpan={7} className="px-4 py-8 text-center text-gray-400 text-sm">No approved users yet</td></tr>
                   )}
                 </tbody>
               </table>

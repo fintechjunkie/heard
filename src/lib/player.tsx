@@ -30,6 +30,24 @@ interface PlayerActions {
 const PlayerContext = createContext<(PlayerState & PlayerActions) | null>(null);
 
 /**
+ * Log that a track was started. Fire-and-forget: playback must never wait on
+ * this, and a missing song_plays table must not surface as an error.
+ *
+ * Called from playSong only, so resuming after a pause is not counted as a
+ * second play — one row per time a track is actually put on.
+ */
+function recordPlay(songId: number) {
+  if (typeof window === 'undefined') return;
+  let userEmail = '';
+  try { userEmail = localStorage.getItem('theheard_demoEmail') || ''; } catch { /* ignore */ }
+  void fetch('/api/plays', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ songId, userEmail }),
+  }).catch(() => { /* tracking is best-effort */ });
+}
+
+/**
  * Current playback position in seconds.
  *
  * Howler's own seek() returns a value it cached at play() time while its
@@ -190,6 +208,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
 
     howlRef.current = howl;
     activeSongIdRef.current = song.id;
+    recordPlay(song.id);
     setActiveSong(song);
     setProgress(seekPercent || 0);
     setCurrentTime(0);
