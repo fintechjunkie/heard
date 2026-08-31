@@ -52,6 +52,7 @@ export default function AdminPage() {
   const [usersLoading, setUsersLoading] = useState(false);
   const [editingUser, setEditingUser] = useState<UserProfile | null>(null);
   const [editUserForm, setEditUserForm] = useState({ full_name: '', role: '', company: '', bio: '', tier: '' });
+  const [memberError, setMemberError] = useState<string | null>(null);
   const [showAddUser, setShowAddUser] = useState(false);
   const [newUserForm, setNewUserForm] = useState({
     email: '', full_name: '', password: '', role: 'manager', tier: 'tier1', company: '',
@@ -372,14 +373,46 @@ export default function AdminPage() {
     loadSongs();
   };
 
-  const updateMember = async (updated: Member) => {
-    await fetch('/api/members', {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(updated),
-    });
-    loadMembers();
-    setEditingMember(null);
+  // id 0 means the form was opened blank, so this is a create.
+  const saveMember = async (member: Member) => {
+    setMemberError(null);
+    if (!member.name.trim()) {
+      setMemberError('A name is required');
+      return;
+    }
+    // The POST route derives initials when they are missing, but PUT does not;
+    // fill them here so both paths behave the same.
+    const payload = {
+      ...member,
+      initials: member.initials?.trim()
+        || member.name.trim().split(/\s+/).map(w => w[0]).join('').toUpperCase().slice(0, 2),
+    };
+    try {
+      const res = await fetch('/api/members', {
+        method: member.id === 0 ? 'POST' : 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || `Save failed (${res.status})`);
+      loadMembers();
+      setEditingMember(null);
+    } catch (err) {
+      setMemberError(err instanceof Error ? err.message : 'Save failed');
+    }
+  };
+
+  const deleteMember = async (id: number, name: string) => {
+    if (!confirm(`Remove ${name} from The Heard? Songs keep their writer credits.`)) return;
+    setMemberError(null);
+    try {
+      const res = await fetch(`/api/members?id=${id}`, { method: 'DELETE' });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || `Delete failed (${res.status})`);
+      loadMembers();
+    } catch (err) {
+      setMemberError(err instanceof Error ? err.message : 'Delete failed');
+    }
   };
 
   const TABS: { key: AdminTab; label: string }[] = [
@@ -552,7 +585,18 @@ export default function AdminPage() {
           <>
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-bold">Members ({members.length})</h2>
+              <button onClick={() => { setMemberError(null); setEditingMember(BLANK_MEMBER()); }}
+                className="px-4 py-2 bg-black text-white rounded-lg text-sm cursor-pointer border-none">
+                + Add Member
+              </button>
             </div>
+            {memberError && (
+              <div className="mb-4 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-sm text-red-700 flex items-start justify-between gap-3">
+                <span>{memberError}</span>
+                <button onClick={() => setMemberError(null)}
+                  className="text-red-400 cursor-pointer bg-transparent border-none flex-shrink-0">✕</button>
+              </div>
+            )}
             <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
               <table className="w-full text-sm">
                 <thead>
@@ -571,7 +615,10 @@ export default function AdminPage() {
                       <td className="px-4 py-3">{m.streams}</td>
                       <td className="px-4 py-3">{songs.filter(s => s.writer_ids.includes(m.id) && s.status !== 'purchased').length}</td>
                       <td className="px-4 py-3">
-                        <button onClick={() => setEditingMember(m)} className="text-blue-600 text-xs cursor-pointer bg-transparent border-none">Edit</button>
+                        <button onClick={() => { setMemberError(null); setEditingMember(m); }}
+                          className="text-blue-600 text-xs cursor-pointer bg-transparent border-none">Edit</button>
+                        <button onClick={() => deleteMember(m.id, m.name)}
+                          className="text-red-500 text-xs cursor-pointer bg-transparent border-none ml-3">Delete</button>
                       </td>
                     </tr>
                   ))}
@@ -582,7 +629,7 @@ export default function AdminPage() {
         )}
 
         {activeTab === 'members' && editingMember && (
-          <MemberForm member={editingMember} onSave={updateMember} onCancel={() => setEditingMember(null)} />
+          <MemberForm member={editingMember} onSave={saveMember} onCancel={() => setEditingMember(null)} />
         )}
 
         {activeTab === 'users' && (
@@ -1472,6 +1519,25 @@ function ImageUploadField({ label, value, onChange }: { label: string; value: st
   );
 }
 
+/** A fresh collective member. id 0 marks it as unsaved. */
+function BLANK_MEMBER(): Member {
+  return {
+    id: 0,
+    name: '',
+    initials: '',
+    role: 'Songwriter',
+    color: '#FFB830',
+    bio: '',
+    streams: '',
+    awards: [],
+    hits: [],
+    member_type: 'general',
+    joined_at: new Date().toISOString(),
+    avatar_url: '',
+    banner_url: '',
+  };
+}
+
 function MemberForm({ member, onSave, onCancel }: { member: Member; onSave: (m: Member) => void; onCancel: () => void }) {
   const [form, setForm] = useState(member);
 
@@ -1480,7 +1546,7 @@ function MemberForm({ member, onSave, onCancel }: { member: Member; onSave: (m: 
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold">Edit Member</h2>
+        <h2 className="text-2xl font-bold">{member.id === 0 ? 'Add Member' : 'Edit Member'}</h2>
         <button onClick={onCancel} className="text-gray-500 cursor-pointer bg-transparent border-none">← Back</button>
       </div>
       <div className="bg-white rounded-xl border border-gray-100 p-6 max-w-2xl">
