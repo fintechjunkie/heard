@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useStore } from '@/lib/store';
 import { usePlayer, formatTime } from '@/lib/player';
 import PlayerVisualizer, { VizMode } from './PlayerVisualizer';
@@ -89,6 +89,20 @@ export default function ArtistMode({ open, onClose, onOpenProfile, onOpenDetail,
     const prev = (currentIndex - 1 + queuedSongs.length) % queuedSongs.length;
     setCurrentIndex(prev);
   }, [currentIndex, queuedSongs.length]);
+
+  // Dragging the progress bar. Pointer events cover mouse and touch alike, and
+  // pointer capture keeps the drag alive when a finger slides off the bar.
+  const scrubTrackRef = useRef<HTMLDivElement | null>(null);
+  const [scrubbing, setScrubbing] = useState(false);
+
+  const seekFromPointer = useCallback((clientX: number) => {
+    const el = scrubTrackRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    if (rect.width === 0) return;
+    const pct = ((clientX - rect.left) / rect.width) * 100;
+    seek(Math.max(0, Math.min(100, pct)));
+  }, [seek]);
 
   const handleReaction = (songId: number, key: string) => {
     const current = artistReactions[songId];
@@ -380,18 +394,62 @@ export default function ArtistMode({ open, onClose, onOpenProfile, onOpenDetail,
                     {formatTime(isSongPlaying && duration > 0 ? duration : song.audio_duration_seconds)}
                   </span>
                 </div>
-                {/* Padded hit area — a 4px bar is too thin to tap accurately */}
+                {/* Draggable scrubber. touch-none stops the page scrolling
+                    under a finger that is dragging the bar. */}
                 <div
-                  className="py-[8px] -my-[8px] cursor-pointer"
-                  onClick={(e) => {
+                  className="py-[12px] -my-[8px] cursor-pointer touch-none select-none"
+                  onPointerDown={(e) => {
                     if (!isSongPlaying) return;
-                    const rect = e.currentTarget.getBoundingClientRect();
-                    seek(Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100)));
+                    e.currentTarget.setPointerCapture(e.pointerId);
+                    setScrubbing(true);
+                    seekFromPointer(e.clientX);
                   }}
+                  onPointerMove={(e) => {
+                    if (!scrubbing) return;
+                    seekFromPointer(e.clientX);
+                  }}
+                  onPointerUp={(e) => {
+                    if (e.currentTarget.hasPointerCapture(e.pointerId)) {
+                      e.currentTarget.releasePointerCapture(e.pointerId);
+                    }
+                    setScrubbing(false);
+                  }}
+                  onPointerCancel={() => setScrubbing(false)}
                 >
-                  <div className="h-[4px] rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.08)' }}>
-                    <div className="h-full rounded-full"
-                      style={{ width: `${currentProgress}%`, background: effectiveColor, boxShadow: `0 0 6px ${effectiveColor}66` }} />
+                  <div
+                    ref={scrubTrackRef}
+                    className="relative rounded-full"
+                    style={{
+                      height: scrubbing ? 10 : 8,
+                      background: 'rgba(255,255,255,0.12)',
+                      transition: 'height 120ms ease',
+                    }}
+                  >
+                    <div
+                      className="h-full rounded-full"
+                      style={{
+                        width: `${currentProgress}%`,
+                        background: effectiveColor,
+                        boxShadow: `0 0 6px ${effectiveColor}66`,
+                      }}
+                    />
+                    {/* Thumb: gives the finger something to aim at, and shows
+                        where the playhead is when the bar is near empty. */}
+                    <div
+                      className="absolute rounded-full pointer-events-none"
+                      style={{
+                        left: `${currentProgress}%`,
+                        top: '50%',
+                        width: scrubbing ? 20 : 16,
+                        height: scrubbing ? 20 : 16,
+                        transform: 'translate(-50%, -50%)',
+                        background: effectiveColor,
+                        border: '2px solid rgba(0,0,0,0.35)',
+                        boxShadow: `0 0 10px ${effectiveColor}88`,
+                        opacity: isSongPlaying ? 1 : 0.45,
+                        transition: 'width 120ms ease, height 120ms ease',
+                      }}
+                    />
                   </div>
                 </div>
               </div>

@@ -107,6 +107,14 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const updatePreviewMode = useCallback((preview: boolean) => {
     setPreviewMode(preview);
     previewModeRef.current = preview;
+    // Lifting preview must also release whatever is playing right now.
+    // Otherwise a track started in the bank keeps the 20s cap it was given at
+    // playSong time, and stalls mid-song once carried into Pocket Songs.
+    //
+    // The reverse deliberately does not apply: turning preview back on (which
+    // happens on leaving Pocket) leaves the current track uncapped, so it is
+    // not cut off mid-play. The cap returns with the next track started.
+    if (!preview) previewLockRef.current = false;
   }, []);
 
   const stopProgress = useCallback(() => {
