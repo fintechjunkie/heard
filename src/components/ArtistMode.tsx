@@ -243,7 +243,7 @@ export default function ArtistMode({ open, onClose, onOpenDetail, inline }: Arti
                   </button>
                 )}
                 <div className="flex-1 min-w-0">
-                  <FitTitle text={song.title} max={38} min={16} />
+                  <FitTitle text={song.title} max={42} min={20} />
                 </div>
                 {queuedSongs.length > 1 && (
                   <button onClick={goNext} aria-label="Next song"
@@ -542,11 +542,17 @@ export default function ArtistMode({ open, onClose, onOpenDetail, inline }: Arti
 }
 
 /**
- * A song title on one line, shrunk until it fits.
+ * A song title on one line, sized to fill the space it has.
  *
- * Character counts are a poor proxy — "MMM" and "III" differ hugely in Bebas —
- * so this measures the rendered text and scales the size by the overflow
- * ratio. One pass is enough: text width is close to linear in font size.
+ * Measures the rendered text rather than counting characters, since "MMM" and
+ * "III" are nothing alike in Bebas. Two details matter:
+ *
+ *  - Bebas loads asynchronously with display=swap, so a first measurement can
+ *    land against the fallback face, which is far wider than this condensed
+ *    one. Measuring then produced titles shrunk to a fraction of the room they
+ *    actually had. It re-measures once fonts are ready.
+ *  - It grows as well as shrinks: the size is recomputed from `max` every
+ *    time, so a short title never inherits a small size from a long one.
  */
 function FitTitle({ text, max, min }: { text: string; max: number; min: number }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -555,21 +561,46 @@ function FitTitle({ text, max, min }: { text: string; max: number; min: number }
   useLayoutEffect(() => {
     const el = ref.current;
     if (!el) return;
+    let cancelled = false;
+
     const fit = () => {
-      const available = el.parentElement?.clientWidth ?? el.clientWidth;
+      if (cancelled || !el) return;
+      const available = el.clientWidth;
       if (!available) return;
-      // Measure at full size, then scale down by however much it overflows.
+
       el.style.fontSize = `${max}px`;
       const needed = el.scrollWidth;
-      if (needed <= available) { setSize(max); el.style.fontSize = ''; return; }
-      const scaled = Math.max(min, Math.floor(max * (available / needed)));
-      setSize(scaled);
+      if (needed <= available) {
+        el.style.fontSize = '';
+        setSize(max);
+        return;
+      }
+      // Text width is close to linear in font size, so one ratio gets very
+      // near; a couple of single-pixel steps settle any rounding.
+      let next = Math.max(min, Math.floor(max * (available / needed)));
+      el.style.fontSize = `${next}px`;
+      let guard = 6;
+      while (next > min && el.scrollWidth > available && guard-- > 0) {
+        next -= 1;
+        el.style.fontSize = `${next}px`;
+      }
+      while (next < max && guard-- > 0) {
+        el.style.fontSize = `${next + 1}px`;
+        if (el.scrollWidth > available) break;
+        next += 1;
+      }
       el.style.fontSize = '';
+      setSize(next);
     };
+
     fit();
     const ro = new ResizeObserver(fit);
-    if (el.parentElement) ro.observe(el.parentElement);
-    return () => ro.disconnect();
+    ro.observe(el);
+    // The real font almost always arrives after first paint.
+    if (typeof document !== 'undefined' && document.fonts?.ready) {
+      document.fonts.ready.then(fit).catch(() => {});
+    }
+    return () => { cancelled = true; ro.disconnect(); };
   }, [text, max, min]);
 
   return (

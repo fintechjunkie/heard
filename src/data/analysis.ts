@@ -225,6 +225,12 @@ export function validateAnalysis(input: unknown): ValidationResult {
     errors.push(`Could not read vocal.range_high ("${a.vocal.range_high}") as a note`);
   }
 
+  // Above 0 dBFS the master is clipping — worth an admin's eye even though the
+  // mix block itself is internal.
+  if (a.mix && typeof a.mix.true_peak_db === 'number' && a.mix.true_peak_db > 0) {
+    warnings.push(`True peak is +${a.mix.true_peak_db} dB — the master is clipping`);
+  }
+
   if (a.structure_confidence === 'low') {
     warnings.push('Structure confidence is low — sections and time to hook need checking');
   }
