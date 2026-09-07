@@ -1,0 +1,90 @@
+{
+  "version": 1,
+  "analyzed_at": "2026-09-07T01:26:48Z",
+  "engine_version": "1.0.0",
+  "source_file": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bit_depth": null,
+    "duration_sec": 188.89,
+    "format": "MP3",
+    "quality_flag": null
+  },
+  "tempo": { "bpm": 136, "alt_bpm": null, "confidence": "clear" },
+  "key": {
+    "root": "B",
+    "mode": "minor",
+    "display": "B minor",
+    "runner_up": "D major",
+    "margin": 0.262,
+    "confidence": "clear"
+  },
+  "energy_curve": [
+    0.057, 0.136, 0.118, 0.117, 0.142, 0.241, 0.323, 0.42, 0.383, 0.324,
+    0.321, 0.535, 0.506, 0.399, 0.381, 0.323, 0.316, 0.522, 0.514, 0.443,
+    0.389, 0.358, 0.392, 0.571, 0.53, 0.483, 0.46, 0.354, 0.368, 0.432,
+    0.474, 0.498, 0.491, 0.481, 0.478, 0.523, 0.53, 0.517, 0.512, 0.535,
+    0.447, 0.481, 0.752, 0.9, 0.847, 0.766, 0.81, 0.952, 0.893, 0.925,
+    0.836, 0.794, 0.803, 0.952, 0.899, 0.909, 0.856, 0.786, 0.776, 0.958,
+    0.914, 0.889, 0.837, 0.797, 0.762, 0.867, 0.573, 0.352, 0.585, 0.481,
+    0.223, 0.424, 0.502, 0.4, 0.625, 0.531, 0.315, 0.426, 0.49, 0.488,
+    0.482, 0.468, 0.496, 0.548, 0.549, 0.533, 0.538, 0.528, 0.421, 0.67,
+    0.942, 0.827, 0.837, 0.889, 0.862, 0.911, 0.931, 0.839, 0.836, 0.871,
+    0.875, 0.92, 0.924, 0.829, 0.813, 0.856, 0.895, 0.911, 0.918, 0.838,
+    0.786, 0.859, 0.911, 0.447, 0.154, 0.259, 0.367, 0.47, 0.379, 0.397,
+    0.442, 0.546, 0.595, 0.657, 0.463, 0.459, 0.529, 0.571, 0.536, 0.462,
+    0.3, 0.694, 0.919, 0.858, 0.763, 0.86, 0.972, 0.913, 0.926, 0.878,
+    0.777, 0.838, 0.994, 0.933, 0.922, 0.88, 0.77, 0.83, 0.981, 0.926,
+    0.936, 0.871, 0.802, 0.814, 0.753, 0.224, 0.007, 0.002, 0.0, 0.0
+  ],
+  "sections": [
+    { "start": 0.0, "end": 5.1, "label": "intro", "energy": 0.12, "stability": 3 },
+    { "start": 5.1, "end": 35.4, "label": "verse", "energy": 0.41, "stability": 3 },
+    { "start": 35.4, "end": 47.9, "label": "pre", "energy": 0.5, "stability": 3 },
+    { "start": 47.9, "end": 78.5, "label": "chorus", "energy": 0.84, "stability": 3 },
+    { "start": 78.5, "end": 91.8, "label": "verse", "energy": 0.42, "stability": 3 },
+    { "start": 91.8, "end": 104.4, "label": "pre", "energy": 0.51, "stability": 3 },
+    { "start": 104.4, "end": 134.2, "label": "chorus", "energy": 0.84, "stability": 3 },
+    { "start": 134.2, "end": 141.2, "label": "section", "energy": 0.33, "stability": 3 },
+    { "start": 141.2, "end": 155.3, "label": "bridge", "energy": 0.52, "stability": 3 },
+    { "start": 155.3, "end": 183.6, "label": "chorus", "energy": 0.87, "stability": 3 },
+    { "start": 183.6, "end": 188.9, "label": "outro", "energy": 0.05, "stability": 3 }
+  ],
+  "structure_confidence": "high",
+  "time_to_hook_sec": 47.9,
+  "vocal": {
+    "range_low": "A#3",
+    "range_high": "B5",
+    "tessitura_low": "D4",
+    "tessitura_high": "G#4",
+    "median": "E4",
+    "span_semitones": 25.2,
+    "frames_analyzed": 2160,
+    "confidence": "high"
+  },
+  "mix": {
+    "lufs": -13.5,
+    "true_peak_db": 0.93,
+    "crest_db": 15.4,
+    "stereo_side_mid": 0.27,
+    "stereo_correlation": 0.864,
+    "spectral_centroid_hz": 2621,
+    "band_balance": { "low": 24, "mid": 34, "high": 42 }
+  },
+  "pitch_paragraph": null,
+  "admin": {
+    "reviewed": false,
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "edited_fields": []
+  },
+  "_promoted": {
+    "tempo_bpm": 136,
+    "key_display": "B minor",
+    "time_to_hook_sec": 47.9,
+    "vocal_range_low_midi": 58,
+    "vocal_range_high_midi": 83,
+    "analysis_status": "complete"
+  },
+  "title": "Slippin'"
+}

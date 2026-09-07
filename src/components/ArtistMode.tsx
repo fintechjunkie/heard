@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import { useStore } from '@/lib/store';
 import { usePlayer, formatTime } from '@/lib/player';
 import PlayerVisualizer, { VizMode } from './PlayerVisualizer';
@@ -243,22 +243,7 @@ export default function ArtistMode({ open, onClose, onOpenDetail, inline }: Arti
                   </button>
                 )}
                 <div className="flex-1 min-w-0">
-                  <div
-                    className="tracking-[2px] leading-[0.95]"
-                    style={{
-                      fontFamily: "'Bebas Neue', sans-serif",
-                      color: 'white',
-                      // Bebas at a fixed 38px overflowed longer titles between
-                      // the two nav arrows. Step down rather than truncate — a
-                      // song title is the one thing that must be readable.
-                      fontSize: song.title.length > 30 ? 24
-                        : song.title.length > 22 ? 28
-                        : song.title.length > 16 ? 32
-                        : 38,
-                      overflowWrap: 'break-word',
-                    }}>
-                    {song.title}
-                  </div>
+                  <FitTitle text={song.title} max={38} min={16} />
                 </div>
                 {queuedSongs.length > 1 && (
                   <button onClick={goNext} aria-label="Next song"
@@ -552,6 +537,53 @@ export default function ArtistMode({ open, onClose, onOpenDetail, inline }: Arti
           </div>
         </div>
       </BottomSheet>
+    </div>
+  );
+}
+
+/**
+ * A song title on one line, shrunk until it fits.
+ *
+ * Character counts are a poor proxy — "MMM" and "III" differ hugely in Bebas —
+ * so this measures the rendered text and scales the size by the overflow
+ * ratio. One pass is enough: text width is close to linear in font size.
+ */
+function FitTitle({ text, max, min }: { text: string; max: number; min: number }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [size, setSize] = useState(max);
+
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const fit = () => {
+      const available = el.parentElement?.clientWidth ?? el.clientWidth;
+      if (!available) return;
+      // Measure at full size, then scale down by however much it overflows.
+      el.style.fontSize = `${max}px`;
+      const needed = el.scrollWidth;
+      if (needed <= available) { setSize(max); el.style.fontSize = ''; return; }
+      const scaled = Math.max(min, Math.floor(max * (available / needed)));
+      setSize(scaled);
+      el.style.fontSize = '';
+    };
+    fit();
+    const ro = new ResizeObserver(fit);
+    if (el.parentElement) ro.observe(el.parentElement);
+    return () => ro.disconnect();
+  }, [text, max, min]);
+
+  return (
+    <div
+      ref={ref}
+      className="leading-[1.05] whitespace-nowrap overflow-hidden"
+      style={{
+        fontFamily: "'Bebas Neue', sans-serif",
+        color: 'white',
+        fontSize: size,
+        letterSpacing: size >= 30 ? 2 : 1,
+      }}
+    >
+      {text}
     </div>
   );
 }

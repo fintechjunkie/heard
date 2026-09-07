@@ -1,0 +1,88 @@
+{
+  "version": 1,
+  "analyzed_at": "2026-09-07T01:24:15Z",
+  "engine_version": "1.0.0",
+  "source_file": {
+    "sample_rate": 48000,
+    "channels": 2,
+    "bit_depth": 24,
+    "duration_sec": 162.0,
+    "format": "WAV",
+    "quality_flag": null
+  },
+  "tempo": { "bpm": 117, "alt_bpm": null, "confidence": "clear" },
+  "key": {
+    "root": "A#",
+    "mode": "minor",
+    "display": "A♯ minor",
+    "runner_up": "D♯ minor",
+    "margin": 0.096,
+    "confidence": "ambiguous"
+  },
+  "energy_curve": [
+    0.22, 0.294, 0.305, 0.367, 0.371, 0.328, 0.281, 0.536, 0.72, 0.647,
+    0.677, 0.709, 0.67, 0.677, 0.735, 0.835, 0.775, 0.681, 0.738, 0.826,
+    0.792, 0.743, 0.817, 0.835, 0.832, 0.809, 0.823, 0.797, 0.782, 0.682,
+    0.339, 0.533, 0.905, 0.884, 0.904, 0.907, 0.864, 0.844, 0.887, 0.88,
+    0.865, 0.874, 0.892, 0.909, 0.883, 0.879, 0.906, 0.906, 0.88, 0.87,
+    0.912, 0.881, 0.82, 0.857, 0.87, 0.837, 0.67, 0.674, 0.694, 0.682,
+    0.723, 0.752, 0.833, 0.809, 0.61, 0.414, 0.578, 0.796, 0.789, 0.82,
+    0.851, 0.826, 0.848, 0.859, 0.813, 0.767, 0.702, 0.421, 0.531, 0.882,
+    0.893, 0.916, 0.904, 0.855, 0.854, 0.891, 0.878, 0.869, 0.893, 0.914,
+    0.928, 0.89, 0.856, 0.878, 0.842, 0.835, 0.874, 0.905, 0.885, 0.838,
+    0.876, 0.886, 0.87, 0.871, 0.856, 0.906, 0.879, 0.812, 0.875, 0.934,
+    0.799, 0.565, 0.605, 0.61, 0.571, 0.533, 0.581, 0.606, 0.596, 0.648,
+    0.661, 0.635, 0.603, 0.494, 0.421, 0.568, 0.656, 0.645, 0.857, 0.935,
+    0.878, 0.853, 0.893, 0.897, 0.881, 0.873, 0.903, 0.91, 0.868, 0.853,
+    0.895, 0.923, 0.874, 0.87, 0.912, 0.893, 0.838, 0.847, 0.885, 0.878,
+    0.864, 0.861, 0.9, 0.886, 0.832, 0.6, 0.285, 0.136, 0.01, 0.001
+  ],
+  "sections": [
+    { "start": 0.0, "end": 7.1, "label": "intro", "energy": 0.33, "stability": 3 },
+    { "start": 7.1, "end": 22.0, "label": "verse", "energy": 0.72, "stability": 3 },
+    { "start": 22.0, "end": 31.5, "label": "section", "energy": 0.74, "stability": 3 },
+    { "start": 31.5, "end": 56.1, "label": "chorus", "energy": 0.87, "stability": 3 },
+    { "start": 56.1, "end": 67.2, "label": "verse", "energy": 0.73, "stability": 3 },
+    { "start": 67.2, "end": 79.8, "label": "section", "energy": 0.75, "stability": 3 },
+    { "start": 79.8, "end": 112.0, "label": "chorus", "energy": 0.88, "stability": 3 },
+    { "start": 112.0, "end": 130.0, "label": "bridge", "energy": 0.6, "stability": 3 },
+    { "start": 130.0, "end": 162.0, "label": "chorus", "energy": 0.88, "stability": 3 }
+  ],
+  "structure_confidence": "high",
+  "time_to_hook_sec": 31.5,
+  "vocal": {
+    "range_low": "A#3",
+    "range_high": "E5",
+    "tessitura_low": "D4",
+    "tessitura_high": "G#4",
+    "median": "F4",
+    "span_semitones": 17.9,
+    "frames_analyzed": 2001,
+    "confidence": "high"
+  },
+  "mix": {
+    "lufs": -8.0,
+    "true_peak_db": -0.1,
+    "crest_db": 10.2,
+    "stereo_side_mid": 0.288,
+    "stereo_correlation": 0.846,
+    "spectral_centroid_hz": 2888,
+    "band_balance": { "low": 21, "mid": 32, "high": 47 }
+  },
+  "pitch_paragraph": null,
+  "admin": {
+    "reviewed": false,
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "edited_fields": []
+  },
+  "_promoted": {
+    "tempo_bpm": 117,
+    "key_display": "A♯ minor",
+    "time_to_hook_sec": 31.5,
+    "vocal_range_low_midi": 58,
+    "vocal_range_high_midi": 76,
+    "analysis_status": "complete"
+  },
+  "title": "BET"
+}

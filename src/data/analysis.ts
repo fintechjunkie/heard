@@ -90,7 +90,7 @@ export interface SongAnalysis {
   time_to_hook_sec: number | null;
   vocal: AnalysisVocal;
   mix: AnalysisMix;
-  pitch_paragraph: string;
+  pitch_paragraph: string | null;
   admin: AnalysisAdmin;
 }
 
@@ -237,8 +237,18 @@ export function validateAnalysis(input: unknown): ValidationResult {
   if (a.key?.confidence === 'ambiguous') {
     warnings.push(`Key is ambiguous — ${a.key.display} vs ${a.key.runner_up}`);
   }
-  if (a.source_file && (a.source_file.sample_rate < 44100 || a.source_file.bit_depth < 16)) {
-    warnings.push('Source file is below master quality (under 44.1kHz or 16-bit)');
+  if (a.source_file) {
+    const { sample_rate: rate, bit_depth: depth, format } = a.source_file;
+    if (typeof rate === 'number' && rate < 44100) {
+      warnings.push(`Source is ${rate}Hz — below master quality`);
+    }
+    // A lossy source reports no bit depth; null there is expected, not a fault.
+    if (typeof depth === 'number' && depth < 16) {
+      warnings.push(`Source is ${depth}-bit — below master quality`);
+    }
+    if (format && /mp3|m4a|aac|ogg/i.test(format)) {
+      warnings.push(`Source is ${format} — analysis ran on a lossy file, not a master`);
+    }
   }
 
   return { ok: errors.length === 0, errors, warnings };

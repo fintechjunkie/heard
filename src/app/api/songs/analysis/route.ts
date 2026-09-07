@@ -2,11 +2,25 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import {
   derivePromoted,
+  deriveTimeToHook,
   validateAnalysis,
   freshAdminBlock,
   type SongAnalysis,
   type AnalysisStatus,
 } from '@/data/analysis';
+
+/**
+ * time_to_hook_sec is derived from the sections, so it must be rewritten
+ * inside the JSONB on every save — not just in the promoted column.
+ *
+ * Relabelling a chorus used to move the column while leaving the stored
+ * analysis untouched, so the hook marker on the buyer's arc (which reads the
+ * JSONB) kept pointing at the old moment.
+ */
+function syncDerived(analysis: SongAnalysis): SongAnalysis {
+  analysis.time_to_hook_sec = deriveTimeToHook(analysis.sections || []);
+  return analysis;
+}
 
 function getClient() {
   return createClient(
@@ -83,6 +97,7 @@ export async function POST(request: NextRequest) {
 
   const { analysis, promotedHint } = stripPromoted(body.analysis as Record<string, unknown>);
   analysis.admin = analysis.admin ?? freshAdminBlock();
+  syncDerived(analysis);
 
   const prior = existing.analysis as SongAnalysis | null;
   if (prior && !body.overwrite) {
@@ -132,7 +147,7 @@ export async function PUT(request: NextRequest) {
     .eq('id', body.songId)
     .maybeSingle();
 
-  const analysis = body.analysis as SongAnalysis;
+  const analysis = syncDerived(body.analysis as SongAnalysis);
 
   // Union of what the client marked and what actually changed on the server.
   const { data: priorRow } = await supabase
@@ -185,7 +200,7 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json({ error: 'This song has no analysis to approve' }, { status: 400 });
   }
 
-  const analysis = existing.analysis as SongAnalysis;
+  const analysis = syncDerived(existing.analysis as SongAnalysis);
   const now = new Date().toISOString();
 
   if (action === 'approve') {

@@ -121,6 +121,9 @@ export default function AnalysisPanel({ song, onSongUpdated }: AnalysisPanelProp
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error || `Save failed (${res.status})`);
+      // Take the server's copy back: it rewrites derived fields such as
+      // time_to_hook_sec, so keeping the local draft would leave them stale.
+      setDraft(data.song.analysis);
       setDirty(false);
       setWarnings(data.warnings || []);
       onSongUpdated(data.song);
