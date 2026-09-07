@@ -33,10 +33,15 @@ export interface Song {
   /** pending | running | complete | failed | approved. Only 'approved' songs
    *  may expose analysis to buyers. */
   analysis_status?: string;
-  /** The buyer-facing paragraph: who this song is for. Admin-editable. */
-  pitch_paragraph?: string;
-  /** Seconds into the track where the first chorus lands. */
+  /** The full analysis object (JSONB column). Absent until imported. */
+  analysis?: unknown;
+  // Promoted columns, derived from `analysis` on every write so they cannot
+  // drift from it. Present for filtering and range queries.
+  tempo_bpm?: number | null;
+  key_display?: string | null;
   time_to_hook_sec?: number | null;
+  vocal_range_low_midi?: number | null;
+  vocal_range_high_midi?: number | null;
 }
 
 export interface Member {

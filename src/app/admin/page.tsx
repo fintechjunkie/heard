@@ -7,6 +7,7 @@ import { MEMBERS as SEED_MEMBERS } from '@/data/members';
 import { upload } from '@vercel/blob/client';
 import { downscaleImage, formatBytes } from '@/lib/downscaleImage';
 import { convertToMp3 } from '@/lib/convertAudio';
+import AnalysisPanel from '@/components/admin/AnalysisPanel';
 import { GENRE_VALUES } from '@/data/genres';
 interface UserProfile {
   id: string;
@@ -45,6 +46,7 @@ export default function AdminPage() {
   const [songs, setSongs] = useState<Song[]>([]);
   const [members, setMembers] = useState<Member[]>([]);
   const [editingSong, setEditingSong] = useState<Song | null>(null);
+  const [analysisSong, setAnalysisSong] = useState<Song | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [editingMember, setEditingMember] = useState<Member | null>(null);
   const [mounted, setMounted] = useState(false);
@@ -535,7 +537,7 @@ export default function AdminPage() {
           </>
         )}
 
-        {activeTab === 'songs' && !editingSong && (
+        {activeTab === 'songs' && !editingSong && !analysisSong && (
           <>
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-bold">Songs ({songs.length})</h2>
@@ -561,7 +563,7 @@ export default function AdminPage() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-gray-100">
-                    {['Title', 'Writers', 'Genre', 'BPM', 'Status', 'Days Left', 'Actions'].map(h => (
+                    {['Title', 'Writers', 'Genre', 'BPM', 'Status', 'Analysis', 'Actions'].map(h => (
                       <th key={h} className="text-left px-4 py-3 text-xs text-gray-500 font-medium">{h}</th>
                     ))}
                   </tr>
@@ -580,9 +582,19 @@ export default function AdminPage() {
                           'bg-purple-50 text-purple-700'
                         }`}>{s.status}</span>
                       </td>
-                      <td className="px-4 py-3">{s.tier1_days_remaining}d</td>
                       <td className="px-4 py-3">
+                        {(() => {
+                          const st = s.analysis_status || 'pending';
+                          const tone = st === 'approved' ? 'bg-green-50 text-green-700'
+                            : st === 'complete' ? 'bg-amber-50 text-amber-700'
+                            : st === 'failed' ? 'bg-red-50 text-red-600'
+                            : 'bg-gray-100 text-gray-500';
+                          return <span className={`px-2 py-1 rounded-full text-xs ${tone}`}>{st}</span>;
+                        })()}
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap">
                         <button onClick={() => setEditingSong(s)} className="text-blue-600 text-xs cursor-pointer bg-transparent border-none mr-3">Edit</button>
+                        <button onClick={() => setAnalysisSong(s)} className="text-blue-600 text-xs cursor-pointer bg-transparent border-none mr-3">Analysis</button>
                         <button onClick={() => deleteSong(s.id)} className="text-red-500 text-xs cursor-pointer bg-transparent border-none">Delete</button>
                       </td>
                     </tr>
@@ -590,6 +602,28 @@ export default function AdminPage() {
                 </tbody>
               </table>
             </div>
+          </>
+        )}
+
+        {activeTab === 'songs' && analysisSong && (
+          <>
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-2xl font-bold">{analysisSong.title}</h2>
+                <div className="text-sm text-gray-500">
+                  {analysisSong.writers.join(' · ')} · {analysisSong.genre}
+                </div>
+              </div>
+              <button onClick={() => { setAnalysisSong(null); loadSongs(); }}
+                className="text-gray-500 cursor-pointer bg-transparent border-none">← Back to songs</button>
+            </div>
+            <AnalysisPanel
+              song={analysisSong}
+              onSongUpdated={(updated) => {
+                setAnalysisSong(updated);
+                setSongs(prev => prev.map(s => (s.id === updated.id ? updated : s)));
+              }}
+            />
           </>
         )}
 

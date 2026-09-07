@@ -1,0 +1,89 @@
+{
+  "version": 1,
+  "analyzed_at": "2026-09-06T00:00:00Z",
+  "engine_version": "1.0.0",
+  "source_file": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bit_depth": 24,
+    "duration_sec": 187.27,
+    "format": "WAVEX",
+    "quality_flag": null
+  },
+  "tempo": { "bpm": 99, "alt_bpm": null, "confidence": "clear" },
+  "key": {
+    "root": "F#",
+    "mode": "minor",
+    "display": "F♯ minor",
+    "runner_up": "F♯ major",
+    "margin": 0.117,
+    "confidence": "clear"
+  },
+  "energy_curve": [
+    0.08, 0.191, 0.191, 0.189, 0.225, 0.241, 0.281, 0.351, 0.637, 0.98,
+    0.772, 0.877, 0.78, 0.887, 0.786, 0.889, 0.811, 0.908, 0.776, 0.836,
+    0.753, 0.806, 0.739, 0.69, 0.594, 0.588, 0.625, 0.597, 0.577, 0.526,
+    0.58, 0.672, 0.686, 0.917, 0.799, 0.794, 0.8, 0.86, 0.792, 0.78,
+    0.797, 0.888, 0.855, 0.818, 0.803, 0.853, 0.832, 0.808, 0.838, 0.878,
+    0.921, 0.883, 0.882, 0.909, 0.938, 0.882, 0.933, 0.603, 0.394, 0.38,
+    0.372, 0.405, 0.396, 0.391, 0.395, 0.684, 0.954, 0.765, 0.81, 0.599,
+    0.479, 0.472, 0.456, 0.456, 0.544, 0.647, 0.591, 0.595, 0.556, 0.615,
+    0.687, 0.729, 0.968, 0.797, 0.803, 0.807, 0.859, 0.784, 0.777, 0.81,
+    0.896, 0.841, 0.824, 0.811, 0.855, 0.818, 0.797, 0.806, 0.868, 0.864,
+    0.823, 0.82, 0.888, 0.873, 0.815, 0.845, 0.533, 0.355, 0.306, 0.301,
+    0.373, 0.36, 0.315, 0.322, 0.399, 0.392, 0.35, 0.349, 0.431, 0.43,
+    0.382, 0.355, 0.641, 0.975, 0.787, 0.887, 0.825, 0.936, 0.779, 0.85,
+    0.831, 0.948, 0.821, 0.877, 0.816, 0.891, 0.785, 0.823, 0.834, 0.881,
+    0.82, 0.82, 0.815, 0.886, 0.817, 0.794, 0.805, 0.898, 0.871, 0.835,
+    0.802, 0.857, 0.829, 0.811, 0.824, 0.289, 0.026, 0.011, 0.005, 0.001
+  ],
+  "sections": [
+    { "start": 0, "end": 9.6, "label": "intro", "energy": 0.26, "stability": 3 },
+    { "start": 9.6, "end": 28.5, "label": "verse", "energy": 0.78, "stability": 3 },
+    { "start": 28.5, "end": 37.9, "label": "pre", "energy": 0.6, "stability": 3 },
+    { "start": 37.9, "end": 67.2, "label": "chorus", "energy": 0.86, "stability": 3 },
+    { "start": 67.2, "end": 75.0, "label": "section", "energy": 0.4, "stability": 3 },
+    { "start": 75.0, "end": 86.4, "label": "verse", "energy": 0.6, "stability": 3 },
+    { "start": 86.4, "end": 95.5, "label": "pre", "energy": 0.6, "stability": 3 },
+    { "start": 95.5, "end": 124.7, "label": "chorus", "energy": 0.85, "stability": 3 },
+    { "start": 124.7, "end": 144.0, "label": "bridge", "energy": 0.37, "stability": 3 },
+    { "start": 144.0, "end": 182.3, "label": "chorus", "energy": 0.85, "stability": 3 },
+    { "start": 182.3, "end": 187.27, "label": "outro", "energy": 0.05, "stability": 3 }
+  ],
+  "structure_confidence": "high",
+  "time_to_hook_sec": 37.9,
+  "vocal": {
+    "range_low": "G3",
+    "range_high": "E5",
+    "tessitura_low": "A#3",
+    "tessitura_high": "B4",
+    "median": "E4",
+    "span_semitones": 21.1,
+    "frames_analyzed": 1671,
+    "confidence": "high"
+  },
+  "mix": {
+    "lufs": -6.8,
+    "true_peak_db": 0.0,
+    "crest_db": 8.5,
+    "stereo_side_mid": 0.275,
+    "stereo_correlation": 0.858,
+    "spectral_centroid_hz": 3656,
+    "band_balance": { "low": 18, "mid": 28, "high": 55 }
+  },
+  "pitch_paragraph": "The track reaches full energy nine seconds in and holds there, so the interest lives in the topline rather than the arrangement — and the chorus doesn't land until 0:38, which is the first thing to look at for a single edit. The vocal is accommodating rather than demanding: it sits between A♯3 and B4 through the body and only reaches E5 at the top, so it suits a singer with presence in the middle of the range instead of one who needs the ceiling. All three choruses are near-identical, so any lift on the last one is a decision to be made in the room rather than something the demo already builds in. Bright and tightly centred, with the drop at 2:05 the only real dynamic event — that's the moment to produce around.",
+  "admin": {
+    "reviewed": false,
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "edited_fields": []
+  },
+  "_promoted": {
+    "tempo_bpm": 99,
+    "key_display": "F♯ minor",
+    "time_to_hook_sec": 37.9,
+    "vocal_range_low_midi": 55,
+    "vocal_range_high_midi": 76,
+    "analysis_status": "complete"
+  }
+}

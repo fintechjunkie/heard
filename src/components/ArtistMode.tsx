@@ -5,6 +5,7 @@ import { useStore } from '@/lib/store';
 import { usePlayer, formatTime } from '@/lib/player';
 import PlayerVisualizer, { VizMode } from './PlayerVisualizer';
 import BottomSheet from './BottomSheet';
+import type { SongAnalysis } from '@/data/analysis';
 import { FEATURES } from '@/lib/features';
 
 const REACTIONS = [
@@ -67,6 +68,13 @@ export default function ArtistMode({ open, onClose, onOpenDetail, inline }: Arti
   }
 
   const song = queuedSongs[currentIndex] || null;
+
+  // Only an approved analysis reaches a buyer (§7.4 / §8.3). Anything else is
+  // machine output no reviewer has signed off on.
+  const approvedAnalysis: SongAnalysis | null =
+    song && song.analysis_status === 'approved' && song.analysis
+      ? (song.analysis as SongAnalysis)
+      : null;
 
   const goNext = () => {
     if (queuedSongs.length <= 1) return;
@@ -265,6 +273,12 @@ export default function ArtistMode({ open, onClose, onOpenDetail, inline }: Arti
                   onToggle={() => toggle(song)}
                   mode={vizMode}
                   onModeChange={setVizMode}
+                  analysis={approvedAnalysis}
+                  getTime={() => currentTime}
+                  onSeek={(seconds) => {
+                    const dur = duration || song.audio_duration_seconds || 0;
+                    if (dur > 0) seek(Math.max(0, Math.min(100, (seconds / dur) * 100)));
+                  }}
                   extraAction={
                     <>
                       <button
@@ -513,9 +527,9 @@ export default function ArtistMode({ open, onClose, onOpenDetail, inline }: Arti
             </div>
           )}
           <div className="px-5">
-            {song?.pitch_paragraph ? (
+            {approvedAnalysis?.pitch_paragraph ? (
               <p className="text-body leading-relaxed" style={{ color: 'var(--black)' }}>
-                {song.pitch_paragraph}
+                {approvedAnalysis.pitch_paragraph}
               </p>
             ) : (
               <div className="rounded-xl p-4" style={{ background: 'var(--cream)', border: '1px solid var(--border)' }}>

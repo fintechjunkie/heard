@@ -3,10 +3,12 @@
 import { useRef, useEffect, useCallback, type ReactNode } from 'react';
 import { Song } from '@/data/types';
 import { usePlayer } from '@/lib/player';
+import CompositionArc from './CompositionArc';
+import type { SongAnalysis } from '@/data/analysis';
 
 export type VizMode = 'aurora' | 'composition';
-const VIZ_MODES: VizMode[] = ['aurora', 'composition'];
-const VIZ_LABELS = ['Player', 'Composition'];
+const ALL_VIZ_MODES: VizMode[] = ['aurora', 'composition'];
+const VIZ_LABEL: Record<VizMode, string> = { aurora: 'Player', composition: 'Composition' };
 
 /** Seconds for the palette to travel a full turn of the colour wheel. */
 const COLOR_CYCLE_SECONDS = 90;
@@ -66,13 +68,26 @@ interface PlayerVisualizerProps {
   /** Rendered alongside the mode buttons, so page-level actions can sit in the
    *  same row without the visualizer knowing what they are. */
   extraAction?: ReactNode;
+  /** Approved analysis for this song, or null. Composition mode is not offered
+   *  without it (§7.4) — an unreviewed arc is machine output nobody checked. */
+  analysis?: SongAnalysis | null;
+  /** Live position in seconds, for the Composition playhead. */
+  getTime?: () => number;
+  onSeek?: (seconds: number) => void;
 }
 
 export default function PlayerVisualizer({
   song, isPlaying, progress, onToggle, mode, onModeChange, themeColor, extraAction,
+  analysis = null, getTime, onSeek,
 }: PlayerVisualizerProps) {
   const color = themeColor || song.color;
   const { getFrequencyData } = usePlayer();
+
+  // §7.4: Composition is only offered for an approved analysis. Without one it
+  // is not a mode the user can reach at all, rather than an empty panel.
+  const compositionReady = !!analysis && Array.isArray(analysis.energy_curve) && analysis.energy_curve.length > 0;
+  const offeredModes: VizMode[] = compositionReady ? ALL_VIZ_MODES : ['aurora'];
+  const effectiveMode: VizMode = offeredModes.includes(mode) ? mode : 'aurora';
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const touchStartX = useRef(0);
@@ -84,6 +99,9 @@ export default function PlayerVisualizer({
   /** The anchor colour advanced around the wheel; recomputed every frame. */
   const drawColorRef = useRef(color);
   const songIdRef = useRef(song.id);
+  // Which modes the swipe gesture may cycle through, kept in a ref so the
+  // gesture handler does not need re-binding when availability changes.
+  const offeredRef = useRef<VizMode[]>(ALL_VIZ_MODES);
   const progressRef = useRef(progress);
   const playingRef = useRef(isPlaying);
   const freqFnRef = useRef(getFrequencyData);
@@ -94,7 +112,10 @@ export default function PlayerVisualizer({
     freqFnRef.current = getFrequencyData;
     songIdRef.current = song.id;
     progressRef.current = progress;
-  }, [mode, color, isPlaying, getFrequencyData, song.id, progress]);
+    // Kept in a ref so the swipe handler does not need re-binding when the
+    // offered modes change; written here rather than during render.
+    offeredRef.current = compositionReady ? ALL_VIZ_MODES : ['aurora'];
+  }, [mode, color, isPlaying, getFrequencyData, song.id, progress, compositionReady]);
 
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
     touchStartX.current = e.touches[0].clientX;
@@ -105,11 +126,11 @@ export default function PlayerVisualizer({
     const delta = e.changedTouches[0].clientX - touchStartX.current;
     if (Math.abs(delta) > 40) {
       swipedRef.current = true; // suppress the tap-to-toggle that follows
-      const idx = VIZ_MODES.indexOf(modeRef.current);
+      const idx = offeredRef.current.indexOf(modeRef.current);
       const next = delta < 0
-        ? (idx + 1) % VIZ_MODES.length
-        : (idx - 1 + VIZ_MODES.length) % VIZ_MODES.length;
-      onModeChange(VIZ_MODES[next]);
+        ? (idx + 1) % offeredRef.current.length
+        : (idx - 1 + offeredRef.current.length) % offeredRef.current.length;
+      onModeChange(offeredRef.current[next]);
     }
   }, [onModeChange]);
 
@@ -161,16 +182,7 @@ export default function PlayerVisualizer({
       const b = parseInt(h.slice(4, 6), 16);
       return `rgba(${r || 0},${g || 0},${b || 0},${a})`;
     };
-    const roundRect = (x: number, y: number, w: number, h: number, r: number) => {
-      r = Math.min(r, w / 2, h / 2 > 0 ? h / 2 : r);
-      ctx.beginPath();
-      ctx.moveTo(x + r, y);
-      ctx.arcTo(x + w, y, x + w, y + h, r);
-      ctx.arcTo(x + w, y + h, x, y + h, r);
-      ctx.arcTo(x, y + h, x, y, r);
-      ctx.arcTo(x, y, x + w, y, r);
-      ctx.closePath();
-    };
+    // roundRect went with the Composition canvas placeholder.
 
     // Fold real FFT data into `spec`, or synthesize a musical signal when the
     // analyser is unavailable / silent (CORS-tainted streams read as zeros).
@@ -264,86 +276,8 @@ export default function PlayerVisualizer({
      * looks consistent run to run, but it is invented — the real curve and
      * section marks come from analysis data the admin does not capture yet.
      */
-    const drawComposition = () => {
-      const c = drawColorRef.current;
-      ctx.clearRect(0, 0, W, H);
-      ctx.fillStyle = 'rgba(6,6,14,0.9)';
-      ctx.fillRect(0, 0, W, H);
-
-      const seed = songIdRef.current || 1;
-      const rand = (n: number) => {
-        const v = Math.sin(seed * 12.9898 + n * 78.233) * 43758.5453;
-        return v - Math.floor(v);
-      };
-
-      const padX = 10;
-      const barH = 12;
-      const plotH = H - barH - 26;
-      const plotW = W - padX * 2;
-
-      // Sections across the track, alternating quiet and loud.
-      const sections = [
-        { label: 'Intro', w: 0.07, hot: false },
-        { label: 'Verse', w: 0.15, hot: false },
-        { label: 'Pre', w: 0.07, hot: false },
-        { label: 'Chorus', w: 0.19, hot: true },
-        { label: 'Verse', w: 0.12, hot: false },
-        { label: 'Chorus', w: 0.19, hot: true },
-        { label: 'Bridge', w: 0.09, hot: false },
-        { label: 'Chorus', w: 0.12, hot: true },
-      ];
-
-      // Energy curve
-      ctx.beginPath();
-      ctx.moveTo(padX, plotH + 8);
-      let x = padX;
-      sections.forEach((sec, si) => {
-        const segW = sec.w * plotW;
-        const steps = Math.max(4, Math.floor(segW / 5));
-        for (let i = 0; i <= steps; i++) {
-          const base = sec.hot ? 0.78 : 0.42;
-          const jitter = (rand(si * 10 + i) - 0.5) * (sec.hot ? 0.16 : 0.12);
-          const y = plotH + 8 - (base + jitter) * plotH;
-          ctx.lineTo(x + (i / steps) * segW, y);
-        }
-        x += segW;
-      });
-      ctx.lineTo(W - padX, plotH + 8);
-      ctx.closePath();
-      const fill = ctx.createLinearGradient(0, 0, 0, plotH + 8);
-      fill.addColorStop(0, hexA(c, 0.35));
-      fill.addColorStop(1, hexA(c, 0.02));
-      ctx.fillStyle = fill;
-      ctx.fill();
-      ctx.strokeStyle = hexA(c, 0.95);
-      ctx.lineWidth = 1.5;
-      ctx.stroke();
-
-      // Section bar
-      x = padX;
-      sections.forEach(sec => {
-        const segW = sec.w * plotW - 2;
-        ctx.fillStyle = sec.hot ? hexA(c, 0.95) : 'rgba(255,255,255,0.22)';
-        roundRect(x, plotH + 16, Math.max(2, segW), barH, barH / 2);
-        ctx.fill();
-        x += sec.w * plotW;
-      });
-
-      // Playhead
-      const px = padX + (progressRef.current / 100) * plotW;
-      ctx.strokeStyle = 'rgba(255,255,255,0.55)';
-      ctx.setLineDash([3, 3]);
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.moveTo(px, 4);
-      ctx.lineTo(px, plotH + 16 + barH);
-      ctx.stroke();
-      ctx.setLineDash([]);
-
-      ctx.fillStyle = 'rgba(255,255,255,0.35)';
-      ctx.font = '9px monospace';
-      ctx.fillText('STRUCTURE · PLACEHOLDER DATA', padX, H - 5);
-    };
+    // The canvas Composition placeholder is gone: Composition is now a real
+    // SVG arc drawn from analysis data by CompositionArc.
 
     let raf = 0;
     let last = performance.now();
@@ -354,10 +288,9 @@ export default function PlayerVisualizer({
       drawColorRef.current = reduce
         ? colorRef.current
         : rotateHue(colorRef.current, (t / COLOR_CYCLE_SECONDS) * 360);
-      switch (modeRef.current) {
-        case 'composition': drawComposition(); break;
-        default: drawAurora();
-      }
+      // Composition is rendered as SVG by CompositionArc; the canvas only ever
+      // draws the Player view now.
+      drawAurora();
       raf = requestAnimationFrame(frame);
     };
     raf = requestAnimationFrame(frame);
@@ -381,14 +314,33 @@ export default function PlayerVisualizer({
         }}
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
-        onClick={handleClick}
+        onClick={effectiveMode === 'composition' ? undefined : handleClick}
       >
-        <canvas ref={canvasRef} style={{ width: '100%', height: '100%', display: 'block' }} />
+        {/* The canvas stays mounted so its animation loop is not torn down and
+            rebuilt every time the user flips modes; it is just hidden. */}
+        <div style={{ display: effectiveMode === 'composition' ? 'none' : 'block', height: '100%' }}>
+          <canvas ref={canvasRef} style={{ width: '100%', height: '100%', display: 'block' }} />
+        </div>
+        {effectiveMode === 'composition' && analysis && (
+          <div className="px-2 pt-1">
+            <CompositionArc
+              analysis={analysis}
+              duration={analysis.source_file?.duration_sec}
+              accent={color}
+              muted="rgba(255,255,255,0.35)"
+              textColor="rgba(255,255,255,0.55)"
+              height={172}
+              getTime={getTime}
+              isPlaying={isPlaying}
+              onSeek={onSeek}
+            />
+          </div>
+        )}
       </div>
 
       {/* Mode selector */}
       <div className="flex items-center justify-center gap-[16px] mt-3">
-        {VIZ_MODES.map((m, i) => (
+        {offeredModes.map(m => (
           <button
             key={m}
             onClick={() => onModeChange(m)}
@@ -397,18 +349,18 @@ export default function PlayerVisualizer({
             <div
               className="rounded-full transition-all duration-300"
               style={{
-                width: mode === m ? 10 : 6,
-                height: mode === m ? 10 : 6,
-                background: mode === m ? color : 'rgba(255,255,255,0.2)',
-                boxShadow: mode === m ? `0 0 10px ${color}88, 0 0 20px ${color}44` : 'none',
+                width: effectiveMode === m ? 10 : 6,
+                height: effectiveMode === m ? 10 : 6,
+                background: effectiveMode === m ? color : 'rgba(255,255,255,0.2)',
+                boxShadow: effectiveMode === m ? `0 0 10px ${color}88, 0 0 20px ${color}44` : 'none',
               }}
             />
             <span className="text-micro tracking-[0.5px] uppercase"
               style={{
                 fontFamily: "'DM Mono', monospace",
-                color: mode === m ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.25)',
+                color: effectiveMode === m ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.25)',
               }}>
-              {VIZ_LABELS[i]}
+              {VIZ_LABEL[m]}
             </span>
           </button>
         ))}
