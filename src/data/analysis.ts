@@ -8,15 +8,23 @@
  */
 
 export type AnalysisStatus = 'pending' | 'running' | 'complete' | 'failed' | 'approved';
-export type Confidence = 'clear' | 'ambiguous' | 'high' | 'low';
+/** 'review' arrived with engine 1.1.0: the pipeline is not confident enough
+ *  to publish the structure but does not consider it worthless either. */
+export type Confidence = 'clear' | 'ambiguous' | 'high' | 'low' | 'review';
+
+/** Structure confidences that must not reach a buyer unreviewed. */
+export const UNTRUSTED_STRUCTURE: Confidence[] = ['low', 'review'];
 
 export interface AnalysisSourceFile {
   sample_rate: number;
   channels: number;
-  bit_depth: number;
+  /** Null for a lossy source, which has no bit depth to report. */
+  bit_depth: number | null;
   duration_sec: number;
   format: string;
-  quality_flag: string | null;
+  /** Engine 1.0.0 emitted a single flag; 1.1.0 emits an array. Both are read. */
+  quality_flag?: string | null;
+  quality_flags?: string[];
 }
 
 export interface AnalysisTempo {
@@ -76,6 +84,14 @@ export interface AnalysisAdmin {
   edited_fields: string[];
 }
 
+/** Why the pipeline was unsure about the structure. Engine 1.1.0 onward. */
+export interface StructureDiagnostics {
+  /** Energy gap between the chorus family and everything else. Small numbers
+   *  mean the labelling had little to go on. */
+  chorus_separation?: number;
+  flags?: string[];
+}
+
 export interface SongAnalysis {
   version: number;
   analyzed_at: string;
@@ -90,6 +106,7 @@ export interface SongAnalysis {
   time_to_hook_sec: number | null;
   vocal: AnalysisVocal;
   mix: AnalysisMix;
+  structure_diagnostics?: StructureDiagnostics;
   pitch_paragraph: string | null;
   admin: AnalysisAdmin;
 }
@@ -231,8 +248,21 @@ export function validateAnalysis(input: unknown): ValidationResult {
     warnings.push(`True peak is +${a.mix.true_peak_db} dB — the master is clipping`);
   }
 
-  if (a.structure_confidence === 'low') {
-    warnings.push('Structure confidence is low — sections and time to hook need checking');
+  if (a.structure_confidence && UNTRUSTED_STRUCTURE.includes(a.structure_confidence)) {
+    warnings.push(
+      `Structure confidence is "${a.structure_confidence}" — sections and time to hook `
+      + 'need checking, and buyers see the curve without them until this is raised'
+    );
+  }
+  const diag = a.structure_diagnostics as StructureDiagnostics | undefined;
+  if (diag?.chorus_separation != null && diag.chorus_separation < 0.15) {
+    warnings.push(
+      `Chorus separation is only ${diag.chorus_separation} — the choruses barely stand `
+      + 'out from the rest, so the labels are a guess'
+    );
+  }
+  for (const flag of diag?.flags || []) {
+    warnings.push(`Structure flag: ${flag.replace(/_/g, ' ')}`);
   }
   if (a.vocal?.confidence === 'low') {
     warnings.push(`Vocal confidence is low (${a.vocal.frames_analyzed} frames analyzed)`);
@@ -254,6 +284,13 @@ export function validateAnalysis(input: unknown): ValidationResult {
     }
     if (format && /mp3|m4a|aac|ogg/i.test(format)) {
       warnings.push(`Source is ${format} — analysis ran on a lossy file, not a master`);
+    }
+    // Engine 1.1.0 reports its own quality findings; surface any we have not
+    // already said in plainer words.
+    const flags = a.source_file.quality_flags || (a.source_file.quality_flag ? [a.source_file.quality_flag] : []);
+    for (const flag of flags) {
+      if (flag === 'lossy_source' || flag === 'clipping') continue; // covered above
+      warnings.push(`Source flag: ${flag.replace(/_/g, ' ')}`);
     }
   }
 

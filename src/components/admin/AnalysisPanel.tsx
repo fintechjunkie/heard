@@ -397,10 +397,10 @@ export default function AnalysisPanel({ song, onSongUpdated }: AnalysisPanelProp
               return a;
             })}
             className="px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none bg-white text-gray-800">
-            {['high', 'clear', 'ambiguous', 'low'].map(c => <option key={c} value={c}>{c}</option>)}
+            {['high', 'clear', 'ambiguous', 'review', 'low'].map(c => <option key={c} value={c}>{c}</option>)}
           </select>
           <div className="text-xs text-gray-400 mt-1">
-            &quot;low&quot; hides the section bar and hook marker from buyers
+&quot;low&quot; and &quot;review&quot; hide the section bar and hook marker from buyers
           </div>
         </div>
       </div>

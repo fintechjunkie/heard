@@ -240,8 +240,8 @@ export default function MemberProfile({ member, songs, open, onClose, onOpenDeta
                         const queued = artistQueue.includes(s.id);
                         toggleArtistQueue(s.id);
                         showToast(queued
-                          ? `"${s.title}" removed from Pocket Songs.`
-                          : `"${s.title}" added to Pocket Songs.`);
+                          ? `"${s.title}" removed from Crate.`
+                          : `"${s.title}" added to Crate.`);
                       }}
                       className="flex items-center gap-[5px] px-[10px] py-[5px] rounded-full cursor-pointer"
                       style={{
@@ -254,7 +254,7 @@ export default function MemberProfile({ member, songs, open, onClose, onOpenDeta
                         <path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
                       </svg>
                       <span className="text-micro tracking-[1px] uppercase">
-                        {artistQueue.includes(s.id) ? 'In Pocket' : 'Pocket'}
+                        {artistQueue.includes(s.id) ? 'In Crate' : 'Crate'}
                       </span>
                     </button>
 

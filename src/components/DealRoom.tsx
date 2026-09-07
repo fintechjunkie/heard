@@ -122,7 +122,7 @@ export default function DealRoom({ song, open, onClose, onBack, onReserve, onBuy
   // Re-load when userId becomes available (auth finishes after initial load)
   useEffect(() => { if (dealRoomId && userId) loadData(); }, [userId, dealRoomId, loadData]);
 
-  // Sync Pocket reaction → Deal Room on open
+  // Sync Crate reaction → Deal Room on open
   const pocketSyncedRef = useRef(false);
   useEffect(() => {
     if (!open) { pocketSyncedRef.current = false; return; }
@@ -144,7 +144,7 @@ export default function DealRoom({ song, open, onClose, onBack, onReserve, onBuy
         });
         setTimeout(() => loadData(), 500);
       } catch (err) {
-        console.error('Pocket sync error:', err);
+        console.error('Crate sync error:', err);
       }
     })();
   }, [open, dealRoomId, pocketReaction, myReaction, getUserId, loadData]);

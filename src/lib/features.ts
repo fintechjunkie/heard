@@ -45,7 +45,7 @@ export const FEATURES: Record<FeatureName, boolean> = {
   /** Song Bank list, waveforms, player, search / genre / sort. Always on. */
   songBank: true,
 
-  /** Pocket Songs tab: queue, visualizers, theme chips, full-length playback. */
+  /** Crate tab: queue, visualizers, theme chips, full-length playback. */
   pocket: true,
 
   /** The Collective / writer profiles. */

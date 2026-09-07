@@ -19,7 +19,7 @@ const REACTIONS = [
 interface ArtistModeProps {
   open: boolean;
   onClose: () => void;
-  /** Kept in the props for the caller's benefit; the Pocket header no longer
+  /** Kept in the props for the caller's benefit; the Crate header no longer
    *  lists writers, so nothing here opens a profile. */
   onOpenProfile?: (memberId: number) => void;
   onOpenDetail?: (songId: number) => void;
@@ -37,7 +37,7 @@ export default function ArtistMode({ open, onClose, onOpenDetail, inline }: Arti
   const vizMode = (pocketVizMode === 'composition' ? 'composition' : 'aurora') as VizMode;
   const setVizMode = (mode: VizMode) => setPocketVizMode(mode);
 
-  // Disable preview mode when in Pocket Songs, re-enable when leaving
+  // Disable preview mode when in Crate, re-enable when leaving
   useEffect(() => {
     if (open || inline) {
       setPreviewMode(false);
@@ -167,7 +167,7 @@ export default function ArtistMode({ open, onClose, onOpenDetail, inline }: Arti
       <div className="flex-shrink-0 flex items-center justify-between px-5 pt-4 pb-3">
         <div className="flex items-center gap-2">
           <span className="w-[6px] h-[6px] rounded-full animate-blink" style={{ background: effectiveColor }} />
-          <span className="text-[18px] tracking-[3px]" style={{ fontFamily: "'Bebas Neue', sans-serif", color: '#FFFFFF' }}>Pocket Songs</span>
+          <span className="text-[18px] tracking-[3px]" style={{ fontFamily: "'Bebas Neue', sans-serif", color: '#FFFFFF' }}>Crate</span>
         </div>
         <div className="flex items-center gap-2">
           <span className="text-caption tracking-[1px]" style={{ fontFamily: "'DM Mono', monospace", color: effectiveColor }}>
@@ -570,36 +570,40 @@ function FitTitle({ text, max, min }: { text: string; max: number; min: number }
 
       el.style.fontSize = `${max}px`;
       const needed = el.scrollWidth;
-      if (needed <= available) {
-        el.style.fontSize = '';
-        setSize(max);
-        return;
-      }
-      // Text width is close to linear in font size, so one ratio gets very
-      // near; a couple of single-pixel steps settle any rounding.
-      let next = Math.max(min, Math.floor(max * (available / needed)));
+      const next = needed <= available
+        ? max
+        : Math.max(min, Math.floor(max * (available / needed)));
+
       el.style.fontSize = `${next}px`;
-      let guard = 6;
-      while (next > min && el.scrollWidth > available && guard-- > 0) {
-        next -= 1;
-        el.style.fontSize = `${next}px`;
-      }
-      while (next < max && guard-- > 0) {
-        el.style.fontSize = `${next + 1}px`;
-        if (el.scrollWidth > available) break;
-        next += 1;
+      // One correction pass: the ratio is a linear estimate and letter-spacing
+      // does not scale with it, so it can land a pixel over.
+      let settled = next;
+      for (let i = 0; i < 3 && settled > min && el.scrollWidth > available; i++) {
+        settled -= 1;
+        el.style.fontSize = `${settled}px`;
       }
       el.style.fontSize = '';
-      setSize(next);
+      setSize(settled);
     };
 
     fit();
     const ro = new ResizeObserver(fit);
     ro.observe(el);
-    // The real font almost always arrives after first paint.
-    if (typeof document !== 'undefined' && document.fonts?.ready) {
-      document.fonts.ready.then(fit).catch(() => {});
+
+    // document.fonts.ready resolves when the loads in flight *at that moment*
+    // finish, which can be before Bebas has even been requested — so waiting
+    // on it alone left the measurement made against the fallback face, which
+    // is far wider than this condensed one. Ask for the face by name instead:
+    // that promise resolves when this font is genuinely usable.
+    if (typeof document !== 'undefined' && document.fonts) {
+      document.fonts.load(`${max}px 'Bebas Neue'`).then(() => {
+        if (!cancelled) requestAnimationFrame(fit);
+      }).catch(() => {});
+      document.fonts.ready.then(() => {
+        if (!cancelled) requestAnimationFrame(fit);
+      }).catch(() => {});
     }
+
     return () => { cancelled = true; ro.disconnect(); };
   }, [text, max, min]);
 

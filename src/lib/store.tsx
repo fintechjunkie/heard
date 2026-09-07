@@ -13,7 +13,7 @@ interface StoreState {
   /** Songs the user has waved off. They stay in the bank, collapsed and
    *  pushed below the live list, and can be restored at any time. */
   noInterestIds: number[];
-  /** Pocket Songs player appearance. Persisted so a chosen look survives
+  /** Crate player appearance. Persisted so a chosen look survives
    *  leaving the tab, which unmounts the player. */
   pocketTheme: string;
   pocketVizMode: string;

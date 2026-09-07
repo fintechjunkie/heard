@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import {
   formatSeconds,
+  UNTRUSTED_STRUCTURE,
   type AnalysisSection,
   type SongAnalysis,
 } from '@/data/analysis';
@@ -89,7 +90,9 @@ export default function CompositionArc({
 
   const total = duration || analysis.source_file?.duration_sec || 1;
   const curve = analysis.energy_curve || [];
-  const showStructure = !curveOnly && analysis.structure_confidence !== 'low';
+  // §7.4 — sections and the hook marker are withheld until a reviewer has
+  // raised the confidence, so buyers never see an unchecked structure.
+  const showStructure = !curveOnly && !UNTRUSTED_STRUCTURE.includes(analysis.structure_confidence);
   const sections: AnalysisSection[] = showStructure ? (analysis.sections || []) : [];
   const hook = showStructure ? analysis.time_to_hook_sec : null;
 

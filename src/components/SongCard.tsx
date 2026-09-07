@@ -121,9 +121,9 @@ export default function SongCard({
           <button onClick={(e) => {
               e.stopPropagation();
               toggleArtistQueue(song.id);
-              showToast(isQueued ? `"${song.title}" removed from Pocket Songs.` : `"${song.title}" added to Pocket Songs.`);
+              showToast(isQueued ? `"${song.title}" removed from Crate.` : `"${song.title}" added to Crate.`);
             }}
-            title="Add to Pocket Songs"
+            title="Add to Crate"
             className="flex flex-col items-center gap-[3px] cursor-pointer bg-transparent border-none"
             style={{ color: ACTION_VIOLET }}>
             {/* Queued state is a solid fill, not a tint: an outlined icon that
@@ -148,7 +148,7 @@ export default function SongCard({
               )}
             </span>
             <span className="text-micro tracking-[0.8px] uppercase" style={{ fontFamily: "'DM Mono', monospace", fontWeight: isQueued ? 600 : 400 }}>
-              {isQueued ? 'In Pocket' : 'Pocket'}
+              {isQueued ? 'In Crate' : 'Crate'}
             </span>
           </button>
           <button onClick={(e) => { e.stopPropagation(); onOpenDetail(song.id); }}

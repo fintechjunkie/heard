@@ -1,0 +1,91 @@
+{
+  "version": 2,
+  "analyzed_at": "2026-09-07T02:32:21Z",
+  "engine_version": "1.1.0",
+  "source_file": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bit_depth": null,
+    "duration_sec": 164.67,
+    "format": "MP3",
+    "quality_flags": ["lossy_source", "clipping"]
+  },
+  "tempo": { "bpm": 136, "alt_bpm": null, "confidence": "clear" },
+  "key": {
+    "root": "F#",
+    "mode": "minor",
+    "display": "F♯ minor",
+    "runner_up": "D major",
+    "margin": 0.095,
+    "confidence": "ambiguous"
+  },
+  "energy_curve": [
+    0.244, 0.505, 0.556, 0.556, 0.503, 0.503, 0.568, 0.56, 0.562, 0.655,
+    0.649, 0.641, 0.635, 0.621, 0.585, 0.67, 0.697, 0.607, 0.561, 0.588,
+    0.653, 0.741, 0.651, 0.619, 0.655, 0.635, 0.68, 0.653, 0.639, 0.703,
+    0.675, 0.682, 0.643, 0.661, 0.749, 0.866, 0.99, 0.981, 0.982, 0.993,
+    0.987, 0.982, 0.981, 0.983, 0.978, 0.972, 0.985, 0.944, 0.825, 0.758,
+    0.741, 0.778, 0.793, 0.766, 0.759, 0.81, 0.789, 0.746, 0.752, 0.755,
+    0.787, 0.838, 0.707, 0.643, 0.626, 0.613, 0.617, 0.643, 0.588, 0.615,
+    0.712, 0.619, 0.542, 0.593, 0.669, 0.743, 0.655, 0.616, 0.674, 0.62,
+    0.687, 0.648, 0.625, 0.711, 0.677, 0.7, 0.663, 0.666, 0.72, 0.847,
+    0.982, 0.986, 0.987, 0.982, 0.984, 0.979, 0.978, 0.986, 0.967, 0.971,
+    0.977, 0.959, 0.848, 0.75, 0.781, 0.782, 0.792, 0.761, 0.752, 0.813,
+    0.795, 0.734, 0.761, 0.768, 0.781, 0.836, 0.898, 0.913, 0.907, 0.916,
+    0.917, 0.928, 0.924, 0.922, 0.928, 0.909, 0.908, 0.915, 0.845, 0.576,
+    0.36, 0.343, 0.324, 0.299, 0.293, 0.334, 0.623, 0.946, 0.978, 0.974,
+    0.965, 0.991, 0.901, 0.821, 0.793, 0.767, 0.778, 0.768, 0.783, 0.8,
+    0.818, 0.767, 0.728, 0.781, 0.784, 0.778, 0.667, 0.245, 0.005, 0.0
+  ],
+  "sections": [
+    { "start": 0.0, "end": 7.9, "label": "section", "energy": 0.52, "stability": 3 },
+    { "start": 7.9, "end": 21.8, "label": "verse", "energy": 0.63, "stability": 3 },
+    { "start": 21.8, "end": 35.9, "label": "pre", "energy": 0.67, "stability": 3 },
+    { "start": 35.9, "end": 49.9, "label": "chorus", "energy": 0.97, "stability": 3 },
+    { "start": 49.9, "end": 77.9, "label": "verse", "energy": 0.71, "stability": 3 },
+    { "start": 77.9, "end": 91.9, "label": "pre", "energy": 0.67, "stability": 3 },
+    { "start": 91.9, "end": 106.0, "label": "chorus", "energy": 0.96, "stability": 3 },
+    { "start": 106.0, "end": 134.1, "label": "section", "energy": 0.83, "stability": 3 },
+    { "start": 134.1, "end": 141.0, "label": "pre", "energy": 0.35, "stability": 3 },
+    { "start": 141.0, "end": 148.0, "label": "chorus", "energy": 0.94, "stability": 3 },
+    { "start": 148.0, "end": 164.7, "label": "section", "energy": 0.77, "stability": 3 }
+  ],
+  "structure_confidence": "high",
+  "structure_diagnostics": { "chorus_separation": 0.287, "flags": [] },
+  "time_to_hook_sec": 35.9,
+  "vocal": {
+    "range_low": "A3",
+    "range_high": "B5",
+    "tessitura_low": "C#4",
+    "tessitura_high": "B4",
+    "median": "E4",
+    "span_semitones": 26.0,
+    "frames_analyzed": 1430,
+    "confidence": "high"
+  },
+  "mix": {
+    "lufs": -8.1,
+    "true_peak_db": 1.79,
+    "crest_db": 10.7,
+    "stereo_side_mid": 0.346,
+    "stereo_correlation": 0.786,
+    "spectral_centroid_hz": 2383,
+    "band_balance": { "low": 22, "mid": 37, "high": 41 }
+  },
+  "pitch_paragraph": "The choruses detonate — they jump to near-maximum from verses sitting well below, and they're short and concentrated at around fourteen seconds each, so the hook hits hard and gets out. The last one arrives out of a deep clear-out at 2:14 where the arrangement empties almost completely, which is as clean a dance-break slot as you'll find. The topline reaches from A3 all the way to B5 while working mostly between C♯4 and B4, so the body of the line divides easily across members and the top end is there for whoever earns it. Warm and mid-forward rather than bright, with weight in the low end.",
+  "admin": {
+    "reviewed": false,
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "edited_fields": []
+  },
+  "_promoted": {
+    "tempo_bpm": 136,
+    "key_display": "F♯ minor",
+    "time_to_hook_sec": 35.9,
+    "vocal_range_low_midi": 57,
+    "vocal_range_high_midi": 83,
+    "analysis_status": "complete"
+  },
+  "title": "That Juice"
+}

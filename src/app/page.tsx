@@ -72,7 +72,7 @@ export default function Home() {
     localStorage.setItem('theheard_activeTeam', JSON.stringify(team));
   }, []);
 
-  // Sync Pocket Songs reactions → Deal Room
+  // Sync Crate reactions → Deal Room
   const prevReactionsRef = useRef(store.artistReactions);
   useEffect(() => {
     const prev = prevReactionsRef.current;

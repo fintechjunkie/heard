@@ -5,7 +5,7 @@ import { FEATURES } from '@/lib/features';
 
 const TABS = [
   { key: 'bank', icon: '▦', label: 'Bank', enabled: FEATURES.songBank },
-  { key: 'pocket', icon: '♫', label: 'Pocket', badge: true, enabled: FEATURES.pocket },
+  { key: 'pocket', icon: '♫', label: 'Crate', badge: true, enabled: FEATURES.pocket },
   { key: 'reserved', icon: '◷', label: 'Reserved', enabled: FEATURES.commerce },
   { key: 'writers', icon: '◈', label: 'Writers', enabled: FEATURES.writers },
   { key: 'purchased', icon: '✓', label: 'Purchased', enabled: FEATURES.commerce },

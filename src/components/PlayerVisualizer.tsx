@@ -48,7 +48,7 @@ function hslToHex(h: number, sPct: number, lPct: number): string {
 /**
  * The palette drifts around the wheel from the song's anchor colour rather
  * than being picked by hand — the theme chips it replaces cost more room in
- * Pocket than the choice was worth.
+ * the Crate than the choice was worth.
  */
 function rotateHue(hex: string, degrees: number): string {
   const [h, sat, l] = hexToHsl(hex);

@@ -83,7 +83,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const pendingSeekRef = useRef<number | undefined>(undefined);
   const previewModeRef = useRef(true);
   /** Whether THIS playback session is preview-limited. Captured when playback
-   *  starts so that later mode changes — e.g. leaving Pocket Songs while a
+   *  starts so that later mode changes — e.g. leaving Crate while a
    *  track is mid-play — cannot retroactively cut it off. */
   const previewLockRef = useRef(true);
   /** Mirrors isPlaying for the rAF loop. Howler's own playing() briefly
@@ -109,10 +109,10 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     previewModeRef.current = preview;
     // Lifting preview must also release whatever is playing right now.
     // Otherwise a track started in the bank keeps the 20s cap it was given at
-    // playSong time, and stalls mid-song once carried into Pocket Songs.
+    // playSong time, and stalls mid-song once carried into Crate.
     //
     // The reverse deliberately does not apply: turning preview back on (which
-    // happens on leaving Pocket) leaves the current track uncapped, so it is
+    // happens on leaving the Crate) leaves the current track uncapped, so it is
     // not cut off mid-play. The cap returns with the next track started.
     if (!preview) previewLockRef.current = false;
   }, []);

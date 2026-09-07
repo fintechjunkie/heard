@@ -1,0 +1,92 @@
+{
+  "version": 2,
+  "analyzed_at": "2026-09-07T02:21:44Z",
+  "engine_version": "1.1.0",
+  "source_file": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bit_depth": null,
+    "duration_sec": 205.68,
+    "format": "MP3",
+    "quality_flags": ["lossy_source", "clipping"]
+  },
+  "tempo": { "bpm": 117, "alt_bpm": null, "confidence": "clear" },
+  "key": {
+    "root": "A",
+    "mode": "minor",
+    "display": "A minor",
+    "runner_up": "C major",
+    "margin": 0.056,
+    "confidence": "ambiguous"
+  },
+  "energy_curve": [
+    0.075, 0.202, 0.18, 0.186, 0.191, 0.189, 0.423, 0.8, 0.951, 0.888,
+    0.753, 0.751, 0.831, 0.895, 0.937, 0.94, 0.793, 0.67, 0.428, 0.602,
+    0.862, 0.908, 0.855, 0.755, 0.827, 0.817, 0.856, 0.947, 0.939, 0.74,
+    0.766, 0.828, 0.757, 0.651, 0.536, 0.641, 0.679, 0.649, 0.56, 0.554,
+    0.446, 0.495, 0.608, 0.632, 0.732, 0.901, 0.923, 0.878, 0.742, 0.831,
+    0.917, 0.923, 0.963, 0.941, 0.819, 0.763, 0.849, 0.918, 0.906, 0.916,
+    0.815, 0.759, 0.827, 0.856, 0.921, 0.932, 0.887, 0.785, 0.8, 0.852,
+    0.841, 0.916, 0.928, 0.747, 0.617, 0.578, 0.877, 0.904, 0.896, 0.798,
+    0.672, 0.454, 0.675, 0.844, 0.922, 0.827, 0.766, 0.813, 0.828, 0.87,
+    0.964, 0.888, 0.736, 0.56, 0.562, 0.858, 0.907, 0.895, 0.82, 0.813,
+    0.883, 0.906, 0.936, 0.979, 0.837, 0.745, 0.803, 0.896, 0.926, 0.89,
+    0.887, 0.786, 0.828, 0.862, 0.892, 0.932, 0.948, 0.791, 0.797, 0.841,
+    0.855, 0.795, 0.742, 0.725, 0.787, 0.809, 0.793, 0.755, 0.726, 0.701,
+    0.703, 0.529, 0.669, 0.929, 0.934, 0.926, 0.79, 0.846, 0.926, 0.915,
+    0.936, 0.914, 0.826, 0.758, 0.841, 0.913, 0.907, 0.925, 0.807, 0.761,
+    0.824, 0.867, 0.92, 0.93, 0.888, 0.802, 0.529, 0.232, 0.017, 0.0
+  ],
+  "sections": [
+    { "start": 0.0, "end": 8.4, "label": "intro", "energy": 0.22, "stability": 3 },
+    { "start": 8.4, "end": 24.7, "label": "verse", "energy": 0.82, "stability": 3 },
+    { "start": 24.7, "end": 41.0, "label": "verse", "energy": 0.84, "stability": 3 },
+    { "start": 41.0, "end": 49.0, "label": "section", "energy": 0.65, "stability": 3 },
+    { "start": 49.0, "end": 54.9, "label": "section", "energy": 0.52, "stability": 3 },
+    { "start": 54.9, "end": 121.8, "label": "verse", "energy": 0.83, "stability": 3 },
+    { "start": 121.8, "end": 154.9, "label": "chorus", "energy": 0.86, "stability": 3 },
+    { "start": 154.9, "end": 170.1, "label": "section", "energy": 0.73, "stability": 3 },
+    { "start": 170.1, "end": 205.7, "label": "chorus", "energy": 0.86, "stability": 3 }
+  ],
+  "structure_confidence": "low",
+  "structure_diagnostics": {
+    "chorus_separation": 0.085,
+    "flags": ["long_section_at_chorus_level", "flat_energy_profile"]
+  },
+  "time_to_hook_sec": 121.8,
+  "vocal": {
+    "range_low": "B3",
+    "range_high": "F5",
+    "tessitura_low": "D4",
+    "tessitura_high": "C5",
+    "median": "F#4",
+    "span_semitones": 18.0,
+    "frames_analyzed": 2430,
+    "confidence": "high"
+  },
+  "mix": {
+    "lufs": -8.1,
+    "true_peak_db": 2.26,
+    "crest_db": 11.3,
+    "stereo_side_mid": 0.284,
+    "stereo_correlation": 0.851,
+    "spectral_centroid_hz": 2522,
+    "band_balance": { "low": 23, "mid": 33, "high": 43 }
+  },
+  "pitch_paragraph": null,
+  "admin": {
+    "reviewed": false,
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "edited_fields": []
+  },
+  "_promoted": {
+    "tempo_bpm": 117,
+    "key_display": "A minor",
+    "time_to_hook_sec": 121.8,
+    "vocal_range_low_midi": 59,
+    "vocal_range_high_midi": 77,
+    "analysis_status": "complete"
+  },
+  "title": "Tea"
+}

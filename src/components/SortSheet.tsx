@@ -13,7 +13,7 @@ const SORT_OPTIONS = [
   { key: 'default', label: 'Default' },
   { key: 'title-az', label: 'Title A–Z' },
   { key: 'genre', label: 'Genre' },
-  { key: 'pocket', label: 'Pocket Songs First' },
+  { key: 'pocket', label: 'Crate First' },
   { key: 'writer-az', label: 'Writer A–Z' },
   { key: 'bpm-low', label: 'BPM Low → High' },
   { key: 'bpm-high', label: 'BPM High → Low' },
