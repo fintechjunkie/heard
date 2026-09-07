@@ -194,7 +194,7 @@ export default function MemberProfile({ member, songs, open, onClose, onOpenDeta
                     {/* Art tile — the colour and per-song variation live here,
                         so the card itself stays calm and readable. */}
                     <div
-                      onClick={() => { onClose(); setTimeout(() => onOpenDetail(s.id), 100); }}
+                      onClick={() => onOpenDetail(s.id)}
                       className="w-[56px] h-[56px] rounded-lg flex-shrink-0 relative overflow-hidden cursor-pointer"
                       style={songTileStyle(s.id, member.color)}
                     >
@@ -208,7 +208,7 @@ export default function MemberProfile({ member, songs, open, onClose, onOpenDeta
 
                     <div className="flex-1 min-w-0 flex flex-col justify-center">
                       <div
-                        onClick={() => { onClose(); setTimeout(() => onOpenDetail(s.id), 100); }}
+                        onClick={() => onOpenDetail(s.id)}
                         className="text-[19px] tracking-[1px] leading-none truncate cursor-pointer"
                         style={{ fontFamily: "'Bebas Neue', sans-serif" }}
                       >
@@ -259,7 +259,7 @@ export default function MemberProfile({ member, songs, open, onClose, onOpenDeta
                     </button>
 
                     <button
-                      onClick={(e) => { e.stopPropagation(); onClose(); setTimeout(() => onOpenDetail(s.id), 100); }}
+                      onClick={(e) => { e.stopPropagation(); onOpenDetail(s.id); }}
                       className="flex items-center gap-[5px] px-[10px] py-[5px] rounded-full cursor-pointer"
                       style={{
                         fontFamily: "'DM Mono', monospace",
@@ -296,7 +296,7 @@ export default function MemberProfile({ member, songs, open, onClose, onOpenDeta
                     <div className="px-3 pb-3 flex items-center justify-between">
                       <span className="text-[14px] font-medium" style={{ fontFamily: "'Bebas Neue', sans-serif" }}>$85K</span>
                       <button
-                        onClick={() => { onClose(); setTimeout(() => onOpenDetail(s.id), 100); }}
+                        onClick={() => onOpenDetail(s.id)}
                         className="px-3 py-1 rounded-md text-caption tracking-[1px] uppercase cursor-pointer border-none"
                         style={{ fontFamily: "'DM Mono', monospace", background: 'var(--black)', color: '#FFFFFF' }}>
                         Details

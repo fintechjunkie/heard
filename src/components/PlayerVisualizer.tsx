@@ -6,7 +6,7 @@ import { usePlayer } from '@/lib/player';
 
 export type VizMode = 'aurora' | 'composition';
 const VIZ_MODES: VizMode[] = ['aurora', 'composition'];
-const VIZ_LABELS = ['Aurora', 'Composition'];
+const VIZ_LABELS = ['Player', 'Composition'];
 
 /** Seconds for the palette to travel a full turn of the colour wheel. */
 const COLOR_CYCLE_SECONDS = 90;

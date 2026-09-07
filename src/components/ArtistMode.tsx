@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useStore } from '@/lib/store';
 import { usePlayer, formatTime } from '@/lib/player';
 import PlayerVisualizer, { VizMode } from './PlayerVisualizer';
+import BottomSheet from './BottomSheet';
 import { FEATURES } from '@/lib/features';
 
 const REACTIONS = [
@@ -17,13 +18,15 @@ const REACTIONS = [
 interface ArtistModeProps {
   open: boolean;
   onClose: () => void;
+  /** Kept in the props for the caller's benefit; the Pocket header no longer
+   *  lists writers, so nothing here opens a profile. */
   onOpenProfile?: (memberId: number) => void;
   onOpenDetail?: (songId: number) => void;
   inline?: boolean;
 }
 
-export default function ArtistMode({ open, onClose, onOpenProfile, onOpenDetail, inline }: ArtistModeProps) {
-  const { songs, members, artistQueue, artistReactions, setArtistReaction, showToast,
+export default function ArtistMode({ open, onClose, onOpenDetail, inline }: ArtistModeProps) {
+  const { songs, artistQueue, artistReactions, setArtistReaction, showToast,
     pocketVizMode, setPocketVizMode } = useStore();
   const { activeSong, isPlaying, progress, currentTime, duration, seek, toggle, playSong, skipForward, skipBack, setPreviewMode } = usePlayer();
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -79,6 +82,7 @@ export default function ArtistMode({ open, onClose, onOpenProfile, onOpenDetail,
   // pointer capture keeps the drag alive when a finger slides off the bar.
   const scrubTrackRef = useRef<HTMLDivElement | null>(null);
   const [scrubbing, setScrubbing] = useState(false);
+  const [showAnalysis, setShowAnalysis] = useState(false);
 
   const seekFromPointer = (clientX: number) => {
     const el = scrubTrackRef.current;
@@ -140,7 +144,7 @@ export default function ArtistMode({ open, onClose, onOpenProfile, onOpenDetail,
 
   return (
     <div
-      className={inline ? "flex flex-col overflow-hidden h-full" : "absolute inset-0 z-[170] flex flex-col overflow-hidden"}
+      className={inline ? "relative flex flex-col overflow-hidden h-full" : "absolute inset-0 z-[170] flex flex-col overflow-hidden"}
       style={inline ? {
         background: '#06060e',
       } : {
@@ -235,30 +239,6 @@ export default function ArtistMode({ open, onClose, onOpenProfile, onOpenDetail,
                     style={{ fontFamily: "'Bebas Neue', sans-serif", color: 'white' }}>
                     {song.title}
                   </div>
-                  {/* Clickable writers */}
-                  <div className="flex flex-wrap gap-1 mt-1">
-                    {song.writers.map((writer, wi) => {
-                      const member = members.find(m => m.name === writer);
-                      return (
-                        <span key={wi}>
-                          {wi > 0 && <span style={{ color: 'rgba(255,255,255,0.3)' }}> · </span>}
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              if (member && onOpenProfile) {
-                                onClose();
-                                setTimeout(() => onOpenProfile(member.id), 300);
-                              }
-                            }}
-                            className="bg-transparent border-none cursor-pointer underline text-body"
-                            style={{ color: 'rgba(255,255,255,0.72)', textDecorationColor: 'rgba(255,255,255,0.3)' }}
-                          >
-                            {writer}
-                          </button>
-                        </span>
-                      );
-                    })}
-                  </div>
                 </div>
                 {queuedSongs.length > 1 && (
                   <button onClick={goNext} aria-label="Next song"
@@ -285,19 +265,34 @@ export default function ArtistMode({ open, onClose, onOpenProfile, onOpenDetail,
                   onToggle={() => toggle(song)}
                   mode={vizMode}
                   onModeChange={setVizMode}
-                  extraAction={onOpenDetail ? (
-                    <button
-                      onClick={(e) => { e.stopPropagation(); onOpenDetail(song.id); }}
-                      className="flex flex-col items-center gap-[3px] cursor-pointer bg-transparent border-none"
-                    >
-                      <span className="w-[10px] h-[10px] rounded-full flex items-center justify-center"
-                        style={{ border: '1px solid rgba(255,255,255,0.35)' }} />
-                      <span className="text-micro tracking-[0.5px] uppercase"
-                        style={{ fontFamily: "'DM Mono', monospace", color: 'rgba(255,255,255,0.4)' }}>
-                        Info
-                      </span>
-                    </button>
-                  ) : undefined}
+                  extraAction={
+                    <>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); setShowAnalysis(true); }}
+                        className="flex flex-col items-center gap-[3px] cursor-pointer bg-transparent border-none"
+                      >
+                        <span className="w-[10px] h-[10px] rounded-full"
+                          style={{ border: '1px solid rgba(255,255,255,0.35)' }} />
+                        <span className="text-micro tracking-[0.5px] uppercase"
+                          style={{ fontFamily: "'DM Mono', monospace", color: 'rgba(255,255,255,0.4)' }}>
+                          Analysis
+                        </span>
+                      </button>
+                      {onOpenDetail && (
+                        <button
+                          onClick={(e) => { e.stopPropagation(); onOpenDetail(song.id); }}
+                          className="flex flex-col items-center gap-[3px] cursor-pointer bg-transparent border-none"
+                        >
+                          <span className="w-[10px] h-[10px] rounded-full"
+                            style={{ border: '1px solid rgba(255,255,255,0.35)' }} />
+                          <span className="text-micro tracking-[0.5px] uppercase"
+                            style={{ fontFamily: "'DM Mono', monospace", color: 'rgba(255,255,255,0.4)' }}>
+                            Info
+                          </span>
+                        </button>
+                      )}
+                    </>
+                  }
                 />
               </div>
 
@@ -494,6 +489,47 @@ export default function ArtistMode({ open, onClose, onOpenProfile, onOpenDetail,
           </div>
         )}
       </div>
+
+      {/* Who this song is for. Sourced from the analysis pitch paragraph once
+          the pipeline exists; until a song is analyzed and approved this
+          explains itself rather than showing an empty sheet. */}
+      <BottomSheet open={showAnalysis} onClose={() => setShowAnalysis(false)}>
+        <div className="pt-2 pb-6">
+          <div className="w-[36px] h-[4px] rounded-full mx-auto mb-3" style={{ background: 'var(--border)' }} />
+          <div className="flex items-center justify-between px-5 mb-1">
+            <div className="text-[22px] tracking-[2px] leading-none" style={{ fontFamily: "'Bebas Neue', sans-serif" }}>
+              Analysis
+            </div>
+            <button onClick={() => setShowAnalysis(false)}
+              className="w-[28px] h-[28px] rounded-full flex items-center justify-center cursor-pointer text-[13px]"
+              style={{ background: 'var(--cream)', border: '1px solid var(--border)', color: 'var(--muted)' }}>
+              ✕
+            </button>
+          </div>
+          {song && (
+            <div className="px-5 text-caption tracking-[1.5px] uppercase mb-3"
+              style={{ fontFamily: "'DM Mono', monospace", color: 'var(--muted)' }}>
+              {song.title}
+            </div>
+          )}
+          <div className="px-5">
+            {song?.pitch_paragraph ? (
+              <p className="text-body leading-relaxed" style={{ color: 'var(--black)' }}>
+                {song.pitch_paragraph}
+              </p>
+            ) : (
+              <div className="rounded-xl p-4" style={{ background: 'var(--cream)', border: '1px solid var(--border)' }}>
+                <p className="text-body leading-relaxed" style={{ color: 'var(--muted)' }}>
+                  This song hasn&apos;t been analyzed yet. Once it has, this is where
+                  the summary of who the song is for will appear — what the topline
+                  asks of a singer, where the hook lands, and what a producer would
+                  act on.
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+      </BottomSheet>
     </div>
   );
 }

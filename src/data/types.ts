@@ -26,6 +26,17 @@ export interface Song {
   artistFlagTime: string | null;
   artistReaction: string | null;
   legal_doc_url?: string;
+
+  // Song analysis (see the Song Analysis & Composition Mode spec). Optional
+  // until the analysis pipeline exists; the UI treats absence as "not yet run"
+  // rather than an error.
+  /** pending | running | complete | failed | approved. Only 'approved' songs
+   *  may expose analysis to buyers. */
+  analysis_status?: string;
+  /** The buyer-facing paragraph: who this song is for. Admin-editable. */
+  pitch_paragraph?: string;
+  /** Seconds into the track where the first chorus lands. */
+  time_to_hook_sec?: number | null;
 }
 
 export interface Member {

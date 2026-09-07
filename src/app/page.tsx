@@ -41,6 +41,9 @@ export default function Home() {
   const [profileMemberId, setProfileMemberId] = useState<number | null>(null);
   const [dealRoomSongId, setDealRoomSongId] = useState<number | null>(null);
   const [detailOpenedFromPocket, setDetailOpenedFromPocket] = useState(false);
+  // Which writer's page the detail sheet was opened from, so closing it goes
+  // back there instead of dumping the user on the bank.
+  const [detailReturnMemberId, setDetailReturnMemberId] = useState<number | null>(null);
   const [showDealRoomsList, setShowDealRoomsList] = useState(false);
 
   // Dismissed songs the user has opened back up. Kept local, not persisted:
@@ -317,10 +320,16 @@ export default function Home() {
             setDetailOpenedFromPocket(false);
             store.setActiveTab('pocket');
           }
+          if (detailReturnMemberId !== null) {
+            const back = detailReturnMemberId;
+            setDetailReturnMemberId(null);
+            // Let the sheet finish sliding out before the panel slides back.
+            setTimeout(() => setProfileMemberId(back), 120);
+          }
         }}
         onReserve={setReserveSongId}
         onBuy={setBuySongId}
-        onOpenProfile={(mid) => { setDetailSongId(null); setDetailOpenedFromPocket(false); setTimeout(() => setProfileMemberId(mid), 100); }}
+        onOpenProfile={(mid) => { setDetailSongId(null); setDetailOpenedFromPocket(false); setDetailReturnMemberId(null); setTimeout(() => setProfileMemberId(mid), 100); }}
       />
       {FEATURES.commerce && <ReserveSheet
         song={findSong(reserveSongId)}
@@ -351,7 +360,11 @@ export default function Home() {
         songs={songs}
         open={profileMemberId !== null}
         onClose={() => setProfileMemberId(null)}
-        onOpenDetail={setDetailSongId}
+        onOpenDetail={(songId) => {
+          setDetailReturnMemberId(profileMemberId);
+          setProfileMemberId(null);
+          setDetailSongId(songId);
+        }}
       />
       {FEATURES.dealRooms && (
         <>
