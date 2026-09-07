@@ -1,12 +1,57 @@
 'use client';
 
-import { useRef, useEffect, useCallback } from 'react';
+import { useRef, useEffect, useCallback, type ReactNode } from 'react';
 import { Song } from '@/data/types';
 import { usePlayer } from '@/lib/player';
 
-export type VizMode = 'spectrum' | 'orb' | 'waveform' | 'nebula' | 'aurora';
-const VIZ_MODES: VizMode[] = ['spectrum', 'orb', 'waveform', 'nebula', 'aurora'];
-const VIZ_LABELS = ['Spectrum', 'Orb', 'Waveform', 'Nebula', 'Aurora'];
+export type VizMode = 'aurora' | 'composition';
+const VIZ_MODES: VizMode[] = ['aurora', 'composition'];
+const VIZ_LABELS = ['Aurora', 'Composition'];
+
+/** Seconds for the palette to travel a full turn of the colour wheel. */
+const COLOR_CYCLE_SECONDS = 90;
+
+/** #rrggbb → [h, s, l], h in degrees. */
+function hexToHsl(hex: string): [number, number, number] {
+  const m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex.trim());
+  if (!m) return [0, 0, 60];
+  const r = parseInt(m[1], 16) / 255;
+  const g = parseInt(m[2], 16) / 255;
+  const b = parseInt(m[3], 16) / 255;
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  const l = (max + min) / 2;
+  const d = max - min;
+  if (d === 0) return [0, 0, l * 100];
+  const sat = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+  let h: number;
+  if (max === r) h = ((g - b) / d + (g < b ? 6 : 0));
+  else if (max === g) h = (b - r) / d + 2;
+  else h = (r - g) / d + 4;
+  return [h * 60, sat * 100, l * 100];
+}
+
+function hslToHex(h: number, sPct: number, lPct: number): string {
+  const sat = sPct / 100;
+  const l = lPct / 100;
+  const k = (n: number) => (n + ((h % 360) + 360) / 30) % 12;
+  const a = sat * Math.min(l, 1 - l);
+  const f = (n: number) => {
+    const v = l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)));
+    return Math.round(255 * v).toString(16).padStart(2, '0');
+  };
+  return `#${f(0)}${f(8)}${f(4)}`;
+}
+
+/**
+ * The palette drifts around the wheel from the song's anchor colour rather
+ * than being picked by hand — the theme chips it replaces cost more room in
+ * Pocket than the choice was worth.
+ */
+function rotateHue(hex: string, degrees: number): string {
+  const [h, sat, l] = hexToHsl(hex);
+  return hslToHex(h + degrees, sat, l);
+}
 
 const BINS = 64;
 
@@ -18,10 +63,13 @@ interface PlayerVisualizerProps {
   mode: VizMode;
   onModeChange: (mode: VizMode) => void;
   themeColor?: string; // override color from mood theme
+  /** Rendered alongside the mode buttons, so page-level actions can sit in the
+   *  same row without the visualizer knowing what they are. */
+  extraAction?: ReactNode;
 }
 
 export default function PlayerVisualizer({
-  song, isPlaying, onToggle, mode, onModeChange, themeColor,
+  song, isPlaying, progress, onToggle, mode, onModeChange, themeColor, extraAction,
 }: PlayerVisualizerProps) {
   const color = themeColor || song.color;
   const { getFrequencyData } = usePlayer();
@@ -33,6 +81,10 @@ export default function PlayerVisualizer({
   // Live values read by the animation loop without restarting it.
   const modeRef = useRef(mode);
   const colorRef = useRef(color);
+  /** The anchor colour advanced around the wheel; recomputed every frame. */
+  const drawColorRef = useRef(color);
+  const songIdRef = useRef(song.id);
+  const progressRef = useRef(progress);
   const playingRef = useRef(isPlaying);
   const freqFnRef = useRef(getFrequencyData);
   useEffect(() => {
@@ -40,7 +92,9 @@ export default function PlayerVisualizer({
     colorRef.current = color;
     playingRef.current = isPlaying;
     freqFnRef.current = getFrequencyData;
-  }, [mode, color, isPlaying, getFrequencyData]);
+    songIdRef.current = song.id;
+    progressRef.current = progress;
+  }, [mode, color, isPlaying, getFrequencyData, song.id, progress]);
 
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
     touchStartX.current = e.touches[0].clientX;
@@ -90,17 +144,9 @@ export default function PlayerVisualizer({
 
     // Smoothed spectrum + derived scalars.
     const spec = new Float32Array(BINS);
-    let bass = 0, level = 0, t = 0;
+    let level = 0, t = 0;
 
-    // Particle systems (persist across frames).
-    const orbP = Array.from({ length: 48 }, () => ({
-      a: Math.random() * Math.PI * 2, r: 0.5 + Math.random() * 0.5,
-      sp: 0.2 + Math.random() * 0.6, sz: 1 + Math.random() * 2,
-    }));
-    const nebP = Array.from({ length: 90 }, () => ({
-      a: Math.random() * Math.PI * 2, d: Math.random(),
-      v: 0.2 + Math.random() * 0.8, sz: 1 + Math.random() * 2.5,
-    }));
+    // Particle pools for the Orb and Nebula modes went with those renderers.
     const AUR = [
       { band: 0.08, yoff: 0.60, amp: 0.10, sp: 0.55, freq: 1.4, a: 0.55 },
       { band: 0.24, yoff: 0.52, amp: 0.13, sp: -0.40, freq: 2.1, a: 0.42 },
@@ -164,112 +210,14 @@ export default function PlayerVisualizer({
 
       let sum = 0;
       for (let i = 0; i < BINS; i++) sum += spec[i];
-      bass = (spec[0] + spec[1] + spec[2] + spec[3]) / 4;
       level = sum / BINS;
     };
 
-    const drawSpectrum = () => {
-      const c = colorRef.current;
-      ctx.clearRect(0, 0, W, H);
-      ctx.globalCompositeOperation = 'lighter';
-      const step = W / BINS, cy = H;
-      for (let i = 0; i < BINS; i++) {
-        const v = spec[i];
-        const bh = Math.max(2, v * H * 0.92);
-        const x = i * step + step * 0.18, bw = step * 0.64, y = cy - bh;
-        const g = ctx.createLinearGradient(0, cy, 0, y);
-        g.addColorStop(0, hexA(c, 0.12));
-        g.addColorStop(0.55, hexA(c, 0.85));
-        g.addColorStop(1, `rgba(255,255,255,${Math.min(1, v * 1.3)})`);
-        ctx.fillStyle = g; ctx.shadowColor = hexA(c, 0.8); ctx.shadowBlur = 14;
-        roundRect(x, y, bw, bh, bw / 2); ctx.fill();
-        ctx.shadowBlur = 0; ctx.globalAlpha = 0.12;
-        roundRect(x, cy, bw, bh * 0.4, bw / 2); ctx.fill(); ctx.globalAlpha = 1;
-      }
-      ctx.shadowBlur = 0; ctx.globalCompositeOperation = 'source-over';
-    };
-
-    const drawOrb = () => {
-      const c = colorRef.current;
-      ctx.clearRect(0, 0, W, H);
-      const cx = W / 2, cy = H / 2, base = Math.min(W, H) * 0.16;
-      ctx.globalCompositeOperation = 'lighter';
-      for (let L = 3; L >= 1; L--) {
-        const rad = base + bass * base * 2.4 + L * 10;
-        const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, rad * 2.2);
-        g.addColorStop(0, hexA(c, 0.5 / L));
-        g.addColorStop(0.5, hexA(c, 0.12 / L));
-        g.addColorStop(1, 'rgba(0,0,0,0)');
-        ctx.fillStyle = g; ctx.beginPath(); ctx.arc(cx, cy, rad * 2.2, 0, 7); ctx.fill();
-      }
-      const cr = base + bass * base * 1.6;
-      const cg = ctx.createRadialGradient(cx, cy, 0, cx, cy, cr);
-      cg.addColorStop(0, 'rgba(255,255,255,.95)');
-      cg.addColorStop(0.5, hexA(c, .9));
-      cg.addColorStop(1, hexA(c, .1));
-      ctx.fillStyle = cg; ctx.beginPath(); ctx.arc(cx, cy, cr, 0, 7); ctx.fill();
-      for (const p of orbP) {
-        if (playingRef.current && !reduce) p.a += p.sp * 0.02;
-        const rr = base * 1.8 + p.r * base * 1.2 + bass * base * 2.2;
-        const px = cx + Math.cos(p.a) * rr, py = cy + Math.sin(p.a) * rr;
-        ctx.fillStyle = hexA(c, 0.4 + bass * 0.5);
-        ctx.beginPath(); ctx.arc(px, py, p.sz * (1 + bass * 2), 0, 7); ctx.fill();
-      }
-      ctx.globalCompositeOperation = 'source-over';
-    };
-
-    const drawWaveform = () => {
-      const c = colorRef.current;
-      ctx.clearRect(0, 0, W, H);
-      ctx.globalCompositeOperation = 'lighter';
-      const cy = H / 2;
-      const trace = (scale: number) => {
-        ctx.beginPath();
-        for (let x = 0; x <= W; x += 3) {
-          const f = x / W;
-          const i = Math.floor(f * (BINS - 1));
-          const amp = (spec[i] * 0.6 + level * 0.4) * H * 0.42 * scale;
-          const yy = cy + Math.sin(f * 22 + t * 5) * amp * Math.sin(f * Math.PI);
-          if (x === 0) ctx.moveTo(x, yy); else ctx.lineTo(x, yy);
-        }
-      };
-      trace(1); ctx.lineTo(W, cy); ctx.lineTo(0, cy); ctx.closePath();
-      const g = ctx.createLinearGradient(0, 0, 0, H);
-      g.addColorStop(0, hexA(c, .25));
-      g.addColorStop(0.5, hexA(c, .05));
-      g.addColorStop(1, hexA(c, .25));
-      ctx.fillStyle = g; ctx.fill();
-      ctx.shadowColor = hexA(c, .9); ctx.shadowBlur = 16;
-      ctx.strokeStyle = c; ctx.lineWidth = 2.5; trace(1); ctx.stroke();
-      ctx.strokeStyle = 'rgba(255,255,255,.85)'; ctx.lineWidth = 1; trace(0.55); ctx.stroke();
-      ctx.shadowBlur = 0; ctx.globalCompositeOperation = 'source-over';
-    };
-
-    const drawNebula = () => {
-      const c = colorRef.current;
-      ctx.globalCompositeOperation = 'source-over';
-      ctx.fillStyle = 'rgba(6,6,14,0.18)'; ctx.fillRect(0, 0, W, H);
-      ctx.globalCompositeOperation = 'lighter';
-      const cx = W / 2, cy = H / 2;
-      for (const p of nebP) {
-        if (playingRef.current && !reduce) p.d += (0.002 + level * 0.02) * p.v;
-        if (p.d > 1) { p.d = 0; p.a = Math.random() * Math.PI * 2; }
-        const rr = p.d * Math.min(W, H) * 0.62;
-        const px = cx + Math.cos(p.a) * rr * (W / H > 1 ? 1.4 : 1);
-        const py = cy + Math.sin(p.a) * rr;
-        const s = p.sz * (0.6 + level * 2.4) * (1 - p.d * 0.5);
-        ctx.fillStyle = hexA(c, (1 - p.d) * (0.3 + level * 0.6));
-        ctx.beginPath(); ctx.arc(px, py, Math.max(0.4, s), 0, 7); ctx.fill();
-      }
-      const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, 40 + bass * 80);
-      g.addColorStop(0, hexA(c, .5 + bass * .4));
-      g.addColorStop(1, 'rgba(0,0,0,0)');
-      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(cx, cy, 40 + bass * 80, 0, 7); ctx.fill();
-      ctx.globalCompositeOperation = 'source-over';
-    };
+    // Spectrum, Orb, Waveform and Nebula renderers were removed with their
+    // modes; Aurora and Composition are the only two the player offers.
 
     const drawAurora = () => {
-      const c = colorRef.current;
+      const c = drawColorRef.current;
       ctx.globalCompositeOperation = 'source-over';
       ctx.fillStyle = 'rgba(6,6,14,0.28)'; ctx.fillRect(0, 0, W, H);
       ctx.globalCompositeOperation = 'lighter';
@@ -310,18 +258,105 @@ export default function PlayerVisualizer({
       ctx.globalCompositeOperation = 'source-over';
     };
 
+    /**
+     * Placeholder for the structure view: energy over time with the song's
+     * sections beneath it. The shape is derived from the song id so each track
+     * looks consistent run to run, but it is invented — the real curve and
+     * section marks come from analysis data the admin does not capture yet.
+     */
+    const drawComposition = () => {
+      const c = drawColorRef.current;
+      ctx.clearRect(0, 0, W, H);
+      ctx.fillStyle = 'rgba(6,6,14,0.9)';
+      ctx.fillRect(0, 0, W, H);
+
+      const seed = songIdRef.current || 1;
+      const rand = (n: number) => {
+        const v = Math.sin(seed * 12.9898 + n * 78.233) * 43758.5453;
+        return v - Math.floor(v);
+      };
+
+      const padX = 10;
+      const barH = 12;
+      const plotH = H - barH - 26;
+      const plotW = W - padX * 2;
+
+      // Sections across the track, alternating quiet and loud.
+      const sections = [
+        { label: 'Intro', w: 0.07, hot: false },
+        { label: 'Verse', w: 0.15, hot: false },
+        { label: 'Pre', w: 0.07, hot: false },
+        { label: 'Chorus', w: 0.19, hot: true },
+        { label: 'Verse', w: 0.12, hot: false },
+        { label: 'Chorus', w: 0.19, hot: true },
+        { label: 'Bridge', w: 0.09, hot: false },
+        { label: 'Chorus', w: 0.12, hot: true },
+      ];
+
+      // Energy curve
+      ctx.beginPath();
+      ctx.moveTo(padX, plotH + 8);
+      let x = padX;
+      sections.forEach((sec, si) => {
+        const segW = sec.w * plotW;
+        const steps = Math.max(4, Math.floor(segW / 5));
+        for (let i = 0; i <= steps; i++) {
+          const base = sec.hot ? 0.78 : 0.42;
+          const jitter = (rand(si * 10 + i) - 0.5) * (sec.hot ? 0.16 : 0.12);
+          const y = plotH + 8 - (base + jitter) * plotH;
+          ctx.lineTo(x + (i / steps) * segW, y);
+        }
+        x += segW;
+      });
+      ctx.lineTo(W - padX, plotH + 8);
+      ctx.closePath();
+      const fill = ctx.createLinearGradient(0, 0, 0, plotH + 8);
+      fill.addColorStop(0, hexA(c, 0.35));
+      fill.addColorStop(1, hexA(c, 0.02));
+      ctx.fillStyle = fill;
+      ctx.fill();
+      ctx.strokeStyle = hexA(c, 0.95);
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      // Section bar
+      x = padX;
+      sections.forEach(sec => {
+        const segW = sec.w * plotW - 2;
+        ctx.fillStyle = sec.hot ? hexA(c, 0.95) : 'rgba(255,255,255,0.22)';
+        roundRect(x, plotH + 16, Math.max(2, segW), barH, barH / 2);
+        ctx.fill();
+        x += sec.w * plotW;
+      });
+
+      // Playhead
+      const px = padX + (progressRef.current / 100) * plotW;
+      ctx.strokeStyle = 'rgba(255,255,255,0.55)';
+      ctx.setLineDash([3, 3]);
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(px, 4);
+      ctx.lineTo(px, plotH + 16 + barH);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      ctx.fillStyle = 'rgba(255,255,255,0.35)';
+      ctx.font = '9px monospace';
+      ctx.fillText('STRUCTURE · PLACEHOLDER DATA', padX, H - 5);
+    };
+
     let raf = 0;
     let last = performance.now();
     const frame = (now: number) => {
       const dt = Math.min(0.05, (now - last) / 1000);
       last = now;
       updateSignal(dt);
+      drawColorRef.current = reduce
+        ? colorRef.current
+        : rotateHue(colorRef.current, (t / COLOR_CYCLE_SECONDS) * 360);
       switch (modeRef.current) {
-        case 'orb': drawOrb(); break;
-        case 'waveform': drawWaveform(); break;
-        case 'nebula': drawNebula(); break;
-        case 'aurora': drawAurora(); break;
-        default: drawSpectrum();
+        case 'composition': drawComposition(); break;
+        default: drawAurora();
       }
       raf = requestAnimationFrame(frame);
     };
@@ -377,6 +412,7 @@ export default function PlayerVisualizer({
             </span>
           </button>
         ))}
+        {extraAction}
       </div>
     </div>
   );

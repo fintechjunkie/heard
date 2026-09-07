@@ -3,6 +3,8 @@
 import { Member, Song } from '@/data/types';
 import { FEATURES } from '@/lib/features';
 import Waveform from './Waveform';
+import { useStore } from '@/lib/store';
+import { usePlayer } from '@/lib/player';
 
 /**
  * A small deterministic art tile per song, built from the writer's colour.
@@ -29,6 +31,8 @@ interface MemberProfileProps {
 }
 
 export default function MemberProfile({ member, songs, open, onClose, onOpenDetail }: MemberProfileProps) {
+  const { artistQueue, toggleArtistQueue, showToast } = useStore();
+  const { activeSong } = usePlayer();
   if (!member) return null;
 
   const memberSongs = songs.filter(s => s.writer_ids.includes(member.id) && s.status !== 'purchased');
@@ -175,11 +179,16 @@ export default function MemberProfile({ member, songs, open, onClose, onOpenDeta
             ) : (
               memberSongs.map((s, i) => (
                 <div key={s.id}
-                  className="rounded-xl mb-2 overflow-hidden"
+                  className="rounded-xl mb-2 overflow-hidden transition-all duration-200"
                   style={{
-                    background: i % 2 === 0 ? 'var(--th-white)' : '#F6F2E8',
-                    border: '1px solid var(--border)',
-                    borderLeft: `3px solid ${member.color}`,
+                    // The track being played lifts out of the list: tinted
+                    // ground, a thicker rail and a ring in the writer's colour.
+                    background: activeSong?.id === s.id
+                      ? `linear-gradient(90deg, ${member.color}26, ${member.color}0d 70%), var(--th-white)`
+                      : i % 2 === 0 ? 'var(--th-white)' : '#F6F2E8',
+                    border: `1px solid ${activeSong?.id === s.id ? `${member.color}88` : 'var(--border)'}`,
+                    borderLeft: `${activeSong?.id === s.id ? 5 : 3}px solid ${member.color}`,
+                    boxShadow: activeSong?.id === s.id ? `0 0 0 2px ${member.color}22` : 'none',
                   }}>
                   <div className="flex items-stretch gap-3 p-3">
                     {/* Art tile — the colour and per-song variation live here,
@@ -220,6 +229,56 @@ export default function MemberProfile({ member, songs, open, onClose, onOpenDeta
                         </span>
                       </div>
                     </div>
+                  </div>
+
+                  {/* Same two actions as the bank card, so a song found here
+                      can be queued or inspected without going back. */}
+                  <div className="flex items-center gap-[10px] px-3 pb-[8px]">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const queued = artistQueue.includes(s.id);
+                        toggleArtistQueue(s.id);
+                        showToast(queued
+                          ? `"${s.title}" removed from Pocket Songs.`
+                          : `"${s.title}" added to Pocket Songs.`);
+                      }}
+                      className="flex items-center gap-[5px] px-[10px] py-[5px] rounded-full cursor-pointer"
+                      style={{
+                        fontFamily: "'DM Mono', monospace",
+                        background: artistQueue.includes(s.id) ? 'var(--violet)' : 'transparent',
+                        border: `1px solid ${artistQueue.includes(s.id) ? 'var(--violet)' : 'rgba(181,123,255,0.45)'}`,
+                        color: artistQueue.includes(s.id) ? '#FFFFFF' : 'var(--violet)',
+                      }}>
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
+                      </svg>
+                      <span className="text-micro tracking-[1px] uppercase">
+                        {artistQueue.includes(s.id) ? 'In Pocket' : 'Pocket'}
+                      </span>
+                    </button>
+
+                    <button
+                      onClick={(e) => { e.stopPropagation(); onClose(); setTimeout(() => onOpenDetail(s.id), 100); }}
+                      className="flex items-center gap-[5px] px-[10px] py-[5px] rounded-full cursor-pointer"
+                      style={{
+                        fontFamily: "'DM Mono', monospace",
+                        background: 'transparent',
+                        border: '1px solid rgba(90,180,255,0.45)',
+                        color: 'var(--sky)',
+                      }}>
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>
+                      </svg>
+                      <span className="text-micro tracking-[1px] uppercase">Info</span>
+                    </button>
+
+                    {activeSong?.id === s.id && (
+                      <span className="ml-auto text-micro tracking-[1px] uppercase"
+                        style={{ fontFamily: "'DM Mono', monospace", color: member.color }}>
+                        ▶ Playing
+                      </span>
+                    )}
                   </div>
 
                   {/* Playable waveform in the writer's colour */}

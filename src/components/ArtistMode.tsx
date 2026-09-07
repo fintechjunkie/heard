@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useStore } from '@/lib/store';
 import { usePlayer, formatTime } from '@/lib/player';
 import PlayerVisualizer, { VizMode } from './PlayerVisualizer';
@@ -14,17 +14,6 @@ const REACTIONS = [
   { key: 'notforme', emoji: '✕', label: 'Pass' },
 ];
 
-// Mood chips now change the color theme of the player surface
-const MOOD_THEMES = [
-  { key: 'default', label: 'Default', color: '' }, // uses song color
-  { key: 'neon', label: 'Neon', color: '#C8FF45' },
-  { key: 'midnight', label: 'Midnight', color: '#5AB4FF' },
-  { key: 'fire', label: 'Fire', color: '#FF6848' },
-  { key: 'violet', label: 'Violet', color: '#B57BFF' },
-  { key: 'gold', label: 'Gold', color: '#FFB830' },
-  { key: 'ice', label: 'Ice', color: '#00F5C4' },
-];
-
 interface ArtistModeProps {
   open: boolean;
   onClose: () => void;
@@ -35,15 +24,14 @@ interface ArtistModeProps {
 
 export default function ArtistMode({ open, onClose, onOpenProfile, onOpenDetail, inline }: ArtistModeProps) {
   const { songs, members, artistQueue, artistReactions, setArtistReaction, showToast,
-    pocketTheme, setPocketTheme, pocketVizMode, setPocketVizMode } = useStore();
+    pocketVizMode, setPocketVizMode } = useStore();
   const { activeSong, isPlaying, progress, currentTime, duration, seek, toggle, playSong, skipForward, skipBack, setPreviewMode } = usePlayer();
   const [currentIndex, setCurrentIndex] = useState(0);
-  // Appearance lives in the store, not local state: leaving the tab unmounts
-  // this component, which was discarding the chosen theme and visualizer.
-  const vizMode = pocketVizMode as VizMode;
+  // Which visualizer is showing survives leaving the tab, which unmounts this
+  // component. The palette is no longer chosen — it drifts from the song's own
+  // colour inside the visualizer.
+  const vizMode = (pocketVizMode === 'composition' ? 'composition' : 'aurora') as VizMode;
   const setVizMode = (mode: VizMode) => setPocketVizMode(mode);
-  const activeTheme = pocketTheme;
-  const setActiveTheme = setPocketTheme;
 
   // Disable preview mode when in Pocket Songs, re-enable when leaving
   useEffect(() => {
@@ -76,33 +64,38 @@ export default function ArtistMode({ open, onClose, onOpenProfile, onOpenDetail,
   }
 
   const song = queuedSongs[currentIndex] || null;
-  const themeColor = MOOD_THEMES.find(t => t.key === activeTheme)?.color || '';
 
-  const goNext = useCallback(() => {
+  const goNext = () => {
     if (queuedSongs.length <= 1) return;
-    const next = (currentIndex + 1) % queuedSongs.length;
-    setCurrentIndex(next);
-  }, [currentIndex, queuedSongs.length]);
+    setCurrentIndex((currentIndex + 1) % queuedSongs.length);
+  };
 
-  const goPrev = useCallback(() => {
+  const goPrev = () => {
     if (queuedSongs.length <= 1) return;
-    const prev = (currentIndex - 1 + queuedSongs.length) % queuedSongs.length;
-    setCurrentIndex(prev);
-  }, [currentIndex, queuedSongs.length]);
+    setCurrentIndex((currentIndex - 1 + queuedSongs.length) % queuedSongs.length);
+  };
 
   // Dragging the progress bar. Pointer events cover mouse and touch alike, and
   // pointer capture keeps the drag alive when a finger slides off the bar.
   const scrubTrackRef = useRef<HTMLDivElement | null>(null);
   const [scrubbing, setScrubbing] = useState(false);
 
-  const seekFromPointer = useCallback((clientX: number) => {
+  const seekFromPointer = (clientX: number) => {
     const el = scrubTrackRef.current;
     if (!el) return;
     const rect = el.getBoundingClientRect();
     if (rect.width === 0) return;
     const pct = ((clientX - rect.left) / rect.width) * 100;
     seek(Math.max(0, Math.min(100, pct)));
-  }, [seek]);
+  };
+
+  // Next + play, as opposed to goNext which only moves the selection.
+  const playNext = () => {
+    if (queuedSongs.length <= 1) return;
+    const next = (currentIndex + 1) % queuedSongs.length;
+    setCurrentIndex(next);
+    playSong(queuedSongs[next]);
+  };
 
   const handleReaction = (songId: number, key: string) => {
     const current = artistReactions[songId];
@@ -141,8 +134,9 @@ export default function ArtistMode({ open, onClose, onOpenProfile, onOpenDetail,
   const rx = song ? (artistReactions[song.id] || null) : null;
   const rxData = rx ? REACTIONS.find(r => r.key === rx) : null;
 
-  // Get the effective color for theming
-  const effectiveColor = themeColor || (song?.color || '#B57BFF');
+  // The anchor colour. The visualizer drifts around the wheel from here; the
+  // surrounding controls stay on it so they do not shift under the eye.
+  const effectiveColor = song?.color || '#B57BFF';
 
   return (
     <div
@@ -180,34 +174,6 @@ export default function ArtistMode({ open, onClose, onOpenProfile, onOpenDetail,
             </button>
           )}
         </div>
-      </div>
-
-      {/* Theme chips (color/vibe selector) */}
-      <div className="flex gap-[6px] overflow-x-auto scrollbar-hide px-5 pb-3 flex-shrink-0">
-        {MOOD_THEMES.map(theme => (
-          <button
-            key={theme.key}
-            onClick={() => setActiveTheme(theme.key)}
-            className="flex-shrink-0 whitespace-nowrap px-[12px] py-[6px] rounded-full text-caption tracking-[1px] uppercase cursor-pointer transition-all duration-200"
-            style={{
-              fontFamily: "'DM Mono', monospace",
-              border: activeTheme === theme.key
-                ? `1px solid ${theme.color || effectiveColor}`
-                : '1px solid rgba(255,255,255,0.12)',
-              background: activeTheme === theme.key
-                ? `${theme.color || effectiveColor}22`
-                : 'transparent',
-              color: activeTheme === theme.key
-                ? (theme.color || effectiveColor)
-                : 'rgba(255,255,255,0.4)',
-            }}
-          >
-            {theme.color && (
-              <span className="inline-block w-[6px] h-[6px] rounded-full mr-[5px]" style={{ background: theme.color }} />
-            )}
-            {theme.label}
-          </button>
-        ))}
       </div>
 
       {/* Song picker strip */}
@@ -251,34 +217,20 @@ export default function ArtistMode({ open, onClose, onOpenProfile, onOpenDetail,
               {/* Title + nav */}
               <div className="flex items-center gap-2 mb-1">
                 {queuedSongs.length > 1 && (
-                  <button onClick={goPrev}
-                    className="w-[32px] h-[32px] rounded-full flex items-center justify-center text-[14px] cursor-pointer border-none flex-shrink-0 active:scale-90 transition-transform"
-                    style={{ background: `${effectiveColor}15`, color: effectiveColor }}>
+                  <button onClick={goPrev} aria-label="Previous song"
+                    className="w-[44px] h-[44px] rounded-full flex items-center justify-center cursor-pointer flex-shrink-0 active:scale-90 transition-transform"
+                    style={{
+                      background: `${effectiveColor}1f`,
+                      border: `1px solid ${effectiveColor}55`,
+                      color: effectiveColor,
+                      fontSize: 26,
+                      lineHeight: 1,
+                      paddingBottom: 3,
+                    }}>
                     ‹
                   </button>
                 )}
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between gap-2 mb-1">
-                    <div className="text-caption tracking-[1.5px] uppercase truncate min-w-0"
-                      style={{ fontFamily: "'DM Mono', monospace", color: 'rgba(255,255,255,0.5)' }}>
-                      {song.genre} · {song.bpm} bpm · {song.key}
-                    </div>
-                    {onOpenDetail && (
-                      <button
-                        onClick={(e) => { e.stopPropagation(); onOpenDetail(song.id); }}
-                        className="flex items-center gap-[5px] px-[10px] py-[4px] rounded-full cursor-pointer border-none active:scale-95 transition-transform flex-shrink-0"
-                        style={{
-                          background: 'rgba(255,255,255,0.08)',
-                          border: '1px solid rgba(255,255,255,0.15)',
-                        }}
-                      >
-                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.6)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>
-                        </svg>
-                        <span className="text-micro tracking-[1px] uppercase" style={{ fontFamily: "'DM Mono', monospace", color: 'rgba(255,255,255,0.5)' }}>Info</span>
-                      </button>
-                    )}
-                  </div>
                   <div className="text-[38px] tracking-[2px] leading-[0.95] truncate"
                     style={{ fontFamily: "'Bebas Neue', sans-serif", color: 'white' }}>
                     {song.title}
@@ -309,9 +261,16 @@ export default function ArtistMode({ open, onClose, onOpenProfile, onOpenDetail,
                   </div>
                 </div>
                 {queuedSongs.length > 1 && (
-                  <button onClick={goNext}
-                    className="w-[32px] h-[32px] rounded-full flex items-center justify-center text-[14px] cursor-pointer border-none flex-shrink-0 active:scale-90 transition-transform"
-                    style={{ background: `${effectiveColor}15`, color: effectiveColor }}>
+                  <button onClick={goNext} aria-label="Next song"
+                    className="w-[44px] h-[44px] rounded-full flex items-center justify-center cursor-pointer flex-shrink-0 active:scale-90 transition-transform"
+                    style={{
+                      background: `${effectiveColor}1f`,
+                      border: `1px solid ${effectiveColor}55`,
+                      color: effectiveColor,
+                      fontSize: 26,
+                      lineHeight: 1,
+                      paddingBottom: 3,
+                    }}>
                     ›
                   </button>
                 )}
@@ -326,7 +285,19 @@ export default function ArtistMode({ open, onClose, onOpenProfile, onOpenDetail,
                   onToggle={() => toggle(song)}
                   mode={vizMode}
                   onModeChange={setVizMode}
-                  themeColor={themeColor || undefined}
+                  extraAction={onOpenDetail ? (
+                    <button
+                      onClick={(e) => { e.stopPropagation(); onOpenDetail(song.id); }}
+                      className="flex flex-col items-center gap-[3px] cursor-pointer bg-transparent border-none"
+                    >
+                      <span className="w-[10px] h-[10px] rounded-full flex items-center justify-center"
+                        style={{ border: '1px solid rgba(255,255,255,0.35)' }} />
+                      <span className="text-micro tracking-[0.5px] uppercase"
+                        style={{ fontFamily: "'DM Mono', monospace", color: 'rgba(255,255,255,0.4)' }}>
+                        Info
+                      </span>
+                    </button>
+                  ) : undefined}
                 />
               </div>
 
@@ -379,6 +350,26 @@ export default function ArtistMode({ open, onClose, onOpenProfile, onOpenDetail,
                     <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', lineHeight: 1 }}>↻</span>
                     <span style={{ fontSize: 12, fontFamily: "'DM Mono', monospace", color: 'rgba(255,255,255,0.4)', lineHeight: 1 }}>10</span>
                   </div>
+                </button>
+
+                {/* Next track — jumps and starts playing, unlike the ‹ › arrows
+                    beside the title, which only change what is on screen. */}
+                <button
+                  onClick={(e) => { e.stopPropagation(); playNext(); }}
+                  disabled={queuedSongs.length <= 1}
+                  aria-label="Next track"
+                  className="h-[38px] px-[12px] rounded-full flex items-center gap-[5px] cursor-pointer border-none active:scale-90 transition-transform"
+                  style={{
+                    background: queuedSongs.length <= 1 ? 'rgba(255,255,255,0.04)' : 'rgba(255,255,255,0.08)',
+                    border: '1px solid rgba(255,255,255,0.12)',
+                    opacity: queuedSongs.length <= 1 ? 0.4 : 1,
+                  }}
+                >
+                  <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.7)', lineHeight: 1 }}>⏭</span>
+                  <span className="text-micro tracking-[1px] uppercase"
+                    style={{ fontFamily: "'DM Mono', monospace", color: 'rgba(255,255,255,0.55)' }}>
+                    Next
+                  </span>
                 </button>
               </div>
 

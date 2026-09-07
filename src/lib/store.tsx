@@ -87,7 +87,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchOpen, setSearchOpen] = useState(false);
   const [activeGenre, setActiveGenre] = useState('all');
-  const [sortMode, setSortMode] = useState('default');
+  // Alphabetical out of the box: 'default' is source order, which looks
+  // arbitrary once the bank holds more than a handful of songs.
+  const [sortMode, setSortMode] = useState('title-az');
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [artistReactions, setArtistReactionsState] = useState<Record<number, string>>(
     () => loadFromStorage('artistReactions', { 1: 'musthave' })
