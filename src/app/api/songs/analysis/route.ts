@@ -35,6 +35,26 @@ function stripPromoted(raw: Record<string, unknown>): {
 }
 
 /**
+ * Which fields actually differ between the stored analysis and an incoming
+ * edit. The admin UI marks fields as it goes, but relying on the client alone
+ * means anything written by a script or a future tool records nothing — and
+ * this list is how we learn which pipeline stages need work (§8.2).
+ */
+function diffFields(prev: SongAnalysis | null, next: SongAnalysis): string[] {
+  if (!prev) return [];
+  const changed: string[] = [];
+  const same = (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b);
+
+  if (prev.tempo?.bpm !== next.tempo?.bpm) changed.push('tempo.bpm');
+  if (prev.key?.display !== next.key?.display) changed.push('key.display');
+  if (!same(prev.sections, next.sections)) changed.push('sections');
+  if (prev.structure_confidence !== next.structure_confidence) changed.push('structure_confidence');
+  if (!same(prev.vocal, next.vocal)) changed.push('vocal');
+  if (prev.pitch_paragraph !== next.pitch_paragraph) changed.push('pitch_paragraph');
+  return changed;
+}
+
+/**
  * POST — import an analysis file against a song.
  *
  * Re-importing discards prior DSP output but preserves the pitch paragraph and
@@ -113,6 +133,17 @@ export async function PUT(request: NextRequest) {
     .maybeSingle();
 
   const analysis = body.analysis as SongAnalysis;
+
+  // Union of what the client marked and what actually changed on the server.
+  const { data: priorRow } = await supabase
+    .from('songs').select('analysis').eq('id', body.songId).maybeSingle();
+  const prior = (priorRow?.analysis as SongAnalysis | null) ?? null;
+  const merged = new Set([
+    ...(analysis.admin?.edited_fields || []),
+    ...diffFields(prior, analysis),
+  ]);
+  analysis.admin = { ...(analysis.admin ?? freshAdminBlock()), edited_fields: [...merged] };
+
   // Editing an approved analysis returns it to 'complete': what buyers were
   // shown is no longer what a reviewer signed off on.
   const current = (existing?.analysis_status as AnalysisStatus) || 'complete';
