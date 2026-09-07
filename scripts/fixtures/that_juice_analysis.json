@@ -1,24 +1,10 @@
 {
-  "version": 2,
+  "version": 3,
   "analyzed_at": "2026-09-07T02:32:21Z",
-  "engine_version": "1.1.0",
-  "source_file": {
-    "sample_rate": 44100,
-    "channels": 2,
-    "bit_depth": null,
-    "duration_sec": 164.67,
-    "format": "MP3",
-    "quality_flags": ["lossy_source", "clipping"]
-  },
+  "engine_version": "1.2.0",
+  "source_file": { "sample_rate": 44100, "channels": 2, "bit_depth": null, "duration_sec": 164.67, "format": "MP3", "quality_flags": ["lossy_source", "clipping"] },
   "tempo": { "bpm": 136, "alt_bpm": null, "confidence": "clear" },
-  "key": {
-    "root": "F#",
-    "mode": "minor",
-    "display": "F♯ minor",
-    "runner_up": "D major",
-    "margin": 0.095,
-    "confidence": "ambiguous"
-  },
+  "key": { "root": "F#", "mode": "minor", "display": "F♯ minor", "runner_up": "D major", "margin": 0.095, "confidence": "ambiguous" },
   "energy_curve": [
     0.244, 0.505, 0.556, 0.556, 0.503, 0.503, 0.568, 0.56, 0.562, 0.655,
     0.649, 0.641, 0.635, 0.621, 0.585, 0.67, 0.697, 0.607, 0.561, 0.588,
@@ -48,44 +34,15 @@
     { "start": 106.0, "end": 134.1, "label": "section", "energy": 0.83, "stability": 3 },
     { "start": 134.1, "end": 141.0, "label": "pre", "energy": 0.35, "stability": 3 },
     { "start": 141.0, "end": 148.0, "label": "chorus", "energy": 0.94, "stability": 3 },
-    { "start": 148.0, "end": 164.7, "label": "section", "energy": 0.77, "stability": 3 }
+    { "start": 148.0, "end": 164.7, "label": "verse", "energy": 0.67, "stability": 3 }
   ],
   "structure_confidence": "high",
-  "structure_diagnostics": { "chorus_separation": 0.287, "flags": [] },
+  "structure_diagnostics": { "chorus_separation": 0.287, "flags": [], "method": "energy" },
   "time_to_hook_sec": 35.9,
-  "vocal": {
-    "range_low": "A3",
-    "range_high": "B5",
-    "tessitura_low": "C#4",
-    "tessitura_high": "B4",
-    "median": "E4",
-    "span_semitones": 26.0,
-    "frames_analyzed": 1430,
-    "confidence": "high"
-  },
-  "mix": {
-    "lufs": -8.1,
-    "true_peak_db": 1.79,
-    "crest_db": 10.7,
-    "stereo_side_mid": 0.346,
-    "stereo_correlation": 0.786,
-    "spectral_centroid_hz": 2383,
-    "band_balance": { "low": 22, "mid": 37, "high": 41 }
-  },
+  "vocal": { "range_low": "A3", "range_high": "B5", "tessitura_low": "C#4", "tessitura_high": "B4", "median": "E4", "span_semitones": 26.0, "frames_analyzed": 1430, "confidence": "high" },
+  "mix": { "lufs": -8.1, "true_peak_db": 1.79, "crest_db": 10.7, "stereo_side_mid": 0.346, "stereo_correlation": 0.786, "spectral_centroid_hz": 2383, "band_balance": { "low": 22, "mid": 37, "high": 41 } },
   "pitch_paragraph": "The choruses detonate — they jump to near-maximum from verses sitting well below, and they're short and concentrated at around fourteen seconds each, so the hook hits hard and gets out. The last one arrives out of a deep clear-out at 2:14 where the arrangement empties almost completely, which is as clean a dance-break slot as you'll find. The topline reaches from A3 all the way to B5 while working mostly between C♯4 and B4, so the body of the line divides easily across members and the top end is there for whoever earns it. Warm and mid-forward rather than bright, with weight in the low end.",
-  "admin": {
-    "reviewed": false,
-    "reviewed_by": null,
-    "reviewed_at": null,
-    "edited_fields": []
-  },
-  "_promoted": {
-    "tempo_bpm": 136,
-    "key_display": "F♯ minor",
-    "time_to_hook_sec": 35.9,
-    "vocal_range_low_midi": 57,
-    "vocal_range_high_midi": 83,
-    "analysis_status": "complete"
-  },
+  "admin": { "reviewed": false, "reviewed_by": null, "reviewed_at": null, "edited_fields": [] },
+  "_promoted": { "tempo_bpm": 136, "key_display": "F♯ minor", "time_to_hook_sec": 35.9, "vocal_range_low_midi": 57, "vocal_range_high_midi": 83, "analysis_status": "complete" },
   "title": "That Juice"
 }

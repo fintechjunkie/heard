@@ -1,24 +1,10 @@
 {
-  "version": 2,
+  "version": 3,
   "analyzed_at": "2026-09-07T02:22:38Z",
-  "engine_version": "1.1.0",
-  "source_file": {
-    "sample_rate": 44100,
-    "channels": 2,
-    "bit_depth": null,
-    "duration_sec": 183.96,
-    "format": "MP3",
-    "quality_flags": ["lossy_source", "clipping"]
-  },
+  "engine_version": "1.2.0",
+  "source_file": { "sample_rate": 44100, "channels": 2, "bit_depth": null, "duration_sec": 183.96, "format": "MP3", "quality_flags": ["lossy_source", "clipping"] },
   "tempo": { "bpm": 123, "alt_bpm": null, "confidence": "clear" },
-  "key": {
-    "root": "G",
-    "mode": "minor",
-    "display": "G minor",
-    "runner_up": "A♯ major",
-    "margin": 0.244,
-    "confidence": "clear"
-  },
+  "key": { "root": "G", "mode": "minor", "display": "G minor", "runner_up": "A♯ major", "margin": 0.244, "confidence": "clear" },
   "energy_curve": [
     0.239, 0.442, 0.442, 0.443, 0.462, 0.633, 0.752, 0.695, 0.685, 0.691,
     0.676, 0.723, 0.694, 0.718, 0.711, 0.705, 0.697, 0.681, 0.693, 0.655,
@@ -40,51 +26,22 @@
   "sections": [
     { "start": 0.0, "end": 5.7, "label": "intro", "energy": 0.44, "stability": 3 },
     { "start": 5.7, "end": 21.3, "label": "verse", "energy": 0.7, "stability": 3 },
-    { "start": 21.3, "end": 36.1, "label": "section", "energy": 0.69, "stability": 3 },
+    { "start": 21.3, "end": 36.1, "label": "pre", "energy": 0.7, "stability": 3 },
     { "start": 36.1, "end": 67.9, "label": "chorus", "energy": 0.85, "stability": 3 },
     { "start": 67.9, "end": 83.3, "label": "verse", "energy": 0.71, "stability": 3 },
     { "start": 83.3, "end": 94.6, "label": "section", "energy": 0.73, "stability": 3 },
-    { "start": 94.6, "end": 129.8, "label": "chorus", "energy": 0.87, "stability": 3 },
+    { "start": 94.6, "end": 129.8, "label": "chorus", "energy": 0.86, "stability": 3 },
     { "start": 129.8, "end": 143.1, "label": "pre", "energy": 0.46, "stability": 3 },
     { "start": 143.1, "end": 176.1, "label": "chorus", "energy": 0.88, "stability": 3 },
-    { "start": 176.1, "end": 184.0, "label": "outro", "energy": 0.04, "stability": 3 }
+    { "start": 176.1, "end": 183.9, "label": "outro", "energy": 0.04, "stability": 3 }
   ],
   "structure_confidence": "high",
-  "structure_diagnostics": { "chorus_separation": 0.167, "flags": [] },
   "time_to_hook_sec": 36.1,
-  "vocal": {
-    "range_low": "A#3",
-    "range_high": "A5",
-    "tessitura_low": "D4",
-    "tessitura_high": "D5",
-    "median": "G4",
-    "span_semitones": 23.2,
-    "frames_analyzed": 1785,
-    "confidence": "high"
-  },
-  "mix": {
-    "lufs": -8.5,
-    "true_peak_db": 0.87,
-    "crest_db": 13.2,
-    "stereo_side_mid": 0.518,
-    "stereo_correlation": 0.576,
-    "spectral_centroid_hz": 3209,
-    "band_balance": { "low": 14, "mid": 34, "high": 52 }
-  },
-  "pitch_paragraph": null,
-  "admin": {
-    "reviewed": false,
-    "reviewed_by": null,
-    "reviewed_at": null,
-    "edited_fields": []
-  },
-  "_promoted": {
-    "tempo_bpm": 123,
-    "key_display": "G minor",
-    "time_to_hook_sec": 36.1,
-    "vocal_range_low_midi": 58,
-    "vocal_range_high_midi": 81,
-    "analysis_status": "complete"
-  },
-  "title": "Telepathic"
+  "vocal": { "range_low": "A#3", "range_high": "A5", "tessitura_low": "D4", "tessitura_high": "D5", "median": "G4", "span_semitones": 23.2, "frames_analyzed": 1785, "confidence": "high" },
+  "mix": { "lufs": -8.5, "true_peak_db": 0.87, "crest_db": 13.2, "stereo_side_mid": 0.518, "stereo_correlation": 0.576, "spectral_centroid_hz": 3209, "band_balance": { "low": 14, "mid": 34, "high": 52 } },
+  "pitch_paragraph": "Three choruses that each land a little bigger than the one before, and a genuine floor-drop at 2:10 that empties the arrangement out before the last one arrives — the record is built to escalate rather than just repeat. The topline asks for something: it works across a full octave from D4 to D5 and reaches A5, so this is a lead-vocal record with real estate for a main voice rather than a line that spreads evenly across a group. The stereo field is wide and genuinely open, and the mix keeps more dynamic headroom than most finished masters, so there's room to sit a new vocal in without fighting the track. Bright and light on the low end, with the 2:10 clear-out an obvious dance-break slot.",
+  "admin": { "reviewed": false, "reviewed_by": null, "reviewed_at": null, "edited_fields": [] },
+  "_promoted": { "tempo_bpm": 123, "key_display": "G minor", "time_to_hook_sec": 36.1, "vocal_range_low_midi": 58, "vocal_range_high_midi": 81, "analysis_status": "complete" },
+  "title": "Telepathic",
+  "structure_diagnostics": { "chorus_separation": 0.163, "flags": [], "method": "energy" }
 }

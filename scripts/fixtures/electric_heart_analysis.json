@@ -1,24 +1,10 @@
 {
-  "version": 1,
+  "version": 3,
   "analyzed_at": "2026-09-06T00:00:00Z",
-  "engine_version": "1.0.0",
-  "source_file": {
-    "sample_rate": 44100,
-    "channels": 2,
-    "bit_depth": 24,
-    "duration_sec": 202.0,
-    "format": "WAV",
-    "quality_flag": null
-  },
+  "engine_version": "1.2.0",
+  "source_file": { "sample_rate": 44100, "channels": 2, "bit_depth": 24, "duration_sec": 202.0, "format": "WAV", "quality_flags": [] },
   "tempo": { "bpm": 117, "alt_bpm": null, "confidence": "clear" },
-  "key": {
-    "root": "F",
-    "mode": "major",
-    "display": "F major",
-    "runner_up": "C major",
-    "margin": 0.104,
-    "confidence": "clear"
-  },
+  "key": { "root": "F", "mode": "major", "display": "F major", "runner_up": "C major", "margin": 0.104, "confidence": "clear" },
   "energy_curve": [
     0.172, 0.324, 0.362, 0.325, 0.299, 0.357, 0.594, 0.876, 0.902, 0.769,
     0.802, 0.876, 0.824, 0.814, 0.849, 0.858, 0.872, 0.82, 0.765, 0.787,
@@ -38,7 +24,7 @@
     0.909, 0.89, 0.894, 0.89, 0.916, 0.888, 0.905, 0.742, 0.182, 0.002
   ],
   "sections": [
-    { "start": 0, "end": 6.8, "label": "intro", "energy": 0.32, "stability": 3 },
+    { "start": 0.0, "end": 6.8, "label": "intro", "energy": 0.32, "stability": 3 },
     { "start": 6.8, "end": 40.8, "label": "verse", "energy": 0.81, "stability": 3 },
     { "start": 40.8, "end": 47.5, "label": "pre", "energy": 0.44, "stability": 3 },
     { "start": 47.5, "end": 88.0, "label": "chorus", "energy": 0.86, "stability": 3 },
@@ -46,44 +32,16 @@
     { "start": 104.4, "end": 111.5, "label": "pre", "energy": 0.44, "stability": 3 },
     { "start": 111.5, "end": 152.0, "label": "chorus", "energy": 0.84, "stability": 3 },
     { "start": 152.0, "end": 168.0, "label": "bridge", "energy": 0.65, "stability": 3 },
-    { "start": 168.0, "end": 175.1, "label": "pre", "energy": 0.55, "stability": 3 },
-    { "start": 175.1, "end": 200.0, "label": "chorus", "energy": 0.88, "stability": 3 },
-    { "start": 200.0, "end": 202.0, "label": "outro", "energy": 0.14, "stability": 3 }
+    { "start": 168.0, "end": 175.1, "label": "bridge", "energy": 0.55, "stability": 3 },
+    { "start": 175.1, "end": 202.0, "label": "verse", "energy": 0.83, "stability": 3 }
   ],
-  "structure_confidence": "high",
+  "structure_confidence": "review",
   "time_to_hook_sec": 47.5,
-  "vocal": {
-    "range_low": "G3",
-    "range_high": "A5",
-    "tessitura_low": "E4",
-    "tessitura_high": "A#4",
-    "median": "A4",
-    "span_semitones": 26.3,
-    "frames_analyzed": 2838,
-    "confidence": "high"
-  },
-  "mix": {
-    "lufs": -6.5,
-    "true_peak_db": -0.1,
-    "crest_db": 9.1,
-    "stereo_side_mid": 0.375,
-    "stereo_correlation": 0.754,
-    "spectral_centroid_hz": 2854,
-    "band_balance": { "low": 21, "mid": 33, "high": 46 }
-  },
-  "pitch_paragraph": "Built on contrast — it runs at full energy for the first thirty-four seconds, cuts out hard, and lets the chorus hit from the drop, a move it repeats before all three. The topline is demanding: it lives around A4 through the body and reaches A5, so it wants a singer with genuine top end rather than one who'll ask to take it down a step. The chorus doesn't land until 0:48, which reads as a deliberate build and is also the obvious thing to tighten for a single edit. Warmer and wider than most current K-pop masters, with real room in the stereo field for stacks and ad-libs.",
-  "admin": {
-    "reviewed": false,
-    "reviewed_by": null,
-    "reviewed_at": null,
-    "edited_fields": []
-  },
-  "_promoted": {
-    "tempo_bpm": 117,
-    "key_display": "F major",
-    "time_to_hook_sec": 47.5,
-    "vocal_range_low_midi": 55,
-    "vocal_range_high_midi": 81,
-    "analysis_status": "complete"
-  }
+  "vocal": { "range_low": "G3", "range_high": "A5", "tessitura_low": "E4", "tessitura_high": "A#4", "median": "A4", "span_semitones": 26.3, "frames_analyzed": 2838, "confidence": "high" },
+  "mix": { "lufs": -6.5, "true_peak_db": -0.1, "crest_db": 9.1, "stereo_side_mid": 0.375, "stereo_correlation": 0.754, "spectral_centroid_hz": 2854, "band_balance": { "low": 21, "mid": 33, "high": 46 } },
+  "pitch_paragraph": "Built entirely on contrast — it runs at full energy for thirty-four seconds, cuts out hard, and lets the chorus detonate from the drop, then earns that same moment twice more. The chorus is a genuine showcase: it lives around A4 and reaches A5, handing a main vocal something to plant a flag on rather than a line to split evenly. Warm and wide, with real room in the stereo field for stacks and ad-libs. The long build makes the payoff land, and the drop before each return sits exactly where a dance break wants to be.",
+  "admin": { "reviewed": false, "reviewed_by": null, "reviewed_at": null, "edited_fields": [] },
+  "_promoted": { "tempo_bpm": 117, "key_display": "F major", "time_to_hook_sec": 47.5, "vocal_range_low_midi": 55, "vocal_range_high_midi": 81, "analysis_status": "complete" },
+  "title": "Electric Heart",
+  "structure_diagnostics": { "chorus_separation": 0.2, "flags": ["long_section_at_chorus_level"], "method": "energy" }
 }

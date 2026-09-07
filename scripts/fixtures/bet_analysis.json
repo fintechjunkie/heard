@@ -1,24 +1,10 @@
 {
-  "version": 1,
+  "version": 3,
   "analyzed_at": "2026-09-07T01:24:15Z",
-  "engine_version": "1.0.0",
-  "source_file": {
-    "sample_rate": 48000,
-    "channels": 2,
-    "bit_depth": 24,
-    "duration_sec": 162.0,
-    "format": "WAV",
-    "quality_flag": null
-  },
+  "engine_version": "1.2.0",
+  "source_file": { "sample_rate": 48000, "channels": 2, "bit_depth": 24, "duration_sec": 162.0, "format": "WAV", "quality_flags": [] },
   "tempo": { "bpm": 117, "alt_bpm": null, "confidence": "clear" },
-  "key": {
-    "root": "A#",
-    "mode": "minor",
-    "display": "A♯ minor",
-    "runner_up": "D♯ minor",
-    "margin": 0.096,
-    "confidence": "ambiguous"
-  },
+  "key": { "root": "A#", "mode": "minor", "display": "A♯ minor", "runner_up": "D♯ minor", "margin": 0.096, "confidence": "ambiguous" },
   "energy_curve": [
     0.22, 0.294, 0.305, 0.367, 0.371, 0.328, 0.281, 0.536, 0.72, 0.647,
     0.677, 0.709, 0.67, 0.677, 0.735, 0.835, 0.775, 0.681, 0.738, 0.826,
@@ -42,47 +28,19 @@
     { "start": 7.1, "end": 22.0, "label": "verse", "energy": 0.72, "stability": 3 },
     { "start": 22.0, "end": 31.5, "label": "section", "energy": 0.74, "stability": 3 },
     { "start": 31.5, "end": 56.1, "label": "chorus", "energy": 0.87, "stability": 3 },
-    { "start": 56.1, "end": 67.2, "label": "verse", "energy": 0.73, "stability": 3 },
+    { "start": 56.1, "end": 67.2, "label": "verse", "energy": 0.69, "stability": 3 },
     { "start": 67.2, "end": 79.8, "label": "section", "energy": 0.75, "stability": 3 },
     { "start": 79.8, "end": 112.0, "label": "chorus", "energy": 0.88, "stability": 3 },
-    { "start": 112.0, "end": 130.0, "label": "bridge", "energy": 0.6, "stability": 3 },
-    { "start": 130.0, "end": 162.0, "label": "chorus", "energy": 0.88, "stability": 3 }
+    { "start": 112.0, "end": 130.0, "label": "bridge", "energy": 0.59, "stability": 3 },
+    { "start": 130.0, "end": 162.0, "label": "section", "energy": 0.79, "stability": 3 }
   ],
-  "structure_confidence": "high",
+  "structure_confidence": "review",
   "time_to_hook_sec": 31.5,
-  "vocal": {
-    "range_low": "A#3",
-    "range_high": "E5",
-    "tessitura_low": "D4",
-    "tessitura_high": "G#4",
-    "median": "F4",
-    "span_semitones": 17.9,
-    "frames_analyzed": 2001,
-    "confidence": "high"
-  },
-  "mix": {
-    "lufs": -8.0,
-    "true_peak_db": -0.1,
-    "crest_db": 10.2,
-    "stereo_side_mid": 0.288,
-    "stereo_correlation": 0.846,
-    "spectral_centroid_hz": 2888,
-    "band_balance": { "low": 21, "mid": 32, "high": 47 }
-  },
-  "pitch_paragraph": null,
-  "admin": {
-    "reviewed": false,
-    "reviewed_by": null,
-    "reviewed_at": null,
-    "edited_fields": []
-  },
-  "_promoted": {
-    "tempo_bpm": 117,
-    "key_display": "A♯ minor",
-    "time_to_hook_sec": 31.5,
-    "vocal_range_low_midi": 58,
-    "vocal_range_high_midi": 76,
-    "analysis_status": "complete"
-  },
-  "title": "BET"
+  "vocal": { "range_low": "A#3", "range_high": "E5", "tessitura_low": "D4", "tessitura_high": "G#4", "median": "F4", "span_semitones": 17.9, "frames_analyzed": 2001, "confidence": "high" },
+  "mix": { "lufs": -8.0, "true_peak_db": -0.1, "crest_db": 10.2, "stereo_side_mid": 0.288, "stereo_correlation": 0.846, "spectral_centroid_hz": 2888, "band_balance": { "low": 21, "mid": 32, "high": 47 } },
+  "pitch_paragraph": "Wastes nothing — the chorus is in your hands at 0:31 and the whole record is done in 2:42, ending on the hook at full height with no wind-down. The topline is inviting, working between D4 and G♯4 and only touching E5, which makes it straightforward to distribute across members and fast to demo. Both pre-choruses cut out hard on the final beat before the chorus, a device the record uses twice and lands both times. Tight, fast, and built for repeat plays.",
+  "admin": { "reviewed": false, "reviewed_by": null, "reviewed_at": null, "edited_fields": [] },
+  "_promoted": { "tempo_bpm": 117, "key_display": "A♯ minor", "time_to_hook_sec": 31.5, "vocal_range_low_midi": 58, "vocal_range_high_midi": 76, "analysis_status": "complete" },
+  "title": "BET",
+  "structure_diagnostics": { "chorus_separation": 0.145, "flags": ["weak_chorus_separation"], "method": "energy" }
 }

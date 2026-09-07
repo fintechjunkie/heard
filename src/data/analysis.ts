@@ -90,6 +90,18 @@ export interface StructureDiagnostics {
    *  mean the labelling had little to go on. */
   chorus_separation?: number;
   flags?: string[];
+  /** How the sections were labelled. 'energy' is the primary path; when the
+   *  energy profile is too flat to separate a chorus the engine falls back to
+   *  'repetition', which finds repeats but cannot tell which repeat is the
+   *  hook — those labels deserve a closer look. */
+  method?: 'energy' | 'repetition' | string;
+  /** Similarity threshold used by the repetition path. */
+  threshold?: number;
+  chorus_instances?: number;
+  /** Fraction of the track the chorus family covers. Above ~0.6 the label has
+   *  stopped meaning much. */
+  chorus_coverage?: number;
+  fallback_reason?: string;
 }
 
 export interface SongAnalysis {
@@ -263,6 +275,23 @@ export function validateAnalysis(input: unknown): ValidationResult {
   }
   for (const flag of diag?.flags || []) {
     warnings.push(`Structure flag: ${flag.replace(/_/g, ' ')}`);
+  }
+  if (diag?.method === 'repetition') {
+    warnings.push(
+      'Sections were labelled by repetition, not energy'
+      + (diag.fallback_reason ? ` (${diag.fallback_reason.replace(/_/g, ' ')})` : '')
+      + ' — the engine found repeats but cannot tell which one is the hook'
+    );
+  }
+  if (diag?.chorus_coverage != null && diag.chorus_coverage > 0.6) {
+    warnings.push(
+      `Chorus covers ${Math.round(diag.chorus_coverage * 100)}% of the track — `
+      + 'too much of the song is labelled chorus for the label to mean anything'
+    );
+  }
+  if (Array.isArray(a.sections) && a.sections.length > 0
+      && !a.sections.some(sec => sec.label === 'chorus')) {
+    warnings.push('No chorus was identified — there is no time to hook to show');
   }
   if (a.vocal?.confidence === 'low') {
     warnings.push(`Vocal confidence is low (${a.vocal.frames_analyzed} frames analyzed)`);

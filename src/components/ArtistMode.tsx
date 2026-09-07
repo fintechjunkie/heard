@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef, useLayoutEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useStore } from '@/lib/store';
 import { usePlayer, formatTime } from '@/lib/player';
 import PlayerVisualizer, { VizMode } from './PlayerVisualizer';
@@ -243,7 +243,7 @@ export default function ArtistMode({ open, onClose, onOpenDetail, inline }: Arti
                   </button>
                 )}
                 <div className="flex-1 min-w-0">
-                  <FitTitle text={song.title} max={42} min={20} />
+                  <FitTitle text={song.title} max={44} min={24} />
                 </div>
                 {queuedSongs.length > 1 && (
                   <button onClick={goNext} aria-label="Next song"
@@ -542,80 +542,38 @@ export default function ArtistMode({ open, onClose, onOpenDetail, inline }: Arti
 }
 
 /**
- * A song title on one line, sized to fill the space it has.
+ * A song title on one line, sized by estimate rather than measurement.
  *
- * Measures the rendered text rather than counting characters, since "MMM" and
- * "III" are nothing alike in Bebas. Two details matter:
+ * Two attempts at measuring the rendered text both under-sized badly in
+ * practice, so this drops the DOM entirely and computes from the string.
+ * Bebas Neue is a condensed uppercase face whose glyphs average roughly 0.37em
+ * of advance; multiplying that by the character count gives a width estimate
+ * good enough to pick a size from, with no async font loading, no
+ * ResizeObserver and nothing to go wrong at runtime.
  *
- *  - Bebas loads asynchronously with display=swap, so a first measurement can
- *    land against the fallback face, which is far wider than this condensed
- *    one. Measuring then produced titles shrunk to a fraction of the room they
- *    actually had. It re-measures once fonts are ready.
- *  - It grows as well as shrinks: the size is recomputed from `max` every
- *    time, so a short title never inherits a small size from a long one.
+ * The estimate is deliberately generous — it is better for a long title to
+ * clip a character at the edge than for every title to be needlessly small.
  */
 function FitTitle({ text, max, min }: { text: string; max: number; min: number }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const [size, setSize] = useState(max);
+  // Room between the two 44px nav arrows inside the card, at phone width.
+  const AVAILABLE_PX = 205;
+  const AVG_ADVANCE_EM = 0.37;
+  const LETTER_SPACING = 1.5;
 
-  useLayoutEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    let cancelled = false;
-
-    const fit = () => {
-      if (cancelled || !el) return;
-      const available = el.clientWidth;
-      if (!available) return;
-
-      el.style.fontSize = `${max}px`;
-      const needed = el.scrollWidth;
-      const next = needed <= available
-        ? max
-        : Math.max(min, Math.floor(max * (available / needed)));
-
-      el.style.fontSize = `${next}px`;
-      // One correction pass: the ratio is a linear estimate and letter-spacing
-      // does not scale with it, so it can land a pixel over.
-      let settled = next;
-      for (let i = 0; i < 3 && settled > min && el.scrollWidth > available; i++) {
-        settled -= 1;
-        el.style.fontSize = `${settled}px`;
-      }
-      el.style.fontSize = '';
-      setSize(settled);
-    };
-
-    fit();
-    const ro = new ResizeObserver(fit);
-    ro.observe(el);
-
-    // document.fonts.ready resolves when the loads in flight *at that moment*
-    // finish, which can be before Bebas has even been requested — so waiting
-    // on it alone left the measurement made against the fallback face, which
-    // is far wider than this condensed one. Ask for the face by name instead:
-    // that promise resolves when this font is genuinely usable.
-    if (typeof document !== 'undefined' && document.fonts) {
-      document.fonts.load(`${max}px 'Bebas Neue'`).then(() => {
-        if (!cancelled) requestAnimationFrame(fit);
-      }).catch(() => {});
-      document.fonts.ready.then(() => {
-        if (!cancelled) requestAnimationFrame(fit);
-      }).catch(() => {});
-    }
-
-    return () => { cancelled = true; ro.disconnect(); };
-  }, [text, max, min]);
+  const chars = Math.max(1, text.trim().length);
+  const estimated = Math.floor(
+    (AVAILABLE_PX - chars * LETTER_SPACING) / (chars * AVG_ADVANCE_EM)
+  );
+  const size = Math.max(min, Math.min(max, estimated));
 
   return (
     <div
-      ref={ref}
       className="leading-[1.05] whitespace-nowrap overflow-hidden"
       style={{
         fontFamily: "'Bebas Neue', sans-serif",
         color: 'white',
         fontSize: size,
-        letterSpacing: size >= 30 ? 2 : 1,
+        letterSpacing: LETTER_SPACING,
       }}
     >
       {text}

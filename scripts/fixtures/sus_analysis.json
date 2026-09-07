@@ -1,24 +1,10 @@
 {
-  "version": 1,
+  "version": 3,
   "analyzed_at": "2026-09-07T02:06:05Z",
-  "engine_version": "1.0.0",
-  "source_file": {
-    "sample_rate": 44100,
-    "channels": 2,
-    "bit_depth": null,
-    "duration_sec": 161.12,
-    "format": "MP3",
-    "quality_flag": null
-  },
+  "engine_version": "1.2.0",
+  "source_file": { "sample_rate": 44100, "channels": 2, "bit_depth": null, "duration_sec": 161.12, "format": "MP3", "quality_flags": ["lossy_source", "clipping"] },
   "tempo": { "bpm": 123, "alt_bpm": null, "confidence": "clear" },
-  "key": {
-    "root": "E",
-    "mode": "minor",
-    "display": "E minor",
-    "runner_up": "E major",
-    "margin": 0.14,
-    "confidence": "clear"
-  },
+  "key": { "root": "E", "mode": "minor", "display": "E minor", "runner_up": "E major", "margin": 0.14, "confidence": "clear" },
   "energy_curve": [
     0.267, 0.477, 0.474, 0.476, 0.503, 0.694, 0.603, 0.394, 0.57, 0.766,
     0.743, 0.721, 0.725, 0.719, 0.717, 0.724, 0.761, 0.783, 0.785, 0.786,
@@ -38,51 +24,31 @@
     0.284, 0.027, 0.01, 0.004, 0.001, 0.001, 0.0, 0.0, 0.0, 0.0
   ],
   "sections": [
-    { "start": 0.0, "end": 8.2, "label": "pre", "energy": 0.51, "stability": 3 },
-    { "start": 8.2, "end": 40.1, "label": "chorus", "energy": 0.75, "stability": 3 },
-    { "start": 40.1, "end": 47.1, "label": "section", "energy": 0.73, "stability": 3 },
-    { "start": 47.1, "end": 55.8, "label": "section", "energy": 0.74, "stability": 3 },
-    { "start": 55.8, "end": 71.9, "label": "verse", "energy": 0.72, "stability": 3 },
-    { "start": 71.9, "end": 103.6, "label": "chorus", "energy": 0.76, "stability": 3 },
+    { "start": 0.0, "end": 8.2, "label": "section", "energy": 0.51, "stability": 3 },
+    { "start": 8.2, "end": 40.1, "label": "verse", "energy": 0.75, "stability": 3 },
+    { "start": 40.1, "end": 47.1, "label": "section", "energy": 0.72, "stability": 3 },
+    { "start": 47.1, "end": 55.8, "label": "section", "energy": 0.75, "stability": 3 },
+    { "start": 55.8, "end": 71.9, "label": "chorus", "energy": 0.72, "stability": 3 },
+    { "start": 71.9, "end": 103.6, "label": "verse", "energy": 0.76, "stability": 3 },
     { "start": 103.6, "end": 119.3, "label": "section", "energy": 0.74, "stability": 3 },
-    { "start": 119.3, "end": 151.5, "label": "verse", "energy": 0.74, "stability": 3 },
+    { "start": 119.3, "end": 151.5, "label": "chorus", "energy": 0.74, "stability": 3 },
     { "start": 151.5, "end": 161.1, "label": "outro", "energy": 0.04, "stability": 3 }
   ],
-  "structure_confidence": "high",
-  "time_to_hook_sec": 8.2,
-  "vocal": {
-    "range_low": "E3",
-    "range_high": "F5",
-    "tessitura_low": "G#3",
-    "tessitura_high": "D4",
-    "median": "A#3",
-    "span_semitones": 25.4,
-    "frames_analyzed": 1595,
-    "confidence": "high"
-  },
-  "mix": {
-    "lufs": -5.2,
-    "true_peak_db": 2.46,
-    "crest_db": 12.1,
-    "stereo_side_mid": 0.561,
-    "stereo_correlation": 0.52,
-    "spectral_centroid_hz": 3108,
-    "band_balance": { "low": 14, "mid": 35, "high": 51 }
-  },
-  "pitch_paragraph": null,
-  "admin": {
-    "reviewed": false,
-    "reviewed_by": null,
-    "reviewed_at": null,
-    "edited_fields": []
-  },
-  "_promoted": {
-    "tempo_bpm": 123,
-    "key_display": "E minor",
-    "time_to_hook_sec": 8.2,
-    "vocal_range_low_midi": 52,
-    "vocal_range_high_midi": 77,
-    "analysis_status": "complete"
-  },
-  "title": "Sus"
+  "structure_confidence": "review",
+  "time_to_hook_sec": 55.8,
+  "vocal": { "range_low": "E3", "range_high": "F5", "tessitura_low": "G#3", "tessitura_high": "D4", "median": "A#3", "span_semitones": 25.4, "frames_analyzed": 1595, "confidence": "high" },
+  "mix": { "lufs": -5.2, "true_peak_db": 2.46, "crest_db": 12.1, "stereo_side_mid": 0.561, "stereo_correlation": 0.52, "spectral_centroid_hz": 3108, "band_balance": { "low": 14, "mid": 35, "high": 51 } },
+  "pitch_paragraph": "Runs at one relentless level from top to bottom with no let-up in it, which makes it genuinely hypnotic — a record that holds a room rather than building toward something. The topline sits low, living between G♯3 and D4 with a reach up to F5 when it wants one, so it plays as attitude and delivery rather than range, and the high parts stay a deliberate choice instead of a requirement. The stereo field is wide open, which leaves room for layers and ad-libs without anything having to move out of the way. Bright and light on the bottom end, so it sits forward on a phone speaker.",
+  "admin": { "reviewed": false, "reviewed_by": null, "reviewed_at": null, "edited_fields": [] },
+  "_promoted": { "tempo_bpm": 123, "key_display": "E minor", "time_to_hook_sec": 55.8, "vocal_range_low_midi": 52, "vocal_range_high_midi": 77, "analysis_status": "complete" },
+  "title": "Sus",
+  "structure_diagnostics": {
+    "method": "repetition",
+    "threshold": 1.95,
+    "chorus_instances": 2,
+    "chorus_coverage": 0.3,
+    "flags": ["labeled_without_energy_signal"],
+    "chorus_separation": 0.025,
+    "fallback_reason": "flat_energy_profile"
+  }
 }

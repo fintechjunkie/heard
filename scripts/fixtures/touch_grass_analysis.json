@@ -1,24 +1,10 @@
 {
-  "version": 2,
+  "version": 3,
   "analyzed_at": "2026-09-07T02:33:22Z",
-  "engine_version": "1.1.0",
-  "source_file": {
-    "sample_rate": 44100,
-    "channels": 2,
-    "bit_depth": null,
-    "duration_sec": 200.7,
-    "format": "MP3",
-    "quality_flags": ["lossy_source", "clipping"]
-  },
+  "engine_version": "1.2.0",
+  "source_file": { "sample_rate": 44100, "channels": 2, "bit_depth": null, "duration_sec": 200.7, "format": "MP3", "quality_flags": ["lossy_source", "clipping"] },
   "tempo": { "bpm": 123, "alt_bpm": null, "confidence": "clear" },
-  "key": {
-    "root": "C",
-    "mode": "major",
-    "display": "C major",
-    "runner_up": "F major",
-    "margin": 0.017,
-    "confidence": "ambiguous"
-  },
+  "key": { "root": "C", "mode": "major", "display": "C major", "runner_up": "F major", "margin": 0.017, "confidence": "ambiguous" },
   "energy_curve": [
     0.005, 0.047, 0.253, 0.496, 0.492, 0.485, 0.502, 0.536, 0.586, 0.694,
     0.82, 0.812, 0.787, 0.806, 0.847, 0.849, 0.834, 0.793, 0.78, 0.788,
@@ -38,7 +24,7 @@
     0.896, 0.951, 0.948, 0.938, 0.954, 0.629, 0.035, 0.008, 0.003, 0.001
   ],
   "sections": [
-    { "start": 0.0, "end": 11.3, "label": "section", "energy": 0.53, "stability": 3 },
+    { "start": 0.0, "end": 11.3, "label": "intro", "energy": 0.41, "stability": 3 },
     { "start": 11.3, "end": 44.2, "label": "verse", "energy": 0.8, "stability": 3 },
     { "start": 44.2, "end": 57.6, "label": "pre", "energy": 0.51, "stability": 3 },
     { "start": 57.6, "end": 73.0, "label": "chorus", "energy": 0.92, "stability": 3 },
@@ -46,44 +32,15 @@
     { "start": 105.7, "end": 119.0, "label": "pre", "energy": 0.51, "stability": 3 },
     { "start": 119.0, "end": 149.8, "label": "chorus", "energy": 0.92, "stability": 3 },
     { "start": 149.8, "end": 165.2, "label": "bridge", "energy": 0.36, "stability": 3 },
-    { "start": 165.2, "end": 200.7, "label": "chorus", "energy": 0.93, "stability": 3 }
+    { "start": 165.2, "end": 200.7, "label": "section", "energy": 0.81, "stability": 3 }
   ],
   "structure_confidence": "high",
-  "structure_diagnostics": { "chorus_separation": 0.403, "flags": [] },
+  "structure_diagnostics": { "chorus_separation": 0.265, "flags": [], "method": "energy" },
   "time_to_hook_sec": 57.6,
-  "vocal": {
-    "range_low": "F3",
-    "range_high": "F5",
-    "tessitura_low": "C4",
-    "tessitura_high": "C5",
-    "median": "E4",
-    "span_semitones": 24.2,
-    "frames_analyzed": 1882,
-    "confidence": "high"
-  },
-  "mix": {
-    "lufs": -5.6,
-    "true_peak_db": 2.85,
-    "crest_db": 11.4,
-    "stereo_side_mid": 0.316,
-    "stereo_correlation": 0.819,
-    "spectral_centroid_hz": 3223,
-    "band_balance": { "low": 14, "mid": 35, "high": 51 }
-  },
+  "vocal": { "range_low": "F3", "range_high": "F5", "tessitura_low": "C4", "tessitura_high": "C5", "median": "E4", "span_semitones": 24.2, "frames_analyzed": 1882, "confidence": "high" },
+  "mix": { "lufs": -5.6, "true_peak_db": 2.85, "crest_db": 11.4, "stereo_side_mid": 0.316, "stereo_correlation": 0.819, "spectral_centroid_hz": 3223, "band_balance": { "low": 14, "mid": 35, "high": 51 } },
   "pitch_paragraph": "A record with a real build in it — the pre-choruses pull back and hold there for a full thirteen seconds before each chorus arrives at near-maximum, so the hook lands as a genuine release rather than just the next section. The final chorus runs thirty-five seconds straight to the end with no wind-down, coming out of a bridge that drops the floor to a third of full height. The topline works across a full octave from C4 to C5 and reaches F5, with a low of F3, which gives a natural split between a comfortable lower part and a lead that can sit up top. Bright, light on the bottom, and it sits forward on a phone speaker.",
-  "admin": {
-    "reviewed": false,
-    "reviewed_by": null,
-    "reviewed_at": null,
-    "edited_fields": []
-  },
-  "_promoted": {
-    "tempo_bpm": 123,
-    "key_display": "C major",
-    "time_to_hook_sec": 57.6,
-    "vocal_range_low_midi": 53,
-    "vocal_range_high_midi": 77,
-    "analysis_status": "complete"
-  },
+  "admin": { "reviewed": false, "reviewed_by": null, "reviewed_at": null, "edited_fields": [] },
+  "_promoted": { "tempo_bpm": 123, "key_display": "C major", "time_to_hook_sec": 57.6, "vocal_range_low_midi": 53, "vocal_range_high_midi": 77, "analysis_status": "complete" },
   "title": "Touch Grass"
 }

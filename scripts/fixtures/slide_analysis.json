@@ -1,24 +1,10 @@
 {
-  "version": 1,
+  "version": 3,
   "analyzed_at": "2026-09-06T00:00:00Z",
-  "engine_version": "1.0.0",
-  "source_file": {
-    "sample_rate": 44100,
-    "channels": 2,
-    "bit_depth": 24,
-    "duration_sec": 187.27,
-    "format": "WAVEX",
-    "quality_flag": null
-  },
+  "engine_version": "1.2.0",
+  "source_file": { "sample_rate": 44100, "channels": 2, "bit_depth": 24, "duration_sec": 187.27, "format": "WAVEX", "quality_flags": [] },
   "tempo": { "bpm": 99, "alt_bpm": null, "confidence": "clear" },
-  "key": {
-    "root": "F#",
-    "mode": "minor",
-    "display": "F♯ minor",
-    "runner_up": "F♯ major",
-    "margin": 0.117,
-    "confidence": "clear"
-  },
+  "key": { "root": "F#", "mode": "minor", "display": "F♯ minor", "runner_up": "F♯ major", "margin": 0.117, "confidence": "clear" },
   "energy_curve": [
     0.08, 0.191, 0.191, 0.189, 0.225, 0.241, 0.281, 0.351, 0.637, 0.98,
     0.772, 0.877, 0.78, 0.887, 0.786, 0.889, 0.811, 0.908, 0.776, 0.836,
@@ -38,52 +24,25 @@
     0.802, 0.857, 0.829, 0.811, 0.824, 0.289, 0.026, 0.011, 0.005, 0.001
   ],
   "sections": [
-    { "start": 0, "end": 9.6, "label": "intro", "energy": 0.26, "stability": 3 },
+    { "start": 0.0, "end": 9.6, "label": "intro", "energy": 0.26, "stability": 3 },
     { "start": 9.6, "end": 28.5, "label": "verse", "energy": 0.78, "stability": 3 },
     { "start": 28.5, "end": 37.9, "label": "pre", "energy": 0.6, "stability": 3 },
     { "start": 37.9, "end": 67.2, "label": "chorus", "energy": 0.86, "stability": 3 },
     { "start": 67.2, "end": 75.0, "label": "section", "energy": 0.4, "stability": 3 },
-    { "start": 75.0, "end": 86.4, "label": "verse", "energy": 0.6, "stability": 3 },
-    { "start": 86.4, "end": 95.5, "label": "pre", "energy": 0.6, "stability": 3 },
+    { "start": 75.0, "end": 85.1, "label": "verse", "energy": 0.62, "stability": 3 },
+    { "start": 85.1, "end": 95.5, "label": "pre", "energy": 0.58, "stability": 3 },
     { "start": 95.5, "end": 124.7, "label": "chorus", "energy": 0.85, "stability": 3 },
     { "start": 124.7, "end": 144.0, "label": "bridge", "energy": 0.37, "stability": 3 },
     { "start": 144.0, "end": 182.3, "label": "chorus", "energy": 0.85, "stability": 3 },
-    { "start": 182.3, "end": 187.27, "label": "outro", "energy": 0.05, "stability": 3 }
+    { "start": 182.3, "end": 187.3, "label": "outro", "energy": 0.05, "stability": 3 }
   ],
   "structure_confidence": "high",
   "time_to_hook_sec": 37.9,
-  "vocal": {
-    "range_low": "G3",
-    "range_high": "E5",
-    "tessitura_low": "A#3",
-    "tessitura_high": "B4",
-    "median": "E4",
-    "span_semitones": 21.1,
-    "frames_analyzed": 1671,
-    "confidence": "high"
-  },
-  "mix": {
-    "lufs": -6.8,
-    "true_peak_db": 0.0,
-    "crest_db": 8.5,
-    "stereo_side_mid": 0.275,
-    "stereo_correlation": 0.858,
-    "spectral_centroid_hz": 3656,
-    "band_balance": { "low": 18, "mid": 28, "high": 55 }
-  },
-  "pitch_paragraph": "The track reaches full energy nine seconds in and holds there, so the interest lives in the topline rather than the arrangement — and the chorus doesn't land until 0:38, which is the first thing to look at for a single edit. The vocal is accommodating rather than demanding: it sits between A♯3 and B4 through the body and only reaches E5 at the top, so it suits a singer with presence in the middle of the range instead of one who needs the ceiling. All three choruses are near-identical, so any lift on the last one is a decision to be made in the room rather than something the demo already builds in. Bright and tightly centred, with the drop at 2:05 the only real dynamic event — that's the moment to produce around.",
-  "admin": {
-    "reviewed": false,
-    "reviewed_by": null,
-    "reviewed_at": null,
-    "edited_fields": []
-  },
-  "_promoted": {
-    "tempo_bpm": 99,
-    "key_display": "F♯ minor",
-    "time_to_hook_sec": 37.9,
-    "vocal_range_low_midi": 55,
-    "vocal_range_high_midi": 76,
-    "analysis_status": "complete"
-  }
+  "vocal": { "range_low": "G3", "range_high": "E5", "tessitura_low": "A#3", "tessitura_high": "B4", "median": "E4", "span_semitones": 21.1, "frames_analyzed": 1671, "confidence": "high" },
+  "mix": { "lufs": -6.8, "true_peak_db": 0.0, "crest_db": 8.5, "stereo_side_mid": 0.275, "stereo_correlation": 0.858, "spectral_centroid_hz": 3656, "band_balance": { "low": 18, "mid": 28, "high": 55 } },
+  "pitch_paragraph": "Locks into full energy nine seconds in and refuses to let go — a record that runs hot from the top and never asks the listener to wait for it. The topline is generous: it works between A♯3 and B4 and tops out at a comfortable E5, a compact enough span that it divides cleanly across a group with nobody straining for their part. All three choruses hit identically, which leaves a producer the whole final chorus as open canvas for a lift, a key change, or a stack. Bright and tightly centred, with a single dramatic drop at 2:05 sitting exactly where a dance break wants to be.",
+  "admin": { "reviewed": false, "reviewed_by": null, "reviewed_at": null, "edited_fields": [] },
+  "_promoted": { "tempo_bpm": 99, "key_display": "F♯ minor", "time_to_hook_sec": 37.9, "vocal_range_low_midi": 55, "vocal_range_high_midi": 76, "analysis_status": "complete" },
+  "title": "Slide",
+  "structure_diagnostics": { "chorus_separation": 0.263, "flags": [], "method": "energy" }
 }

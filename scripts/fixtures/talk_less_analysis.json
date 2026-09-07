@@ -1,24 +1,10 @@
 {
-  "version": 2,
+  "version": 3,
   "analyzed_at": "2026-09-07T02:20:40Z",
-  "engine_version": "1.1.0",
-  "source_file": {
-    "sample_rate": 44100,
-    "channels": 2,
-    "bit_depth": null,
-    "duration_sec": 197.51,
-    "format": "MP3",
-    "quality_flags": ["lossy_source", "clipping"]
-  },
+  "engine_version": "1.2.0",
+  "source_file": { "sample_rate": 44100, "channels": 2, "bit_depth": null, "duration_sec": 197.51, "format": "MP3", "quality_flags": ["lossy_source", "clipping"] },
   "tempo": { "bpm": 123, "alt_bpm": null, "confidence": "clear" },
-  "key": {
-    "root": "C",
-    "mode": "major",
-    "display": "C major",
-    "runner_up": "F major",
-    "margin": 0.013,
-    "confidence": "ambiguous"
-  },
+  "key": { "root": "C", "mode": "major", "display": "C major", "runner_up": "F major", "margin": 0.013, "confidence": "ambiguous" },
   "energy_curve": [
     0.07, 0.136, 0.141, 0.39, 0.847, 0.875, 0.82, 0.805, 0.85, 0.889,
     0.844, 0.878, 0.842, 0.813, 0.852, 0.869, 0.906, 0.902, 0.915, 0.899,
@@ -38,9 +24,9 @@
     0.949, 0.933, 0.906, 0.364, 0.021, 0.007, 0.002, 0.001, 0.0, 0.0
   ],
   "sections": [
-    { "start": 0.0, "end": 37.1, "label": "section", "energy": 0.85, "stability": 3 },
+    { "start": 0.0, "end": 37.1, "label": "section", "energy": 0.77, "stability": 3 },
     { "start": 37.1, "end": 44.9, "label": "verse", "energy": 0.68, "stability": 3 },
-    { "start": 44.9, "end": 50.2, "label": "pre", "energy": 0.65, "stability": 3 },
+    { "start": 44.9, "end": 50.2, "label": "pre", "energy": 0.62, "stability": 3 },
     { "start": 50.2, "end": 97.0, "label": "chorus", "energy": 0.9, "stability": 3 },
     { "start": 97.0, "end": 112.3, "label": "verse", "energy": 0.7, "stability": 3 },
     { "start": 112.3, "end": 143.2, "label": "chorus", "energy": 0.91, "stability": 3 },
@@ -48,45 +34,13 @@
     { "start": 158.7, "end": 189.7, "label": "chorus", "energy": 0.91, "stability": 3 },
     { "start": 189.7, "end": 197.5, "label": "outro", "energy": 0.04, "stability": 3 }
   ],
-  "structure_confidence": "review",
-  "structure_diagnostics": {
-    "chorus_separation": 0.207,
-    "flags": ["long_section_at_chorus_level"]
-  },
+  "structure_confidence": "high",
   "time_to_hook_sec": 50.2,
-  "vocal": {
-    "range_low": "G3",
-    "range_high": "A#5",
-    "tessitura_low": "D4",
-    "tessitura_high": "B4",
-    "median": "G4",
-    "span_semitones": 26.9,
-    "frames_analyzed": 1520,
-    "confidence": "high"
-  },
-  "mix": {
-    "lufs": -5.4,
-    "true_peak_db": 1.37,
-    "crest_db": 10.1,
-    "stereo_side_mid": 0.392,
-    "stereo_correlation": 0.734,
-    "spectral_centroid_hz": 3212,
-    "band_balance": { "low": 12, "mid": 35, "high": 53 }
-  },
-  "pitch_paragraph": null,
-  "admin": {
-    "reviewed": false,
-    "reviewed_by": null,
-    "reviewed_at": null,
-    "edited_fields": []
-  },
-  "_promoted": {
-    "tempo_bpm": 123,
-    "key_display": "C major",
-    "time_to_hook_sec": 50.2,
-    "vocal_range_low_midi": 55,
-    "vocal_range_high_midi": 82,
-    "analysis_status": "complete"
-  },
-  "title": "Talk Less"
+  "vocal": { "range_low": "G3", "range_high": "A#5", "tessitura_low": "D4", "tessitura_high": "B4", "median": "G4", "span_semitones": 26.9, "frames_analyzed": 1520, "confidence": "high" },
+  "mix": { "lufs": -5.4, "true_peak_db": 1.37, "crest_db": 10.1, "stereo_side_mid": 0.392, "stereo_correlation": 0.734, "spectral_centroid_hz": 3212, "band_balance": { "low": 12, "mid": 35, "high": 53 } },
+  "pitch_paragraph": "Opens at full chorus-level intensity and stays there — there is no ramp-up, no waiting, the record is at maximum from the first bar and the hook is working immediately. The choruses are unusually long, running thirty seconds and up, so the hook gets room to land and repeat rather than arriving and leaving. The topline covers a wide sweep from G3 to A♯5 while sitting mostly between D4 and B4, which gives you a comfortable body and a real top to reach for — enough range to split across members and still leave someone a moment. Very bright with a light low end, so it cuts on a phone speaker.",
+  "admin": { "reviewed": false, "reviewed_by": null, "reviewed_at": null, "edited_fields": [] },
+  "_promoted": { "tempo_bpm": 123, "key_display": "C major", "time_to_hook_sec": 50.2, "vocal_range_low_midi": 55, "vocal_range_high_midi": 82, "analysis_status": "complete" },
+  "title": "Talk Less",
+  "structure_diagnostics": { "chorus_separation": 0.207, "flags": [], "method": "energy" }
 }
