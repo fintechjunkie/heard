@@ -13,30 +13,44 @@ interface CompositionArcProps {
   duration?: number;
   /** Accent for the curve and chorus blocks. */
   accent?: string;
-  /** Neutral for non-chorus blocks and ticks. */
+  /** Neutral for non-chorus blocks. */
   muted?: string;
-  /** Ground colour, so the same component works on cream and on near-black. */
   background?: string;
+  /** Ticks and secondary text. */
   textColor?: string;
+  /** Section labels. Kept separate because they have to stay legible against
+   *  whatever the bar is drawn on — white on the dark player, dark in admin. */
+  labelColor?: string;
   height?: number;
-  /** Live position, in seconds. Read every frame while `isPlaying`, so this
-   *  must be cheap — the playhead is moved by mutating the DOM, never by
-   *  re-rendering React. */
+  /**
+   * How many seconds are visible at once. Fitting a 3-minute song into a phone
+   * width leaves roughly two pixels per second, which is unreadable — the
+   * labels collide and the curve turns to noise. A window scrolls instead.
+   * Pass null to fit the whole song, which is what the admin preview wants
+   * while boundaries are being edited.
+   */
+  windowSeconds?: number | null;
+  /** Live position, in seconds. Read every frame — this moves the view. */
   getTime?: () => number;
   isPlaying?: boolean;
-  /** Seconds to seek to when the arc is clicked. Omit to make it read-only. */
   onSeek?: (seconds: number) => void;
-  /** Hide the section bar and hook marker regardless of confidence. */
   curveOnly?: boolean;
 }
 
 const PAD = 10;
-const BAR_H = 12;
-const LABEL_H = 14;
+const BAR_H = 14;
+const LABEL_H = 16;
 const TICK_H = 12;
 
-/** Sections shorter than this have no room for a label without colliding. */
-const MIN_LABEL_SECONDS = 8;
+/**
+ * Where the playhead sits once the view starts scrolling. Before this it moves
+ * across a still image; after it, it holds position and the song moves under
+ * it — a second off the left for every second added on the right.
+ */
+const SCROLL_LEAD_SECONDS = 20;
+
+/** A label needs about this much room before it is worth drawing. */
+const MIN_LABEL_PX = 26;
 
 export default function CompositionArc({
   analysis,
@@ -45,20 +59,24 @@ export default function CompositionArc({
   muted = 'var(--muted)',
   background = 'transparent',
   textColor = 'var(--muted)',
+  labelColor,
   height = 170,
+  windowSeconds = 45,
   getTime,
   isPlaying = false,
   onSeek,
   curveOnly = false,
 }: CompositionArcProps) {
   const wrapRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<SVGGElement>(null);
   const playheadRef = useRef<SVGLineElement>(null);
   const sectionRefs = useRef<(SVGRectElement | null)[]>([]);
   const rafRef = useRef<number | null>(null);
+  /** Left edge of the visible window, in seconds. Read by the pointer handler
+   *  so a tap maps to the right moment in the song. */
+  const windowStartRef = useRef(0);
   const [width, setWidth] = useState(0);
 
-  // Real pixel width rather than a scaled viewBox: a viewBox would squash the
-  // labels and ticks on a narrow phone.
   useEffect(() => {
     const el = wrapRef.current;
     if (!el) return;
@@ -71,8 +89,6 @@ export default function CompositionArc({
 
   const total = duration || analysis.source_file?.duration_sec || 1;
   const curve = analysis.energy_curve || [];
-  // §7.4: low structure confidence means the sections are not trustworthy
-  // enough to draw, but the curve itself still is.
   const showStructure = !curveOnly && analysis.structure_confidence !== 'low';
   const sections: AnalysisSection[] = showStructure ? (analysis.sections || []) : [];
   const hook = showStructure ? analysis.time_to_hook_sec : null;
@@ -83,51 +99,73 @@ export default function CompositionArc({
     height - (showStructure ? BAR_H + LABEL_H : 0) - TICK_H - 8
   );
 
-  const xAt = (sec: number) => PAD + (Math.max(0, Math.min(total, sec)) / total) * plotW;
+  // Seconds visible at once, and therefore how wide a second is.
+  const visible = windowSeconds && windowSeconds < total ? windowSeconds : total;
+  const pxPerSec = plotW > 0 ? plotW / visible : 0;
+  const scrolls = visible < total;
+  const maxStart = Math.max(0, total - visible);
 
-  // Area + stroke share one point list.
+  /** Absolute time → x in the scrolling group's own coordinates. */
+  const xAt = (sec: number) => PAD + sec * pxPerSec;
+
+  // Curve as one path across the whole song; the group is what moves.
   let linePath = '';
   let areaPath = '';
-  if (curve.length > 1 && plotW > 0) {
+  if (curve.length > 1 && pxPerSec > 0) {
     const pts = curve.map((v, i) => {
-      const x = PAD + (i / (curve.length - 1)) * plotW;
+      const t = (i / (curve.length - 1)) * total;
       const y = 4 + (1 - Math.max(0, Math.min(1, v))) * (plotH - 4);
-      return `${x.toFixed(1)},${y.toFixed(1)}`;
+      return `${xAt(t).toFixed(1)},${y.toFixed(1)}`;
     });
     linePath = `M${pts.join('L')}`;
-    areaPath = `M${PAD},${plotH} L${pts.join('L')} L${(PAD + plotW).toFixed(1)},${plotH} Z`;
+    areaPath = `M${xAt(0)},${plotH} L${pts.join('L')} L${xAt(total).toFixed(1)},${plotH} Z`;
   }
 
-  // Minute ticks, plus zero.
-  const ticks: number[] = [0];
-  for (let s = 60; s < total; s += 60) ticks.push(s);
+  // Denser ticks than once a minute: at 45 seconds across a phone, a minute
+  // tick can be off-screen entirely.
+  const tickEvery = visible <= 60 ? 10 : 30;
+  const ticks: number[] = [];
+  for (let s = 0; s <= total; s += tickEvery) ticks.push(s);
 
-  // Playhead + active section, driven by rAF and written straight to the DOM.
-  useEffect(() => {
-    if (!getTime || !isPlaying || plotW <= 0) {
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
-      rafRef.current = null;
-      return;
+  const barY = plotH + 6;
+
+  /** Left edge of the window for a given playback position. */
+  const startFor = (t: number) => {
+    if (!scrolls) return 0;
+    return Math.max(0, Math.min(maxStart, t - SCROLL_LEAD_SECONDS));
+  };
+
+  const applyView = (t: number) => {
+    const start = startFor(t);
+    windowStartRef.current = start;
+    const g = scrollRef.current;
+    if (g) g.setAttribute('transform', `translate(${(-start * pxPerSec).toFixed(2)},0)`);
+    const line = playheadRef.current;
+    if (line) {
+      const x = PAD + (t - start) * pxPerSec;
+      line.setAttribute('x1', String(x));
+      line.setAttribute('x2', String(x));
+      line.setAttribute('opacity', '1');
     }
+    sections.forEach((sec, i) => {
+      const rect = sectionRefs.current[i];
+      if (!rect) return;
+      const active = t >= sec.start && t < sec.end;
+      rect.setAttribute('opacity', active ? '1' : sec.label === 'chorus' ? '0.85' : '0.45');
+    });
+  };
+
+  // The view has to follow the playhead whether or not audio is running —
+  // seeking while paused must move the window too — so the loop is tied to
+  // having a time source rather than to playback. It reads one number and
+  // writes a transform, which is cheap enough to leave running.
+  useEffect(() => {
+    if (!getTime || pxPerSec <= 0) return;
     const tick = () => {
       const t = getTime();
-      // Howler's seek() can hand back the Howl itself before playback has
-      // initialised; anything non-numeric is skipped rather than rendered.
-      if (typeof t === 'number' && Number.isFinite(t)) {
-        const x = xAt(t);
-        const line = playheadRef.current;
-        if (line) {
-          line.setAttribute('x1', String(x));
-          line.setAttribute('x2', String(x));
-          line.setAttribute('opacity', '1');
-        }
-        sections.forEach((sec, i) => {
-          const rect = sectionRefs.current[i];
-          if (!rect) return;
-          const active = t >= sec.start && t < sec.end;
-          rect.setAttribute('opacity', active ? '1' : sec.label === 'chorus' ? '0.85' : '0.5');
-        });
-      }
+      // Howler's seek() hands back the Howl itself before playback
+      // initialises; anything non-numeric is skipped rather than rendered.
+      if (typeof t === 'number' && Number.isFinite(t)) applyView(t);
       rafRef.current = requestAnimationFrame(tick);
     };
     rafRef.current = requestAnimationFrame(tick);
@@ -136,16 +174,17 @@ export default function CompositionArc({
       rafRef.current = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [getTime, isPlaying, plotW, total, sections.length]);
+  }, [getTime, pxPerSec, total, sections.length, isPlaying]);
 
   const seekFromX = (clientX: number) => {
-    if (!onSeek || !wrapRef.current || plotW <= 0) return;
+    if (!onSeek || !wrapRef.current || pxPerSec <= 0) return;
     const rect = wrapRef.current.getBoundingClientRect();
     const rel = clientX - rect.left - PAD;
-    onSeek(Math.max(0, Math.min(total, (rel / plotW) * total)));
+    const t = windowStartRef.current + rel / pxPerSec;
+    onSeek(Math.max(0, Math.min(total, t)));
   };
 
-  const barY = plotH + 6;
+  const labelFill = labelColor || textColor;
 
   return (
     <div
@@ -168,81 +207,81 @@ export default function CompositionArc({
             </linearGradient>
           </defs>
 
-          {/* Minute ticks behind everything */}
-          {ticks.map(t => (
-            <g key={`tick-${t}`}>
-              <line
-                x1={xAt(t)} x2={xAt(t)} y1={0} y2={plotH}
-                stroke="var(--border)" strokeWidth={1} opacity={0.5}
-              />
-              <text
-                x={xAt(t) + 3} y={height - 2}
-                fontSize={9} fontFamily="'DM Mono', monospace" fill={textColor} opacity={0.7}
-              >
-                {formatSeconds(t)}
-              </text>
-            </g>
-          ))}
+          {/* Everything time-positioned lives in here; scrolling is one
+              transform on this group rather than a re-render. */}
+          <g ref={scrollRef} transform="translate(0,0)">
+            {ticks.map(t => (
+              <g key={`tick-${t}`}>
+                <line
+                  x1={xAt(t)} x2={xAt(t)} y1={0} y2={plotH}
+                  stroke={textColor} strokeWidth={1} opacity={0.18}
+                />
+                <text
+                  x={xAt(t) + 3} y={height - 2}
+                  fontSize={9} fontFamily="'DM Mono', monospace" fill={textColor} opacity={0.75}
+                >
+                  {formatSeconds(t)}
+                </text>
+              </g>
+            ))}
 
-          {areaPath && <path d={areaPath} fill="url(#arcFill)" />}
-          {linePath && <path d={linePath} fill="none" stroke={accent} strokeWidth={2} strokeLinejoin="round" />}
+            {areaPath && <path d={areaPath} fill="url(#arcFill)" />}
+            {linePath && <path d={linePath} fill="none" stroke={accent} strokeWidth={2} strokeLinejoin="round" />}
 
-          {/* Hook marker */}
-          {hook != null && (
-            <g>
-              <line
-                x1={xAt(hook)} x2={xAt(hook)} y1={0} y2={plotH}
-                stroke={textColor} strokeWidth={1} strokeDasharray="3 3" opacity={0.8}
-              />
-              <text
-                x={xAt(hook) + 4} y={11}
-                fontSize={9} fontFamily="'DM Mono', monospace" fill={textColor}
-              >
-                hook {formatSeconds(hook)}
-              </text>
-            </g>
-          )}
+            {hook != null && (
+              <g>
+                <line
+                  x1={xAt(hook)} x2={xAt(hook)} y1={0} y2={plotH}
+                  stroke={labelFill} strokeWidth={1} strokeDasharray="3 3" opacity={0.85}
+                />
+                <text
+                  x={xAt(hook) + 4} y={11}
+                  fontSize={10} fontFamily="'DM Mono', monospace" fill={labelFill}
+                >
+                  hook {formatSeconds(hook)}
+                </text>
+              </g>
+            )}
 
-          {/* Section bar */}
-          {sections.map((sec, i) => {
-            const x = xAt(sec.start);
-            const w = Math.max(2, xAt(sec.end) - x - 2);
-            const isChorus = sec.label === 'chorus';
-            return (
-              <rect
-                key={`sec-${i}`}
-                ref={el => { sectionRefs.current[i] = el; }}
-                x={x} y={barY} width={w} height={BAR_H} rx={BAR_H / 2}
-                fill={isChorus ? accent : muted}
-                opacity={isChorus ? 0.85 : 0.5}
-              />
-            );
-          })}
+            {sections.map((sec, i) => {
+              const x = xAt(sec.start);
+              const w = Math.max(2, (sec.end - sec.start) * pxPerSec - 2);
+              const isChorus = sec.label === 'chorus';
+              return (
+                <rect
+                  key={`sec-${i}`}
+                  ref={el => { sectionRefs.current[i] = el; }}
+                  x={x} y={barY} width={w} height={BAR_H} rx={BAR_H / 2}
+                  fill={isChorus ? accent : muted}
+                  opacity={isChorus ? 0.85 : 0.45}
+                />
+              );
+            })}
 
-          {/* Labels, only where there is room */}
-          {sections.map((sec, i) => {
-            if (sec.end - sec.start < MIN_LABEL_SECONDS) return null;
-            const x = xAt(sec.start);
-            const w = xAt(sec.end) - x;
-            return (
-              <text
-                key={`lab-${i}`}
-                x={x + w / 2} y={barY + BAR_H + 11}
-                fontSize={9} fontFamily="'DM Mono', monospace"
-                fill={textColor} textAnchor="middle" opacity={0.85}
-              >
-                {sec.label}
-              </text>
-            );
-          })}
+            {sections.map((sec, i) => {
+              const w = (sec.end - sec.start) * pxPerSec;
+              if (w < MIN_LABEL_PX) return null;
+              return (
+                <text
+                  key={`lab-${i}`}
+                  x={xAt(sec.start) + w / 2} y={barY + BAR_H + 12}
+                  fontSize={10} fontFamily="'DM Mono', monospace"
+                  fontWeight={600}
+                  letterSpacing="0.5"
+                  fill={labelFill} textAnchor="middle"
+                >
+                  {sec.label}
+                </text>
+              );
+            })}
+          </g>
 
-          {/* Playhead, hidden until the first frame gives it a position */}
+          {/* Fixed: the playhead does not scroll with the song. */}
           {getTime && (
             <line
               ref={playheadRef}
               x1={PAD} x2={PAD} y1={0} y2={barY + BAR_H}
-              stroke="#FFFFFF" strokeWidth={1.5} opacity={0}
-              style={{ mixBlendMode: 'difference' }}
+              stroke={labelFill} strokeWidth={1.5} opacity={0}
             />
           )}
         </svg>

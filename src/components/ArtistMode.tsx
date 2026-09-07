@@ -243,8 +243,20 @@ export default function ArtistMode({ open, onClose, onOpenDetail, inline }: Arti
                   </button>
                 )}
                 <div className="flex-1 min-w-0">
-                  <div className="text-[38px] tracking-[2px] leading-[0.95] truncate"
-                    style={{ fontFamily: "'Bebas Neue', sans-serif", color: 'white' }}>
+                  <div
+                    className="tracking-[2px] leading-[0.95]"
+                    style={{
+                      fontFamily: "'Bebas Neue', sans-serif",
+                      color: 'white',
+                      // Bebas at a fixed 38px overflowed longer titles between
+                      // the two nav arrows. Step down rather than truncate — a
+                      // song title is the one thing that must be readable.
+                      fontSize: song.title.length > 30 ? 24
+                        : song.title.length > 22 ? 28
+                        : song.title.length > 16 ? 32
+                        : 38,
+                      overflowWrap: 'break-word',
+                    }}>
                     {song.title}
                   </div>
                 </div>
@@ -367,18 +379,14 @@ export default function ArtistMode({ open, onClose, onOpenDetail, inline }: Arti
                   onClick={(e) => { e.stopPropagation(); playNext(); }}
                   disabled={queuedSongs.length <= 1}
                   aria-label="Next track"
-                  className="h-[38px] px-[12px] rounded-full flex items-center gap-[5px] cursor-pointer border-none active:scale-90 transition-transform"
+                  className="w-[38px] h-[38px] rounded-full flex items-center justify-center cursor-pointer border-none active:scale-90 transition-transform"
                   style={{
                     background: queuedSongs.length <= 1 ? 'rgba(255,255,255,0.04)' : 'rgba(255,255,255,0.08)',
                     border: '1px solid rgba(255,255,255,0.12)',
                     opacity: queuedSongs.length <= 1 ? 0.4 : 1,
                   }}
                 >
-                  <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.7)', lineHeight: 1 }}>⏭</span>
-                  <span className="text-micro tracking-[1px] uppercase"
-                    style={{ fontFamily: "'DM Mono', monospace", color: 'rgba(255,255,255,0.55)' }}>
-                    Next
-                  </span>
+                  <span style={{ fontSize: 14, color: 'rgba(255,255,255,0.7)', lineHeight: 1 }}>⏭</span>
                 </button>
               </div>
 

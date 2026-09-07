@@ -301,8 +301,13 @@ export default function AnalysisPanel({ song, onSongUpdated }: AnalysisPanelProp
           accent="#FF6848"
           muted="#9CA3AF"
           textColor="#6B7280"
+          labelColor="#111827"
           height={180}
+          windowSeconds={null}
         />
+        <div className="text-xs text-gray-400 mt-1">
+          Whole song. Buyers see a scrolling 45-second window.
+        </div>
       </div>
 
       <div className="grid grid-cols-2 gap-6 mb-6">

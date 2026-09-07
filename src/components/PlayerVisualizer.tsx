@@ -327,9 +327,11 @@ export default function PlayerVisualizer({
               analysis={analysis}
               duration={analysis.source_file?.duration_sec}
               accent={color}
-              muted="rgba(255,255,255,0.35)"
-              textColor="rgba(255,255,255,0.55)"
+              muted="rgba(255,255,255,0.30)"
+              textColor="rgba(255,255,255,0.5)"
+              labelColor="#FFFFFF"
               height={172}
+              windowSeconds={45}
               getTime={getTime}
               isPlaying={isPlaying}
               onSeek={onSeek}
