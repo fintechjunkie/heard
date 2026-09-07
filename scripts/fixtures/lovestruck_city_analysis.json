@@ -1,0 +1,51 @@
+{
+  "version": 3,
+  "analyzed_at": "2026-09-07T13:02:12Z",
+  "engine_version": "1.3.0",
+  "source_file": { "sample_rate": 44100, "channels": 2, "bit_depth": 24, "duration_sec": 227.42, "format": "WAVEX", "quality_flags": [] },
+  "tempo": { "bpm": 112, "alt_bpm": null, "confidence": "clear" },
+  "key": { "root": "C#", "mode": "major", "display": "C♯ major", "runner_up": "A♯ minor", "margin": 0.102, "confidence": "clear" },
+  "energy_curve": [
+    0.135, 0.254, 0.642, 0.387, 0.434, 0.551, 0.331, 0.637, 0.661, 0.33,
+    0.745, 0.645, 0.626, 0.895, 0.779, 0.644, 0.953, 0.687, 0.64, 0.938,
+    0.728, 0.657, 0.941, 0.779, 0.867, 0.954, 0.837, 0.783, 0.746, 0.749,
+    0.829, 0.796, 0.804, 0.792, 0.82, 0.759, 0.887, 0.877, 0.848, 0.79,
+    0.803, 0.837, 0.883, 0.848, 0.841, 0.865, 0.825, 0.807, 0.9, 0.854,
+    0.722, 0.932, 0.842, 0.642, 0.934, 0.88, 0.681, 0.895, 0.791, 0.828,
+    0.973, 0.871, 0.845, 0.858, 0.807, 0.847, 0.89, 0.792, 0.787, 0.814,
+    0.751, 0.746, 0.862, 0.841, 0.826, 0.778, 0.806, 0.904, 0.925, 0.862,
+    0.848, 0.784, 0.807, 0.944, 0.945, 0.855, 0.813, 0.772, 0.843, 0.991,
+    0.888, 0.879, 0.832, 0.788, 0.847, 0.861, 0.539, 0.392, 0.341, 0.325,
+    0.39, 0.314, 0.35, 0.349, 0.375, 0.373, 0.528, 0.836, 0.896, 0.777,
+    0.87, 0.858, 0.911, 0.971, 0.889, 0.878, 0.925, 0.828, 0.925, 0.942,
+    0.847, 0.856, 0.887, 0.863, 0.885, 0.936, 0.87, 0.855, 0.871, 0.885,
+    0.956, 0.982, 0.855, 0.818, 0.852, 0.861, 0.933, 0.983, 0.937, 0.861,
+    0.876, 0.872, 0.956, 0.834, 0.792, 0.787, 0.778, 0.735, 0.789, 0.801,
+    0.776, 0.814, 0.772, 0.808, 0.91, 0.547, 0.073, 0.007, 0.002, 0.001
+  ],
+  "sections": [
+    { "start": 0.0, "end": 5.0, "label": "intro", "energy": 0.37, "stability": 3 },
+    { "start": 5.0, "end": 17.7, "label": "section", "energy": 0.55, "stability": 3 },
+    { "start": 17.7, "end": 23.2, "label": "section", "energy": 0.81, "stability": 3 },
+    { "start": 23.2, "end": 50.0, "label": "chorus", "energy": 0.8, "stability": 3 },
+    { "start": 50.0, "end": 69.6, "label": "verse", "energy": 0.84, "stability": 3 },
+    { "start": 69.6, "end": 100.5, "label": "chorus", "energy": 0.83, "stability": 3 },
+    { "start": 100.5, "end": 136.9, "label": "verse", "energy": 0.85, "stability": 3 },
+    { "start": 136.9, "end": 151.6, "label": "bridge", "energy": 0.38, "stability": 3 },
+    { "start": 151.6, "end": 205.8, "label": "verse", "energy": 0.89, "stability": 3 },
+    { "start": 205.8, "end": 221.7, "label": "chorus", "energy": 0.78, "stability": 3 },
+    { "start": 221.7, "end": 227.4, "label": "outro", "energy": 0.07, "stability": 3 }
+  ],
+  "structure_confidence": "review",
+  "structure_diagnostics": {
+    "method": "repetition", "threshold": 1.95, "chorus_instances": 3, "chorus_coverage": 0.324,
+    "flags": ["long_section_above_chorus_level"], "chorus_separation": 0.07, "fallback_reason": "flat_energy_profile"
+  },
+  "time_to_hook_sec": 23.2,
+  "vocal": { "range_low": "G3", "range_high": "F5", "tessitura_low": "C#4", "tessitura_high": "A#4", "median": "F4", "span_semitones": 22.5, "frames_analyzed": 2484, "confidence": "high" },
+  "mix": { "lufs": -5.5, "true_peak_db": 0.0, "crest_db": 8.4, "stereo_side_mid": 0.392, "stereo_correlation": 0.734, "spectral_centroid_hz": 2801, "band_balance": { "low": 19, "mid": 34, "high": 46 } },
+  "pitch_paragraph": "Runs nearly four minutes and uses the length — the standout structural move is the fifteen-second bridge at 2:17 that strips the arrangement back to a third of full height, and what follows is the biggest and longest stretch on the record, holding near maximum for close to a minute before the close. The topline is centred and comfortable, living between C♯4 and A♯4 with a reach up to F5, so the body of the line shares easily and the top stays available for a lead. Mid-warm rather than bright, mastered hot and dense, with a wide enough image to layer into. At 112 it has a steady, unhurried push.",
+  "admin": { "reviewed": false, "reviewed_by": null, "reviewed_at": null, "edited_fields": [] },
+  "_promoted": { "tempo_bpm": 112, "key_display": "C♯ major", "time_to_hook_sec": 23.2, "vocal_range_low_midi": 55, "vocal_range_high_midi": 77, "analysis_status": "complete" },
+  "title": "Lovestruck City"
+}

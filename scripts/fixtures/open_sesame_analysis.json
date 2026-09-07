@@ -1,0 +1,49 @@
+{
+  "version": 2,
+  "analyzed_at": "2026-09-07T12:53:06Z",
+  "engine_version": "1.2.0",
+  "source_file": { "sample_rate": 44100, "channels": 2, "bit_depth": null, "duration_sec": 154.67, "format": "MP3", "quality_flags": ["lossy_source", "clipping"] },
+  "tempo": { "bpm": 136, "alt_bpm": null, "confidence": "clear" },
+  "key": { "root": "E", "mode": "major", "display": "E major", "runner_up": "E minor", "margin": 0.003, "confidence": "ambiguous" },
+  "energy_curve": [
+    0.443, 0.754, 0.751, 0.743, 0.689, 0.727, 0.745, 0.765, 0.78, 0.826,
+    0.758, 0.81, 0.779, 0.778, 0.681, 0.62, 0.784, 0.799, 0.807, 0.798,
+    0.809, 0.767, 0.828, 0.818, 0.792, 0.789, 0.708, 0.778, 0.81, 0.796,
+    0.838, 0.889, 0.833, 0.855, 0.827, 0.782, 0.792, 0.788, 0.878, 0.884,
+    0.822, 0.792, 0.826, 0.774, 0.603, 0.502, 0.582, 0.54, 0.447, 0.518,
+    0.572, 0.703, 0.823, 0.91, 0.857, 0.839, 0.832, 0.768, 0.763, 0.8,
+    0.872, 0.922, 0.916, 0.86, 0.896, 0.905, 0.888, 0.905, 0.925, 0.919,
+    0.862, 0.869, 0.889, 0.879, 0.84, 0.924, 0.962, 0.88, 0.887, 0.914,
+    0.923, 0.889, 0.92, 0.945, 0.905, 0.867, 0.94, 0.859, 0.542, 0.358,
+    0.366, 0.547, 0.771, 0.817, 0.782, 0.813, 0.76, 0.798, 0.828, 0.821,
+    0.823, 0.811, 0.827, 0.849, 0.837, 0.788, 0.865, 0.873, 0.892, 0.843,
+    0.795, 0.828, 0.831, 0.811, 0.664, 0.657, 0.635, 0.623, 0.687, 0.73,
+    0.732, 0.813, 0.949, 0.957, 0.906, 0.85, 0.881, 0.783, 0.809, 0.929,
+    0.917, 0.902, 0.876, 0.879, 0.903, 0.891, 0.867, 0.95, 0.937, 0.902,
+    0.887, 0.892, 0.907, 0.859, 0.894, 0.942, 0.898, 0.867, 0.927, 0.922,
+    0.913, 0.923, 0.941, 0.939, 0.872, 0.914, 0.939, 0.513, 0.081, 0.001
+  ],
+  "sections": [
+    { "start": 0.0, "end": 7.1, "label": "section", "energy": 0.72, "stability": 3 },
+    { "start": 7.1, "end": 14.2, "label": "section", "energy": 0.76, "stability": 3 },
+    { "start": 14.2, "end": 42.9, "label": "verse", "energy": 0.8, "stability": 3 },
+    { "start": 42.9, "end": 49.7, "label": "section", "energy": 0.54, "stability": 3 },
+    { "start": 49.7, "end": 56.3, "label": "verse", "energy": 0.82, "stability": 3 },
+    { "start": 56.3, "end": 85.5, "label": "chorus", "energy": 0.89, "stability": 3 },
+    { "start": 85.5, "end": 110.2, "label": "verse", "energy": 0.77, "stability": 3 },
+    { "start": 110.2, "end": 117.1, "label": "pre", "energy": 0.68, "stability": 3 },
+    { "start": 117.1, "end": 154.7, "label": "chorus", "energy": 0.85, "stability": 3 }
+  ],
+  "structure_confidence": "review",
+  "structure_diagnostics": {
+    "method": "repetition", "threshold": 1.95, "chorus_instances": 2, "chorus_coverage": 0.432,
+    "flags": ["labeled_without_energy_signal"], "chorus_separation": 0.11, "fallback_reason": "flat_energy_profile"
+  },
+  "time_to_hook_sec": 56.3,
+  "vocal": { "range_low": "G#3", "range_high": "F#5", "tessitura_low": "C#4", "tessitura_high": "B4", "median": "F#4", "span_semitones": 21.6, "frames_analyzed": 1709, "confidence": "high" },
+  "mix": { "lufs": -7.7, "true_peak_db": 2.76, "crest_db": 9.6, "stereo_side_mid": 0.251, "stereo_correlation": 0.882, "spectral_centroid_hz": 2565, "band_balance": { "low": 26, "mid": 34, "high": 40 } },
+  "pitch_paragraph": "Runs warm and full from the first bar, then does something smart at 0:43 — the arrangement drops back to just over half height for six seconds before climbing into the chorus, so the hook arrives out of a real gap rather than just following on. The topline sits in a comfortable middle, working between C♯4 and B4 with a reach up to F♯5, which makes it easy to divide across members while leaving a genuine top note for whoever takes the lead. The last chorus runs a full thirty-seven seconds straight to the end with no wind-down. Warm with real weight in the low end and a tightly centred mix that keeps the middle of the image open for vocals.",
+  "admin": { "reviewed": false, "reviewed_by": null, "reviewed_at": null, "edited_fields": [] },
+  "_promoted": { "tempo_bpm": 136, "key_display": "E major", "time_to_hook_sec": 56.3, "vocal_range_low_midi": 56, "vocal_range_high_midi": 78, "analysis_status": "complete" },
+  "title": "Open Sesame"
+}

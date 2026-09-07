@@ -1,0 +1,52 @@
+{
+  "version": 2,
+  "analyzed_at": "2026-09-07T12:54:54Z",
+  "engine_version": "1.2.0",
+  "source_file": { "sample_rate": 44100, "channels": 2, "bit_depth": null, "duration_sec": 185.63, "format": "MP3", "quality_flags": ["lossy_source", "clipping"] },
+  "tempo": { "bpm": 129, "alt_bpm": null, "confidence": "clear" },
+  "key": { "root": "F", "mode": "minor", "display": "F minor", "runner_up": "A♯ minor", "margin": 0.229, "confidence": "clear" },
+  "energy_curve": [
+    0.139, 0.268, 0.286, 0.36, 0.307, 0.37, 0.624, 0.87, 0.913, 0.909,
+    0.899, 0.937, 0.875, 0.911, 0.919, 0.909, 0.882, 0.9, 0.908, 0.858,
+    0.775, 0.77, 0.801, 0.836, 0.818, 0.728, 0.746, 0.838, 0.803, 0.746,
+    0.824, 0.769, 0.696, 0.858, 0.856, 0.8, 0.804, 0.804, 0.8, 0.836,
+    0.811, 0.782, 0.787, 0.79, 0.79, 0.869, 0.841, 0.783, 0.777, 0.666,
+    0.689, 0.802, 0.806, 0.76, 0.899, 0.922, 0.792, 0.763, 0.867, 0.81,
+    0.896, 0.943, 0.933, 0.943, 0.973, 0.916, 0.939, 0.967, 0.94, 0.924,
+    0.961, 0.913, 0.844, 0.772, 0.759, 0.784, 0.765, 0.776, 0.713, 0.772,
+    0.833, 0.753, 0.759, 0.817, 0.755, 0.702, 0.86, 0.872, 0.836, 0.764,
+    0.728, 0.825, 0.836, 0.789, 0.907, 0.936, 0.808, 0.757, 0.865, 0.84,
+    0.862, 0.948, 0.956, 0.957, 0.966, 0.931, 0.926, 0.966, 0.927, 0.934,
+    0.943, 0.936, 0.761, 0.435, 0.409, 0.442, 0.373, 0.426, 0.501, 0.399,
+    0.411, 0.482, 0.387, 0.332, 0.462, 0.494, 0.498, 0.548, 0.549, 0.576,
+    0.582, 0.549, 0.611, 0.632, 0.586, 0.534, 0.447, 0.493, 0.745, 0.987,
+    0.941, 0.929, 0.955, 0.985, 0.92, 0.968, 0.951, 0.964, 0.956, 0.992,
+    0.924, 0.751, 0.579, 0.615, 0.602, 0.589, 0.646, 0.487, 0.136, 0.002
+  ],
+  "sections": [
+    { "start": 0.0, "end": 6.1, "label": "intro", "energy": 0.3, "stability": 3 },
+    { "start": 6.1, "end": 21.5, "label": "chorus", "energy": 0.87, "stability": 3 },
+    { "start": 21.5, "end": 54.3, "label": "chorus", "energy": 0.8, "stability": 3 },
+    { "start": 54.3, "end": 69.0, "label": "pre", "energy": 0.8, "stability": 3 },
+    { "start": 69.0, "end": 84.6, "label": "chorus", "energy": 0.93, "stability": 3 },
+    { "start": 84.6, "end": 101.3, "label": "section", "energy": 0.77, "stability": 3 },
+    { "start": 101.3, "end": 116.2, "label": "pre", "energy": 0.82, "stability": 3 },
+    { "start": 116.2, "end": 131.3, "label": "chorus", "energy": 0.93, "stability": 3 },
+    { "start": 131.3, "end": 146.2, "label": "bridge", "energy": 0.42, "stability": 3 },
+    { "start": 146.2, "end": 161.3, "label": "bridge", "energy": 0.56, "stability": 3 },
+    { "start": 161.3, "end": 176.6, "label": "section", "energy": 0.94, "stability": 3 },
+    { "start": 176.6, "end": 185.6, "label": "bridge", "energy": 0.49, "stability": 3 }
+  ],
+  "structure_confidence": "review",
+  "structure_diagnostics": {
+    "method": "repetition", "threshold": 1.95, "chorus_instances": 4, "chorus_coverage": 0.425,
+    "flags": ["labeled_without_energy_signal"], "chorus_separation": 0.113, "fallback_reason": "flat_energy_profile"
+  },
+  "time_to_hook_sec": 6.1,
+  "vocal": { "range_low": "G#3", "range_high": "A5", "tessitura_low": "C#4", "tessitura_high": "B4", "median": "G#4", "span_semitones": 24.7, "frames_analyzed": 1484, "confidence": "high" },
+  "mix": { "lufs": -8.4, "true_peak_db": 1.15, "crest_db": 11.8, "stereo_side_mid": 0.347, "stereo_correlation": 0.785, "spectral_centroid_hz": 2590, "band_balance": { "low": 15, "mid": 42, "high": 43 } },
+  "pitch_paragraph": "Opens on the hook inside six seconds and comes back to it four times across three minutes, so the central line is doing the work from the very top. The peak of the record arrives late — the section at 2:41 climbs higher than anything before it — and it gets there out of a genuine breakdown at 2:11 that drops the floor to under half height, so there is a real build in the back half. The topline works between C♯4 and B4 and reaches A5, giving a comfortable body to share and a proper ceiling for a lead. Mid-forward and punchy with a light low end, so it cuts through on small speakers.",
+  "admin": { "reviewed": false, "reviewed_by": null, "reviewed_at": null, "edited_fields": [] },
+  "_promoted": { "tempo_bpm": 129, "key_display": "F minor", "time_to_hook_sec": 6.1, "vocal_range_low_midi": 56, "vocal_range_high_midi": 81, "analysis_status": "complete" },
+  "title": "Pop It Like A Bubble"
+}

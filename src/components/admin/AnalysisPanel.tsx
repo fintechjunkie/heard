@@ -4,6 +4,7 @@ import { useState, useRef, useMemo } from 'react';
 import { Song } from '@/data/types';
 import CompositionArc from '../CompositionArc';
 import {
+  UNTRUSTED_STRUCTURE,
   SECTION_LABELS,
   KEY_ROOTS,
   KEY_MODES,
@@ -54,6 +55,7 @@ export default function AnalysisPanel({ song, onSongUpdated }: AnalysisPanelProp
   const machine = useRef(stored).current;
 
   const status = song.analysis_status || 'pending';
+  const structureHidden = !!draft && UNTRUSTED_STRUCTURE.includes(draft.structure_confidence);
   const derivedHook = useMemo(
     () => (draft ? deriveTimeToHook(draft.sections || []) : null),
     [draft]
@@ -397,10 +399,26 @@ export default function AnalysisPanel({ song, onSongUpdated }: AnalysisPanelProp
               return a;
             })}
             className="px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none bg-white text-gray-800">
-            {['high', 'clear', 'ambiguous', 'review', 'low'].map(c => <option key={c} value={c}>{c}</option>)}
+            {/* Only the three values the pipeline emits, each labelled with what
+                it actually does. The generic confidence words that used to be
+                here ("clear", "ambiguous") read as hedging but silently showed
+                the structure to buyers. A stored legacy value is kept as an
+                option so opening an old record does not change it. */}
+            <option value="high">high — buyers see the sections</option>
+            <option value="review">review — hidden until checked</option>
+            <option value="low">low — hidden from buyers</option>
+            {!['high', 'review', 'low'].includes(draft.structure_confidence) && (
+              <option value={draft.structure_confidence}>
+                {draft.structure_confidence} — buyers see the sections
+              </option>
+            )}
           </select>
-          <div className="text-xs text-gray-400 mt-1">
-&quot;low&quot; and &quot;review&quot; hide the section bar and hook marker from buyers
+          <div className={`text-xs mt-1 ${
+            structureHidden ? 'text-amber-700' : 'text-green-700'
+          }`}>
+            {structureHidden
+              ? 'Buyers see the energy curve only — no section bar, no hook marker.'
+              : 'Buyers see the section bar and the hook marker.'}
           </div>
         </div>
       </div>

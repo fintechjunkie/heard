@@ -1,0 +1,49 @@
+{
+  "version": 2,
+  "analyzed_at": "2026-09-07T12:53:57Z",
+  "engine_version": "1.2.0",
+  "source_file": { "sample_rate": 44100, "channels": 2, "bit_depth": null, "duration_sec": 165.71, "format": "MP3", "quality_flags": ["lossy_source", "clipping"] },
+  "tempo": { "bpm": 129, "alt_bpm": null, "confidence": "clear" },
+  "key": { "root": "F#", "mode": "minor", "display": "F♯ minor", "runner_up": "F♯ major", "margin": 0.185, "confidence": "clear" },
+  "energy_curve": [
+    0.139, 0.241, 0.231, 0.278, 0.234, 0.202, 0.246, 0.501, 0.721, 0.746,
+    0.715, 0.728, 0.748, 0.705, 0.698, 0.697, 0.752, 0.757, 0.702, 0.682,
+    0.658, 0.674, 0.794, 0.749, 0.758, 0.867, 0.81, 0.773, 0.778, 0.625,
+    0.408, 0.348, 0.319, 0.32, 0.345, 0.304, 0.395, 0.591, 0.702, 0.719,
+    0.692, 0.694, 0.719, 0.707, 0.651, 0.623, 0.664, 0.683, 0.687, 0.625,
+    0.569, 0.656, 0.733, 0.699, 0.709, 0.732, 0.648, 0.528, 0.547, 0.691,
+    0.764, 0.72, 0.716, 0.732, 0.734, 0.722, 0.698, 0.746, 0.731, 0.688,
+    0.716, 0.685, 0.673, 0.737, 0.753, 0.771, 0.825, 0.849, 0.763, 0.771,
+    0.686, 0.435, 0.365, 0.352, 0.343, 0.36, 0.305, 0.341, 0.57, 0.707,
+    0.738, 0.732, 0.724, 0.722, 0.741, 0.675, 0.682, 0.726, 0.704, 0.719,
+    0.706, 0.626, 0.649, 0.726, 0.711, 0.725, 0.758, 0.792, 0.774, 0.776,
+    0.762, 0.75, 0.752, 0.797, 0.788, 0.654, 0.568, 0.585, 0.642, 0.679,
+    0.696, 0.606, 0.657, 0.756, 0.714, 0.597, 0.617, 0.704, 0.68, 0.597,
+    0.495, 0.543, 0.661, 0.792, 0.889, 0.896, 0.893, 0.93, 0.938, 0.919,
+    0.896, 0.853, 0.932, 0.922, 0.86, 0.77, 0.404, 0.06, 0.01, 0.004,
+    0.002, 0.001, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+  ],
+  "sections": [
+    { "start": 0.0, "end": 6.9, "label": "intro", "energy": 0.23, "stability": 3 },
+    { "start": 6.9, "end": 30.5, "label": "section", "energy": 0.72, "stability": 3 },
+    { "start": 30.5, "end": 38.1, "label": "pre", "energy": 0.36, "stability": 3 },
+    { "start": 38.1, "end": 60.9, "label": "chorus", "energy": 0.66, "stability": 3 },
+    { "start": 60.9, "end": 83.8, "label": "section", "energy": 0.74, "stability": 3 },
+    { "start": 83.8, "end": 91.4, "label": "pre", "energy": 0.36, "stability": 3 },
+    { "start": 91.4, "end": 136.1, "label": "chorus", "energy": 0.69, "stability": 3 },
+    { "start": 136.1, "end": 152.4, "label": "section", "energy": 0.83, "stability": 3 },
+    { "start": 152.4, "end": 165.7, "label": "outro", "energy": 0.01, "stability": 3 }
+  ],
+  "structure_confidence": "review",
+  "structure_diagnostics": {
+    "method": "repetition", "threshold": 1.95, "chorus_instances": 2, "chorus_coverage": 0.407,
+    "flags": ["labeled_without_energy_signal"], "chorus_separation": null, "fallback_reason": "flat_energy_profile"
+  },
+  "time_to_hook_sec": 38.1,
+  "vocal": { "range_low": "E3", "range_high": "E5", "tessitura_low": "A#3", "tessitura_high": "G#4", "median": "C#4", "span_semitones": 24.0, "frames_analyzed": 1286, "confidence": "high" },
+  "mix": { "lufs": -6.9, "true_peak_db": 2.58, "crest_db": 11.1, "stereo_side_mid": 0.285, "stereo_correlation": 0.85, "spectral_centroid_hz": 3110, "band_balance": { "low": 18, "mid": 34, "high": 48 } },
+  "pitch_paragraph": "The hook is the restrained part — the record pulls all the way down to about a third of full height for a full seven seconds before each chorus, and then the chorus itself stays deliberately held back rather than exploding. That inversion is the whole idea and it is genuinely distinctive: the tension comes from what the arrangement withholds, and it makes the section that follows at 2:16 land as the biggest moment in the song. The topline sits low and conversational, living between A♯3 and G♯4 with a reach to E5, so it favours delivery and intimacy in the body with the top end available when it wants it. Bright and open, with room to layer.",
+  "admin": { "reviewed": false, "reviewed_by": null, "reviewed_at": null, "edited_fields": [] },
+  "_promoted": { "tempo_bpm": 129, "key_display": "F♯ minor", "time_to_hook_sec": 38.1, "vocal_range_low_midi": 52, "vocal_range_high_midi": 76, "analysis_status": "complete" },
+  "title": "Pink Headphones"
+}
